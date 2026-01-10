@@ -11,6 +11,7 @@ A comprehensive GTA IV freeroam server for GTAConnected with multiple features i
 - **World Control** - Weather and time manipulation
 - **Enhanced Chat** - Private messages, local chat, actions, and OOC chat
 - **Kill Tracking** - Statistics for kills, deaths, and K/D ratio
+- **Interactive Mod Menu** - Press F5 to access a full GUI menu with all features
 
 ## Installation
 
@@ -41,9 +42,13 @@ GTAConnected/
     ├── chat/               # Enhanced chat system
     │   ├── meta.xml
     │   └── server.js
-    └── teleport/           # Teleportation system
+    ├── teleport/           # Teleportation system
+    │   ├── meta.xml
+    │   └── server.js
+    └── modmenu/            # Interactive GUI mod menu
         ├── meta.xml
-        └── server.js
+        ├── server.js
+        └── client.js
 ```
 
 ## Commands
@@ -220,6 +225,71 @@ const admins = [
     "AnotherAdmin"
 ];
 ```
+
+## Mod Menu (F5)
+
+The server includes an interactive GUI mod menu accessible to all players by pressing **F5**.
+
+### Menu Controls
+
+| Key | Action |
+|-----|--------|
+| F5 | Open/Close Menu |
+| UP/DOWN | Navigate items |
+| ENTER | Select item |
+| BACKSPACE/ESC | Go back |
+| LEFT/RIGHT | Adjust values |
+
+### Menu Categories
+
+**Self Options**
+- Restore health/armor
+- Get all weapons
+- Clear wanted level
+- God Mode toggle
+- Infinite ammo
+- Super jump / Fast run
+- Change player skin
+
+**Vehicle Spawner**
+- Sports Cars (Infernus, Turismo, Comet, etc.)
+- Super Cars (Entity XF, Adder, Vacca, etc.)
+- Muscle Cars (Sabre GT, Dukes, Ruiner, etc.)
+- SUVs & Trucks
+- Motorcycles
+- Emergency Vehicles
+- Aircraft & Boats
+
+**Vehicle Options**
+- Repair / Flip / Clean vehicle
+- Change vehicle colors
+- Drift Mode toggle
+- Handling adjustments (Grip, Acceleration, Top Speed)
+- Indestructible vehicle
+- Nitro boost
+
+**Network Options**
+- View online players
+- Teleport to any player
+- Spectate players
+
+**Teleport Locations**
+- Quick teleport to 15+ Liberty City locations
+- All boroughs covered (Algonquin, Broker, Bohan, Alderney)
+
+**World Options**
+- Set time of day
+- Change weather
+
+**Weapons**
+- Get individual weapons
+- Get all weapons at once
+
+**Fun Options**
+- Launch yourself into the air
+- Spawn random peds
+- Ragdoll mode
+- Chaos mode
 
 ## Requirements
 

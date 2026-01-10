@@ -33,5 +33,6 @@
         <resource src="chat" />
         <resource src="teleport" />
         <resource src="vehicles" />
+        <resource src="modmenu" />
     </resources>
 </server>
