@@ -10,7 +10,7 @@ let currentMenu = "main";
 let selectedIndex = 0;
 let menuStack = []; // For back navigation
 
-// Menu colors
+// Menu colors (RGBA)
 const colors = {
     background: toColour(20, 20, 20, 200),
     header: toColour(200, 50, 50, 255),
@@ -40,7 +40,6 @@ let scrollOffset = 0;
 
 // Player list cache
 let playerList = [];
-let lastPlayerUpdate = 0;
 
 // Vehicle handling values
 let handlingMods = {
@@ -78,8 +77,8 @@ const menuData = {
             { label: "Max Health & Armor", action: "self_max" },
             { label: "Give All Weapons", action: "self_weapons" },
             { label: "Clear Wanted Level", action: "self_wanted" },
-            { label: "Never Wanted", action: "toggle", target: "neverWanted", state: false },
             { label: "God Mode", action: "toggle", target: "godMode", state: false },
+            { label: "Never Wanted", action: "toggle", target: "neverWanted", state: false },
             { label: "Infinite Ammo", action: "toggle", target: "infiniteAmmo", state: false },
             { label: "Super Jump", action: "toggle", target: "superJump", state: false },
             { label: "Fast Run", action: "toggle", target: "fastRun", state: false },
@@ -308,7 +307,6 @@ const menuData = {
         items: [
             { label: ">> Refresh Player List <<", action: "refresh_players" },
             { label: "--- Players Online ---", action: "none" }
-            // Players will be added dynamically
         ]
     },
 
@@ -332,8 +330,7 @@ const menuData = {
             { label: "Westdyke", action: "teleport", value: { x: -1745.0, y: 1157.0, z: 25.0 } },
             { label: "-- Special --", action: "none" },
             { label: "Helipad (High)", action: "teleport", value: { x: -290.0, y: -400.0, z: 81.0 } },
-            { label: "Tower Top", action: "teleport", value: { x: 237.0, y: 1002.0, z: 200.0 } },
-            { label: "Waypoint (Marker)", action: "teleport_waypoint" }
+            { label: "Tower Top", action: "teleport", value: { x: 237.0, y: 1002.0, z: 200.0 } }
         ]
     },
 
@@ -424,9 +421,14 @@ addEventHandler("OnKeyUp", function(event, key, scanCode, mods) {
             selectedIndex = 0;
             scrollOffset = 0;
             menuStack = [];
-            gta.setCursorEnabled(true);
+            // Show cursor - use gui if available
+            if (typeof gui !== "undefined" && gui.showCursor) {
+                gui.showCursor(true, true);
+            }
         } else {
-            gta.setCursorEnabled(false);
+            if (typeof gui !== "undefined" && gui.showCursor) {
+                gui.showCursor(false, false);
+            }
         }
         return;
     }
@@ -443,7 +445,6 @@ addEventHandler("OnKeyUp", function(event, key, scanCode, mods) {
     } else if (key === SDLK_BACKSPACE || key === SDLK_ESCAPE) {
         goBack();
     } else if (key === SDLK_LEFT) {
-        // For sliders/adjustable options
         adjustValue(-1);
     } else if (key === SDLK_RIGHT) {
         adjustValue(1);
@@ -490,7 +491,9 @@ function goBack() {
         scrollOffset = prev.scroll;
     } else {
         menuOpen = false;
-        gta.setCursorEnabled(false);
+        if (typeof gui !== "undefined" && gui.showCursor) {
+            gui.showCursor(false, false);
+        }
     }
 }
 
@@ -523,6 +526,9 @@ function getNetworkMenuItems() {
 // ACTION HANDLING
 // ============================================================================
 
+// Selected player for network options
+let selectedPlayer = null;
+
 function selectItem() {
     let items = getCurrentMenuItems();
     let item = items[selectedIndex];
@@ -531,7 +537,6 @@ function selectItem() {
     switch (item.action) {
         case "submenu":
             if (item.target === "player_options" && item.playerData) {
-                // Store selected player for network options
                 selectedPlayer = item.playerData;
                 openPlayerMenu(item.playerData);
             } else {
@@ -557,11 +562,6 @@ function selectItem() {
         case "teleport":
             triggerNetworkEvent("ModMenu:Teleport", item.value.x, item.value.y, item.value.z);
             showNotification("Teleporting to: " + item.label);
-            break;
-
-        case "teleport_waypoint":
-            triggerNetworkEvent("ModMenu:TeleportWaypoint");
-            showNotification("Teleporting to waypoint...");
             break;
 
         case "self_health":
@@ -725,7 +725,6 @@ function selectItem() {
 }
 
 function adjustValue(direction) {
-    // For handling options when using left/right keys
     let items = getCurrentMenuItems();
     let item = items[selectedIndex];
     if (!item) return;
@@ -738,11 +737,7 @@ function adjustValue(direction) {
     }
 }
 
-// Selected player for network options
-let selectedPlayer = null;
-
 function openPlayerMenu(playerData) {
-    // Create dynamic player options menu
     menuData.player_options = {
         title: playerData.name,
         items: [
@@ -772,7 +767,7 @@ addNetworkHandler("ModMenu:Notification", function(message) {
 });
 
 // ============================================================================
-// RENDERING
+// RENDERING - Using correct GTAC drawing API
 // ============================================================================
 
 addEventHandler("OnDrawnHUD", function(event) {
@@ -787,11 +782,11 @@ addEventHandler("OnDrawnHUD", function(event) {
     let totalHeight = menu.headerHeight + (visibleCount * menu.itemHeight) + menu.footerHeight;
 
     // Draw background
-    drawing.drawRectangle(null, menu.x - 5, menu.y - 5, menu.width + 10, totalHeight + 10, colors.background, colors.background, 0, 0, 0, false);
+    drawRect(menu.x - 5, menu.y - 5, menu.width + 10, totalHeight + 10, colors.background);
 
     // Draw header
-    drawing.drawRectangle(null, menu.x, menu.y, menu.width, menu.headerHeight, colors.header, colors.header, 0, 0, 0, false);
-    drawing.drawText(title, menu.x + menu.width / 2, menu.y + 8, menu.width, menu.headerHeight, colors.headerText, 1.0, 1, true, false, false, true);
+    drawRect(menu.x, menu.y, menu.width, menu.headerHeight, colors.header);
+    drawText(title, menu.x + menu.width / 2, menu.y + 10, colors.headerText, true, 1.0);
 
     // Draw items
     let yPos = menu.y + menu.headerHeight;
@@ -802,45 +797,101 @@ addEventHandler("OnDrawnHUD", function(event) {
         let textColor = isSelected ? colors.itemTextSelected : colors.itemText;
 
         // Draw item background
-        drawing.drawRectangle(null, menu.x, yPos, menu.width, menu.itemHeight, bgColor, bgColor, 0, 0, 0, false);
+        drawRect(menu.x, yPos, menu.width, menu.itemHeight, bgColor);
 
-        // Draw item text
+        // Build label with state indicators
         let label = item.label;
 
-        // Add toggle state indicator
         if (item.action === "toggle") {
             let state = toggleStates[item.target];
             label += state ? " [ON]" : " [OFF]";
         }
 
-        // Add handling value indicator
         if (item.action === "handling" && handlingMods[item.target] !== undefined) {
             label += " [" + handlingMods[item.target].toFixed(1) + "]";
         }
 
-        // Add submenu indicator
         if (item.action === "submenu") {
             label += " >>";
         }
 
-        drawing.drawText(label, menu.x + 15, yPos + 8, menu.width - 30, menu.itemHeight, textColor, 0.9, 1, true, false, false, false);
+        drawText(label, menu.x + 15, yPos + 8, textColor, false, 0.9);
 
         yPos += menu.itemHeight;
     }
 
     // Draw footer
-    drawing.drawRectangle(null, menu.x, yPos, menu.width, menu.footerHeight, colors.footer, colors.footer, 0, 0, 0, false);
+    drawRect(menu.x, yPos, menu.width, menu.footerHeight, colors.footer);
+    drawText("UP/DOWN: Navigate | ENTER: Select | BACKSPACE: Back", menu.x + menu.width / 2, yPos + 8, colors.footerText, true, 0.6);
 
-    // Footer text with controls
-    let footerText = "UP/DOWN: Navigate | ENTER: Select | BACKSPACE: Back";
-    drawing.drawText(footerText, menu.x + menu.width / 2, yPos + 7, menu.width, menu.footerHeight, colors.footerText, 0.6, 1, true, false, false, true);
-
-    // Draw scroll indicator if needed
+    // Draw scroll indicator
     if (items.length > menu.maxVisibleItems) {
         let scrollText = (scrollOffset + 1) + "-" + Math.min(scrollOffset + visibleCount, items.length) + " / " + items.length;
-        drawing.drawText(scrollText, menu.x + menu.width - 70, menu.y + 12, 60, 20, colors.subText, 0.7, 1, true, false, false, false);
+        drawText(scrollText, menu.x + menu.width - 50, menu.y + 12, colors.subText, false, 0.7);
     }
 });
+
+// Helper drawing functions using native drawing
+function drawRect(x, y, width, height, colour) {
+    // Use natives for drawing rectangles
+    if (typeof natives !== "undefined" && natives.drawRect) {
+        // GTA IV native drawing - normalized coordinates (0-1)
+        let screenW = game.width || 1920;
+        let screenH = game.height || 1080;
+
+        let nx = (x + width/2) / screenW;
+        let ny = (y + height/2) / screenH;
+        let nw = width / screenW;
+        let nh = height / screenH;
+
+        // Extract RGBA from colour
+        let r = (colour >> 24) & 0xFF;
+        let g = (colour >> 16) & 0xFF;
+        let b = (colour >> 8) & 0xFF;
+        let a = colour & 0xFF;
+
+        natives.drawRect(nx, ny, nw, nh, r, g, b, a);
+    } else {
+        // Fallback to graphics drawing
+        try {
+            graphics.drawRectangle(null, [x, y], [width, height], colour, colour, 0, 0, 0);
+        } catch(e) {
+            // Silent fail
+        }
+    }
+}
+
+function drawText(text, x, y, colour, centered, scale) {
+    // Use natives for drawing text
+    if (typeof natives !== "undefined" && natives.setTextScale) {
+        let screenW = game.width || 1920;
+        let screenH = game.height || 1080;
+
+        let nx = x / screenW;
+        let ny = y / screenH;
+
+        let r = (colour >> 24) & 0xFF;
+        let g = (colour >> 16) & 0xFF;
+        let b = (colour >> 8) & 0xFF;
+        let a = colour & 0xFF;
+
+        natives.setTextFont(0);
+        natives.setTextScale(scale || 0.35, scale || 0.35);
+        natives.setTextColour(r, g, b, a);
+        if (centered) {
+            natives.setTextCentre(true);
+        }
+        natives.setTextDropshadow(2, 0, 0, 0, 255);
+        natives.displayTextWithLiteralString(nx, ny, "STRING", text);
+    } else {
+        // Fallback
+        try {
+            graphics.drawText(text, [x, y], colour, scale || 1.0, "arial", centered || false);
+        } catch(e) {
+            // Silent fail
+        }
+    }
+}
 
 // ============================================================================
 // NOTIFICATIONS
@@ -854,12 +905,9 @@ function showNotification(text) {
         time: Date.now(),
         duration: 3000
     });
-
-    // Clean old notifications
-    let now = Date.now();
-    notifications = notifications.filter(n => now - n.time < n.duration);
 }
 
+// Draw notifications
 addEventHandler("OnDrawnHUD", function(event) {
     let now = Date.now();
     let yPos = 200;
@@ -873,15 +921,17 @@ addEventHandler("OnDrawnHUD", function(event) {
             let bgColor = toColour(20, 20, 20, alpha);
             let textColor = toColour(255, 255, 100, alpha + 55);
 
-            drawing.drawRectangle(null, 10, yPos, 300, 30, bgColor, bgColor, 0, 0, 0, false);
-            drawing.drawText(notif.text, 20, yPos + 6, 280, 25, textColor, 0.8, 1, true, false, false, false);
+            drawRect(10, yPos, 300, 30, bgColor);
+            drawText(notif.text, 20, yPos + 6, textColor, false, 0.8);
 
             yPos += 35;
         }
     }
 
-    // Clean expired
-    notifications = notifications.filter(n => now - n.time < n.duration);
+    // Clean expired notifications
+    notifications = notifications.filter(function(n) {
+        return now - n.time < n.duration;
+    });
 });
 
 // ============================================================================
@@ -902,14 +952,9 @@ addEventHandler("OnProcess", function(event) {
         localPlayer.wantedLevel = 0;
     }
 
-    // Super Jump (handled via natives if available)
-    // Fast Run (handled via natives if available)
-
-    // Drift Mode & Vehicle God Mode
-    if (localPlayer.vehicle) {
-        if (toggleStates.vehGodMode) {
-            localPlayer.vehicle.health = 1000;
-        }
+    // Vehicle God Mode
+    if (localPlayer.vehicle && toggleStates.vehGodMode) {
+        localPlayer.vehicle.health = 1000;
     }
 });
 
@@ -922,8 +967,4 @@ addEventHandler("OnResourceStart", function(event, resource) {
     console.log("[ModMenu] Press F5 to open the menu");
 });
 
-addEventHandler("OnLocalPlayerSpawn", function(event) {
-    showNotification("Press F5 to open Mod Menu");
-});
-
-console.log("[ModMenu] Client script loaded - Press F5 to open menu!");
+console.log("[ModMenu] Client loaded - Press F5 to open menu!");
