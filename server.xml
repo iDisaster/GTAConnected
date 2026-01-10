@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<server>
+    <!-- Server Information -->
+    <servername>Liberty City Freeroam</servername>
+    <maxplayers>32</maxplayers>
+    <password></password>
+
+    <!-- Network Settings -->
+    <port>22000</port>
+    <httpport>22001</httpport>
+    <announceserver>1</announceserver>
+
+    <!-- Game Settings -->
+    <game>IV</game>
+    <weather>1</weather>
+    <time hour="12" minute="0"/>
+    <trafficdensity>100</trafficdensity>
+    <civiliandensity>100</civiliandensity>
+
+    <!-- Security Settings -->
+    <anticheat>1</anticheat>
+    <logfile>server.log</logfile>
+
+    <!-- Admin Settings -->
+    <owner>Server Owner</owner>
+    <website>https://gtaconnected.com</website>
+
+    <!-- Resources to Load -->
+    <resources>
+        <resource src="freeroam" />
+        <resource src="admin" />
+        <resource src="world" />
+        <resource src="chat" />
+        <resource src="teleport" />
+        <resource src="vehicles" />
+    </resources>
+</server>
