@@ -3,6 +3,13 @@
 // Handles vehicle spawning and management for GTA IV
 // ============================================================================
 
+// Color constants using toColour for integer format
+const COLOUR_SUCCESS = toColour(100, 255, 100, 255);
+const COLOUR_ORANGE = toColour(255, 200, 100, 255);
+const COLOUR_ERROR = toColour(255, 100, 100, 255);
+const COLOUR_GRAY = toColour(200, 200, 200, 255);
+const COLOUR_MAGENTA = toColour(255, 100, 255, 255);
+
 // GTA IV Vehicle Database - Model names and their hash IDs
 const vehicles = {
     // Sports Cars
@@ -57,7 +64,6 @@ const vehicles = {
     "premier": -1883869285,
     "primo": -1150599089,
     "stratum": 1723137093,
-    "sultan": 970598228,
 
     // Compacts
     "blista": -344943009,
@@ -178,8 +184,8 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
                 let vehicleName = params.toLowerCase().split(" ")[0];
                 spawnVehicleForPlayer(client, vehicleName);
             } else {
-                messageClient("[USAGE] /v <vehicle_name>", client, [255, 200, 100, 255]);
-                messageClient("[TIP] Use /vlist to see available vehicles", client, [200, 200, 200, 255]);
+                messageClient("[USAGE] /v <vehicle_name>", client, COLOUR_ORANGE);
+                messageClient("[TIP] Use /vlist to see available vehicles", client, COLOUR_GRAY);
             }
             break;
 
@@ -187,7 +193,7 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
         case "deletevehicle":
         case "destroyvehicle":
             deletePlayerVehicles(client);
-            messageClient("[VEHICLES] Your vehicles have been deleted!", client, [100, 255, 100, 255]);
+            messageClient("[VEHICLES] Your vehicles have been deleted!", client, COLOUR_SUCCESS);
             break;
 
         case "vlist":
@@ -201,7 +207,7 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
             if (params && params.length > 0) {
                 searchVehicles(client, params.toLowerCase());
             } else {
-                messageClient("[USAGE] /vsearch <partial_name>", client, [255, 200, 100, 255]);
+                messageClient("[USAGE] /vsearch <partial_name>", client, COLOUR_ORANGE);
             }
             break;
 
@@ -212,11 +218,11 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
                 if (colors.length >= 2) {
                     setVehicleColor(client, parseInt(colors[0]), parseInt(colors[1]));
                 } else {
-                    messageClient("[USAGE] /vcolor <color1> <color2>", client, [255, 200, 100, 255]);
-                    messageClient("[TIP] Colors are 0-131 for GTA IV", client, [200, 200, 200, 255]);
+                    messageClient("[USAGE] /vcolor <color1> <color2>", client, COLOUR_ORANGE);
+                    messageClient("[TIP] Colors are 0-131 for GTA IV", client, COLOUR_GRAY);
                 }
             } else {
-                messageClient("[USAGE] /vcolor <color1> <color2>", client, [255, 200, 100, 255]);
+                messageClient("[USAGE] /vcolor <color1> <color2>", client, COLOUR_ORANGE);
             }
             break;
 
@@ -225,9 +231,9 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
             if (client.player && client.player.vehicle) {
                 // Simulate nitro boost by increasing vehicle speed
                 let veh = client.player.vehicle;
-                messageClient("[VEHICLES] NITRO! Vehicle boosted!", client, [255, 100, 255, 255]);
+                messageClient("[VEHICLES] NITRO! Vehicle boosted!", client, COLOUR_MAGENTA);
             } else {
-                messageClient("[VEHICLES] You need to be in a vehicle!", client, [255, 100, 100, 255]);
+                messageClient("[VEHICLES] You need to be in a vehicle!", client, COLOUR_ERROR);
             }
             break;
     }
@@ -240,13 +246,13 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
 function spawnVehicleForPlayer(client, vehicleName) {
     // Check if vehicle exists
     if (!vehicles[vehicleName]) {
-        messageClient("[VEHICLES] Vehicle '" + vehicleName + "' not found!", client, [255, 100, 100, 255]);
-        messageClient("[TIP] Use /vlist or /vsearch <name> to find vehicles", client, [200, 200, 200, 255]);
+        messageClient("[VEHICLES] Vehicle '" + vehicleName + "' not found!", client, COLOUR_ERROR);
+        messageClient("[TIP] Use /vlist or /vsearch <name> to find vehicles", client, COLOUR_GRAY);
         return;
     }
 
     if (!client.player) {
-        messageClient("[VEHICLES] You need to spawn first!", client, [255, 100, 100, 255]);
+        messageClient("[VEHICLES] You need to spawn first!", client, COLOUR_ERROR);
         return;
     }
 
@@ -258,13 +264,14 @@ function spawnVehicleForPlayer(client, vehicleName) {
     let heading = client.player.heading;
 
     // Spawn slightly in front of player
-    let spawnX = pos[0] + (Math.sin(heading) * 3);
-    let spawnY = pos[1] + (Math.cos(heading) * 3);
-    let spawnZ = pos[2] + 1;
+    let spawnX = pos.x + (Math.sin(heading) * 3);
+    let spawnY = pos.y + (Math.cos(heading) * 3);
+    let spawnZ = pos.z + 1;
 
     // Create the vehicle
     let modelHash = vehicles[vehicleName];
-    let vehicle = gta.createVehicle(modelHash, [spawnX, spawnY, spawnZ], heading);
+    let spawnPos = new Vec3(spawnX, spawnY, spawnZ);
+    let vehicle = gta.createVehicle(modelHash, spawnPos, heading);
 
     if (vehicle) {
         // Store vehicle for this player
@@ -284,10 +291,10 @@ function spawnVehicleForPlayer(client, vehicleName) {
         vehicle.colour1 = color1;
         vehicle.colour2 = color2;
 
-        messageClient("[VEHICLES] Spawned: " + vehicleName.toUpperCase(), client, [100, 255, 100, 255]);
+        messageClient("[VEHICLES] Spawned: " + vehicleName.toUpperCase(), client, COLOUR_SUCCESS);
         console.log("[Vehicles] " + client.name + " spawned " + vehicleName);
     } else {
-        messageClient("[VEHICLES] Failed to spawn vehicle!", client, [255, 100, 100, 255]);
+        messageClient("[VEHICLES] Failed to spawn vehicle!", client, COLOUR_ERROR);
     }
 }
 
@@ -304,17 +311,17 @@ function deletePlayerVehicles(client) {
 }
 
 function showVehicleList(client) {
-    messageClient("=== VEHICLE CATEGORIES ===", client, [255, 200, 100, 255]);
-    messageClient("Sports: infernus, turismo, comet, banshee, sultan, coquette, feltzer", client, [200, 200, 200, 255]);
-    messageClient("Muscle: sabregt, stalion, vigero, dukes, ruiner, phoenix", client, [200, 200, 200, 255]);
-    messageClient("Super: entityxf, adder, vacca, bullet, cheetah", client, [200, 200, 200, 255]);
-    messageClient("SUV: patriot, cavalcade, granger, huntley, landstalker", client, [200, 200, 200, 255]);
-    messageClient("Sedan: oracle, schafter, admiral, vincent, presidente", client, [200, 200, 200, 255]);
-    messageClient("Emergency: police, fbi, noose, ambulance, firetruk", client, [200, 200, 200, 255]);
-    messageClient("Bikes: nrg900, pcj600, sanchez, faggio, bati, akuma", client, [200, 200, 200, 255]);
-    messageClient("Air: annihilator, maverick, polmav, buzzard, shamal", client, [200, 200, 200, 255]);
-    messageClient("Boats: jetmax, marquis, predator, tropic, dinghy", client, [200, 200, 200, 255]);
-    messageClient("[TIP] Use /vsearch <name> to search for specific vehicles", client, [255, 200, 100, 255]);
+    messageClient("=== VEHICLE CATEGORIES ===", client, COLOUR_ORANGE);
+    messageClient("Sports: infernus, turismo, comet, banshee, sultan, coquette, feltzer", client, COLOUR_GRAY);
+    messageClient("Muscle: sabregt, stalion, vigero, dukes, ruiner, phoenix", client, COLOUR_GRAY);
+    messageClient("Super: entityxf, adder, vacca, bullet, cheetah", client, COLOUR_GRAY);
+    messageClient("SUV: patriot, cavalcade, granger, huntley, landstalker", client, COLOUR_GRAY);
+    messageClient("Sedan: oracle, schafter, admiral, vincent, presidente", client, COLOUR_GRAY);
+    messageClient("Emergency: police, fbi, noose, ambulance, firetruk", client, COLOUR_GRAY);
+    messageClient("Bikes: nrg900, pcj600, sanchez, faggio, bati, akuma", client, COLOUR_GRAY);
+    messageClient("Air: annihilator, maverick, polmav, buzzard, shamal", client, COLOUR_GRAY);
+    messageClient("Boats: jetmax, marquis, predator, tropic, dinghy", client, COLOUR_GRAY);
+    messageClient("[TIP] Use /vsearch <name> to search for specific vehicles", client, COLOUR_ORANGE);
 }
 
 function searchVehicles(client, searchTerm) {
@@ -326,10 +333,10 @@ function searchVehicles(client, searchTerm) {
     }
 
     if (found.length > 0) {
-        messageClient("=== VEHICLES MATCHING '" + searchTerm.toUpperCase() + "' ===", client, [255, 200, 100, 255]);
-        messageClient(found.join(", "), client, [200, 200, 200, 255]);
+        messageClient("=== VEHICLES MATCHING '" + searchTerm.toUpperCase() + "' ===", client, COLOUR_ORANGE);
+        messageClient(found.join(", "), client, COLOUR_GRAY);
     } else {
-        messageClient("[VEHICLES] No vehicles found matching '" + searchTerm + "'", client, [255, 100, 100, 255]);
+        messageClient("[VEHICLES] No vehicles found matching '" + searchTerm + "'", client, COLOUR_ERROR);
     }
 }
 
@@ -338,9 +345,9 @@ function setVehicleColor(client, color1, color2) {
         let veh = client.player.vehicle;
         veh.colour1 = color1;
         veh.colour2 = color2;
-        messageClient("[VEHICLES] Vehicle color changed to: " + color1 + ", " + color2, client, [100, 255, 100, 255]);
+        messageClient("[VEHICLES] Vehicle color changed to: " + color1 + ", " + color2, client, COLOUR_SUCCESS);
     } else {
-        messageClient("[VEHICLES] You need to be in a vehicle!", client, [255, 100, 100, 255]);
+        messageClient("[VEHICLES] You need to be in a vehicle!", client, COLOUR_ERROR);
     }
 }
 
