@@ -10,28 +10,24 @@ let currentMenu = "main";
 let selectedIndex = 0;
 let menuStack = []; // For back navigation
 
-// Menu colors (RGBA)
+// Menu colors (RGBA components)
 const colors = {
-    background: toColour(20, 20, 20, 200),
-    header: toColour(200, 50, 50, 255),
-    headerText: toColour(255, 255, 255, 255),
-    itemBg: toColour(40, 40, 40, 200),
-    itemBgSelected: toColour(200, 50, 50, 220),
-    itemText: toColour(255, 255, 255, 255),
-    itemTextSelected: toColour(255, 255, 255, 255),
-    footer: toColour(30, 30, 30, 200),
-    footerText: toColour(180, 180, 180, 255),
-    subText: toColour(150, 150, 150, 255)
+    bgR: 20, bgG: 20, bgB: 20, bgA: 200,
+    headerR: 200, headerG: 50, headerB: 50, headerA: 255,
+    itemR: 40, itemG: 40, itemB: 40, itemA: 200,
+    selectedR: 200, selectedG: 50, selectedB: 50, selectedA: 220,
+    textR: 255, textG: 255, textB: 255, textA: 255,
+    footerR: 30, footerG: 30, footerB: 30, footerA: 200
 };
 
-// Menu dimensions
+// Menu dimensions - positioned on RIGHT side to avoid chat
 const menu = {
-    x: 50,
-    y: 100,
-    width: 300,
-    headerHeight: 40,
-    itemHeight: 35,
-    footerHeight: 30,
+    x: 0.73,  // Normalized (0-1) - right side of screen
+    y: 0.15,  // Normalized (0-1) - top area
+    width: 0.24,
+    headerHeight: 0.045,
+    itemHeight: 0.038,
+    footerHeight: 0.035,
     maxVisibleItems: 12
 };
 
@@ -421,7 +417,6 @@ addEventHandler("OnKeyUp", function(event, key, scanCode, mods) {
             selectedIndex = 0;
             scrollOffset = 0;
             menuStack = [];
-            // Show cursor - use gui if available
             if (typeof gui !== "undefined" && gui.showCursor) {
                 gui.showCursor(true, true);
             }
@@ -526,7 +521,6 @@ function getNetworkMenuItems() {
 // ACTION HANDLING
 // ============================================================================
 
-// Selected player for network options
 let selectedPlayer = null;
 
 function selectItem() {
@@ -767,7 +761,7 @@ addNetworkHandler("ModMenu:Notification", function(message) {
 });
 
 // ============================================================================
-// RENDERING - Using correct GTAC drawing API
+// RENDERING - Using GTA IV Native Drawing Functions with Vec2
 // ============================================================================
 
 addEventHandler("OnDrawnHUD", function(event) {
@@ -782,22 +776,28 @@ addEventHandler("OnDrawnHUD", function(event) {
     let totalHeight = menu.headerHeight + (visibleCount * menu.itemHeight) + menu.footerHeight;
 
     // Draw background
-    drawRect(menu.x - 5, menu.y - 5, menu.width + 10, totalHeight + 10, colors.background);
+    drawMenuRect(menu.x - 0.005, menu.y - 0.005, menu.width + 0.01, totalHeight + 0.01,
+                 colors.bgR, colors.bgG, colors.bgB, colors.bgA);
 
     // Draw header
-    drawRect(menu.x, menu.y, menu.width, menu.headerHeight, colors.header);
-    drawText(title, menu.x + menu.width / 2, menu.y + 10, colors.headerText, true, 1.0);
+    drawMenuRect(menu.x, menu.y, menu.width, menu.headerHeight,
+                 colors.headerR, colors.headerG, colors.headerB, colors.headerA);
+    drawMenuText(title, menu.x + menu.width / 2, menu.y + 0.012, 0.45, true);
 
     // Draw items
     let yPos = menu.y + menu.headerHeight;
     for (let i = scrollOffset; i < scrollOffset + visibleCount && i < items.length; i++) {
         let item = items[i];
         let isSelected = (i === selectedIndex);
-        let bgColor = isSelected ? colors.itemBgSelected : colors.itemBg;
-        let textColor = isSelected ? colors.itemTextSelected : colors.itemText;
 
         // Draw item background
-        drawRect(menu.x, yPos, menu.width, menu.itemHeight, bgColor);
+        if (isSelected) {
+            drawMenuRect(menu.x, yPos, menu.width, menu.itemHeight,
+                         colors.selectedR, colors.selectedG, colors.selectedB, colors.selectedA);
+        } else {
+            drawMenuRect(menu.x, yPos, menu.width, menu.itemHeight,
+                         colors.itemR, colors.itemG, colors.itemB, colors.itemA);
+        }
 
         // Build label with state indicators
         let label = item.label;
@@ -815,46 +815,55 @@ addEventHandler("OnDrawnHUD", function(event) {
             label += " >>";
         }
 
-        drawText(label, menu.x + 15, yPos + 8, textColor, false, 0.9);
+        drawMenuText(label, menu.x + 0.01, yPos + 0.008, 0.35, false);
 
         yPos += menu.itemHeight;
     }
 
     // Draw footer
-    drawRect(menu.x, yPos, menu.width, menu.footerHeight, colors.footer);
-    drawText("UP/DOWN: Navigate | ENTER: Select | BACKSPACE: Back", menu.x + menu.width / 2, yPos + 8, colors.footerText, true, 0.6);
+    drawMenuRect(menu.x, yPos, menu.width, menu.footerHeight,
+                 colors.footerR, colors.footerG, colors.footerB, colors.footerA);
+    drawMenuText("UP/DOWN: Nav | ENTER: Select | BACKSPACE: Back",
+                 menu.x + menu.width / 2, yPos + 0.008, 0.25, true);
 
     // Draw scroll indicator
     if (items.length > menu.maxVisibleItems) {
-        let scrollText = (scrollOffset + 1) + "-" + Math.min(scrollOffset + visibleCount, items.length) + " / " + items.length;
-        drawText(scrollText, menu.x + menu.width - 50, menu.y + 12, colors.subText, false, 0.7);
+        let scrollText = (scrollOffset + 1) + "-" + Math.min(scrollOffset + visibleCount, items.length) + "/" + items.length;
+        drawMenuText(scrollText, menu.x + menu.width - 0.03, menu.y + 0.012, 0.3, false);
     }
 });
 
-// Helper drawing functions using GTAC graphics API
-function drawRect(x, y, width, height, colour) {
-    // Use graphics.drawRectangle with Vec2 objects
-    // Signature: graphics.drawRectangle(surface, Vec2 position, Vec2 size, colour1, colour2, colour3, colour4, rotation)
-    try {
-        let pos = new Vec2(x, y);
-        let size = new Vec2(width, height);
-        graphics.drawRectangle(null, pos, size, colour, colour, colour, colour, 0);
-    } catch(e) {
-        // Silent fail
-    }
+// Drawing functions using GTA IV natives with Vec2
+function drawMenuRect(x, y, w, h, r, g, b, a) {
+    // natives.drawRect expects: Vec2 position (center), Vec2 size, r, g, b, a
+    // Position is center-based, so adjust x and y
+    let centerX = x + w / 2;
+    let centerY = y + h / 2;
+
+    let pos = new Vec2(centerX, centerY);
+    let size = new Vec2(w, h);
+
+    natives.drawRect(pos, size, r, g, b, a);
 }
 
-function drawText(text, x, y, colour, centered, scale) {
-    // Use font.render with Vec2 position
-    // Signature: font.render(text, Vec2 position, width, align, justify, size, colour, wordWrap, colourCodes, ignoreColourCodes, shadow)
-    try {
-        let pos = new Vec2(x, y);
-        let textScale = (scale || 1.0) * 14;  // Convert scale to pixel size
-        let align = centered ? 0.5 : 0.0;     // 0.5 = center, 0.0 = left
-        font.render(text, pos, 500, align, 0.0, textScale, colour, false, false, false, true);
-    } catch(e) {
-        // Silent fail
+function drawMenuText(text, x, y, scale, centered) {
+    // Set up text properties
+    natives.setTextFont(0);
+    natives.setTextScale(scale, scale);
+    natives.setTextColour(255, 255, 255, 255);
+    natives.setTextDropshadow(2, 0, 0, 0, 255);
+
+    if (centered) {
+        natives.setTextCentre(true);
+    } else {
+        natives.setTextCentre(false);
     }
+
+    // displayText expects Vec2 position
+    let pos = new Vec2(x, y);
+    natives.displayText(pos, "STRING");
+    natives.addTextComponentString(text);
+    natives.drawText();
 }
 
 // ============================================================================
@@ -874,7 +883,7 @@ function showNotification(text) {
 // Draw notifications
 addEventHandler("OnDrawnHUD", function(event) {
     let now = Date.now();
-    let yPos = 200;
+    let yPos = 0.25;
 
     for (let i = 0; i < notifications.length; i++) {
         let notif = notifications[i];
@@ -882,13 +891,23 @@ addEventHandler("OnDrawnHUD", function(event) {
 
         if (elapsed < notif.duration) {
             let alpha = elapsed < notif.duration - 500 ? 200 : Math.floor(200 * (notif.duration - elapsed) / 500);
-            let bgColor = toColour(20, 20, 20, alpha);
-            let textColor = toColour(255, 255, 100, alpha + 55);
 
-            drawRect(10, yPos, 300, 30, bgColor);
-            drawText(notif.text, 20, yPos + 6, textColor, false, 0.8);
+            // Draw notification background
+            drawMenuRect(0.01, yPos, 0.25, 0.035, 20, 20, 20, alpha);
 
-            yPos += 35;
+            // Draw notification text
+            natives.setTextFont(0);
+            natives.setTextScale(0.3, 0.3);
+            natives.setTextColour(255, 255, 100, Math.min(255, alpha + 55));
+            natives.setTextDropshadow(2, 0, 0, 0, 255);
+            natives.setTextCentre(false);
+
+            let pos = new Vec2(0.015, yPos + 0.008);
+            natives.displayText(pos, "STRING");
+            natives.addTextComponentString(notif.text);
+            natives.drawText();
+
+            yPos += 0.04;
         }
     }
 
