@@ -3,6 +3,12 @@
 // Handles weather, time, and world environment controls
 // ============================================================================
 
+// Color constants using toColour for integer format
+const COLOUR_WORLD = toColour(100, 200, 255, 255);
+const COLOUR_ORANGE = toColour(255, 200, 100, 255);
+const COLOUR_ERROR = toColour(255, 100, 100, 255);
+const COLOUR_GRAY = toColour(200, 200, 200, 255);
+
 // GTA IV Weather Types
 const weatherTypes = {
     0: "Extra Sunny",
@@ -68,12 +74,12 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
                 let weatherId = parseInt(params);
                 if (!isNaN(weatherId) && weatherId >= 0 && weatherId <= 9) {
                     setWeather(weatherId);
-                    message("[WORLD] Weather changed to: " + weatherTypes[weatherId], [100, 200, 255, 255]);
+                    message("[WORLD] Weather changed to: " + weatherTypes[weatherId], COLOUR_WORLD);
                 } else {
-                    messageClient("[WORLD] Invalid weather ID (0-9)", client, [255, 100, 100, 255]);
+                    messageClient("[WORLD] Invalid weather ID (0-9)", client, COLOUR_ERROR);
                 }
             } else {
-                messageClient("[USAGE] /weather <0-9>", client, [255, 200, 100, 255]);
+                messageClient("[USAGE] /weather <0-9>", client, COLOUR_ORANGE);
                 showWeatherList(client);
             }
             break;
@@ -87,78 +93,78 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
 
                 if (!isNaN(hour) && hour >= 0 && hour <= 23) {
                     setTime(hour, minute);
-                    message("[WORLD] Time changed to: " + formatTime(hour, minute), [100, 200, 255, 255]);
+                    message("[WORLD] Time changed to: " + formatTime(hour, minute), COLOUR_WORLD);
                 } else {
-                    messageClient("[WORLD] Invalid time (0-23 hours)", client, [255, 100, 100, 255]);
+                    messageClient("[WORLD] Invalid time (0-23 hours)", client, COLOUR_ERROR);
                 }
             } else {
-                messageClient("[USAGE] /time <hour> or /time <hour:minute>", client, [255, 200, 100, 255]);
+                messageClient("[USAGE] /time <hour> or /time <hour:minute>", client, COLOUR_ORANGE);
             }
             break;
 
         case "morning":
             setTime(8, 0);
-            message("[WORLD] Time set to morning (8:00)", [100, 200, 255, 255]);
+            message("[WORLD] Time set to morning (8:00)", COLOUR_WORLD);
             break;
 
         case "noon":
         case "midday":
             setTime(12, 0);
-            message("[WORLD] Time set to noon (12:00)", [100, 200, 255, 255]);
+            message("[WORLD] Time set to noon (12:00)", COLOUR_WORLD);
             break;
 
         case "evening":
             setTime(18, 0);
-            message("[WORLD] Time set to evening (18:00)", [100, 200, 255, 255]);
+            message("[WORLD] Time set to evening (18:00)", COLOUR_WORLD);
             break;
 
         case "night":
         case "midnight":
             setTime(0, 0);
-            message("[WORLD] Time set to midnight (0:00)", [100, 200, 255, 255]);
+            message("[WORLD] Time set to midnight (0:00)", COLOUR_WORLD);
             break;
 
         case "sunny":
             setWeather(1);
-            message("[WORLD] Weather set to Sunny", [100, 200, 255, 255]);
+            message("[WORLD] Weather set to Sunny", COLOUR_WORLD);
             break;
 
         case "cloudy":
             setWeather(3);
-            message("[WORLD] Weather set to Cloudy", [100, 200, 255, 255]);
+            message("[WORLD] Weather set to Cloudy", COLOUR_WORLD);
             break;
 
         case "rain":
         case "rainy":
             setWeather(4);
-            message("[WORLD] Weather set to Raining", [100, 200, 255, 255]);
+            message("[WORLD] Weather set to Raining", COLOUR_WORLD);
             break;
 
         case "thunder":
         case "storm":
             setWeather(7);
-            message("[WORLD] Weather set to Thunder", [100, 200, 255, 255]);
+            message("[WORLD] Weather set to Thunder", COLOUR_WORLD);
             break;
 
         case "foggy":
         case "fog":
             setWeather(6);
-            message("[WORLD] Weather set to Foggy", [100, 200, 255, 255]);
+            message("[WORLD] Weather set to Foggy", COLOUR_WORLD);
             break;
 
         case "freezetime":
         case "stoptime":
             worldState.timeFrozen = !worldState.timeFrozen;
             let status = worldState.timeFrozen ? "frozen" : "unfrozen";
-            message("[WORLD] Time has been " + status, [100, 200, 255, 255]);
+            message("[WORLD] Time has been " + status, COLOUR_WORLD);
             break;
 
         case "gettime":
-            messageClient("[WORLD] Current time: " + formatTime(worldState.hour, worldState.minute), client, [100, 200, 255, 255]);
+            messageClient("[WORLD] Current time: " + formatTime(worldState.hour, worldState.minute), client, COLOUR_WORLD);
             break;
 
         case "getweather":
-            messageClient("[WORLD] Current weather: " + weatherTypes[worldState.weather] + " (" + worldState.weather + ")", client, [100, 200, 255, 255]);
+            messageClient("[WORLD] Current weather: " + weatherTypes[worldState.weather] + " (" + worldState.weather + ")", client, COLOUR_WORLD);
             break;
 
         case "weatherlist":
@@ -169,7 +175,7 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
         case "randomweather":
             let randomWeather = Math.floor(Math.random() * 10);
             setWeather(randomWeather);
-            message("[WORLD] Random weather: " + weatherTypes[randomWeather], [100, 200, 255, 255]);
+            message("[WORLD] Random weather: " + weatherTypes[randomWeather], COLOUR_WORLD);
             break;
     }
 });
@@ -215,9 +221,9 @@ function formatTime(hour, minute) {
 }
 
 function showWeatherList(client) {
-    messageClient("=== WEATHER TYPES ===", client, [255, 200, 100, 255]);
+    messageClient("=== WEATHER TYPES ===", client, COLOUR_ORANGE);
     for (let id in weatherTypes) {
-        messageClient(id + " - " + weatherTypes[id], client, [200, 200, 200, 255]);
+        messageClient(id + " - " + weatherTypes[id], client, COLOUR_GRAY);
     }
 }
 

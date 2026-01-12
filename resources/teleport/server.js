@@ -3,6 +3,13 @@
 // Teleportation system with Liberty City (GTA IV) locations
 // ============================================================================
 
+// Color constants using toColour for integer format
+const COLOUR_SUCCESS = toColour(100, 255, 100, 255);
+const COLOUR_ORANGE = toColour(255, 200, 100, 255);
+const COLOUR_ERROR = toColour(255, 100, 100, 255);
+const COLOUR_GRAY = toColour(200, 200, 200, 255);
+const COLOUR_INFO = toColour(100, 200, 255, 255);
+
 // Liberty City Teleport Locations
 const locations = {
     // Algonquin (Manhattan)
@@ -81,8 +88,8 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
                 let locationName = params.toLowerCase().split(" ")[0];
                 teleportToLocation(client, locationName);
             } else {
-                messageClient("[USAGE] /tp <location>", client, [255, 200, 100, 255]);
-                messageClient("[TIP] Use /tplist to see available locations", client, [200, 200, 200, 255]);
+                messageClient("[USAGE] /tp <location>", client, COLOUR_ORANGE);
+                messageClient("[TIP] Use /tplist to see available locations", client, COLOUR_GRAY);
             }
             break;
 
@@ -96,7 +103,7 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
             if (params && params.length > 0) {
                 searchLocations(client, params.toLowerCase());
             } else {
-                messageClient("[USAGE] /tpsearch <partial_name>", client, [255, 200, 100, 255]);
+                messageClient("[USAGE] /tpsearch <partial_name>", client, COLOUR_ORANGE);
             }
             break;
 
@@ -112,13 +119,13 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
                     if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
                         teleportToCoords(client, x, y, z);
                     } else {
-                        messageClient("[TELEPORT] Invalid coordinates!", client, [255, 100, 100, 255]);
+                        messageClient("[TELEPORT] Invalid coordinates!", client, COLOUR_ERROR);
                     }
                 } else {
-                    messageClient("[USAGE] /setpos <x> <y> <z>", client, [255, 200, 100, 255]);
+                    messageClient("[USAGE] /setpos <x> <y> <z>", client, COLOUR_ORANGE);
                 }
             } else {
-                messageClient("[USAGE] /setpos <x> <y> <z>", client, [255, 200, 100, 255]);
+                messageClient("[USAGE] /setpos <x> <y> <z>", client, COLOUR_ORANGE);
             }
             break;
 
@@ -127,7 +134,7 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
             if (params && params.length > 0) {
                 saveWaypoint(client, params.toLowerCase());
             } else {
-                messageClient("[USAGE] /savewaypoint <name>", client, [255, 200, 100, 255]);
+                messageClient("[USAGE] /savewaypoint <name>", client, COLOUR_ORANGE);
             }
             break;
 
@@ -136,7 +143,7 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
             if (params && params.length > 0) {
                 deleteWaypoint(client, params.toLowerCase());
             } else {
-                messageClient("[USAGE] /delwaypoint <name>", client, [255, 200, 100, 255]);
+                messageClient("[USAGE] /delwaypoint <name>", client, COLOUR_ORANGE);
             }
             break;
 
@@ -150,7 +157,7 @@ addEventHandler("OnPlayerCommand", function(event, client, command, params) {
             if (params && params.length > 0) {
                 teleportToWaypoint(client, params.toLowerCase());
             } else {
-                messageClient("[USAGE] /tpwp <waypoint_name>", client, [255, 200, 100, 255]);
+                messageClient("[USAGE] /tpwp <waypoint_name>", client, COLOUR_ORANGE);
             }
             break;
 
@@ -182,7 +189,7 @@ function teleportToLocation(client, locationName) {
     if (locations[locationName]) {
         let loc = locations[locationName];
         teleportPlayer(client, loc.x, loc.y, loc.z);
-        messageClient("[TELEPORT] Teleported to: " + loc.name, client, [100, 255, 100, 255]);
+        messageClient("[TELEPORT] Teleported to: " + loc.name, client, COLOUR_SUCCESS);
         console.log("[Teleport] " + client.name + " teleported to " + loc.name);
         return;
     }
@@ -191,50 +198,51 @@ function teleportToLocation(client, locationName) {
     if (playerWaypoints[client.index] && playerWaypoints[client.index][locationName]) {
         let wp = playerWaypoints[client.index][locationName];
         teleportPlayer(client, wp.x, wp.y, wp.z);
-        messageClient("[TELEPORT] Teleported to waypoint: " + locationName, client, [100, 255, 100, 255]);
+        messageClient("[TELEPORT] Teleported to waypoint: " + locationName, client, COLOUR_SUCCESS);
         return;
     }
 
-    messageClient("[TELEPORT] Location '" + locationName + "' not found!", client, [255, 100, 100, 255]);
-    messageClient("[TIP] Use /tplist or /tpsearch <name>", client, [200, 200, 200, 255]);
+    messageClient("[TELEPORT] Location '" + locationName + "' not found!", client, COLOUR_ERROR);
+    messageClient("[TIP] Use /tplist or /tpsearch <name>", client, COLOUR_GRAY);
 }
 
 function teleportToCoords(client, x, y, z) {
     teleportPlayer(client, x, y, z);
-    messageClient("[TELEPORT] Teleported to: X:" + x.toFixed(1) + " Y:" + y.toFixed(1) + " Z:" + z.toFixed(1), client, [100, 255, 100, 255]);
+    messageClient("[TELEPORT] Teleported to: X:" + x.toFixed(1) + " Y:" + y.toFixed(1) + " Z:" + z.toFixed(1), client, COLOUR_SUCCESS);
 }
 
 function teleportPlayer(client, x, y, z) {
     if (client.player) {
+        let newPos = new Vec3(x, y, z);
         // If in vehicle, teleport vehicle
         if (client.player.vehicle) {
-            client.player.vehicle.position = [x, y, z];
+            client.player.vehicle.position = newPos;
         } else {
-            client.player.position = [x, y, z];
+            client.player.position = newPos;
         }
     } else {
-        messageClient("[TELEPORT] You need to spawn first!", client, [255, 100, 100, 255]);
+        messageClient("[TELEPORT] You need to spawn first!", client, COLOUR_ERROR);
     }
 }
 
 function showLocationList(client) {
-    messageClient("=== TELEPORT LOCATIONS ===", client, [255, 200, 100, 255]);
-    messageClient("-- Algonquin --", client, [100, 200, 255, 255]);
-    messageClient("starjunction, middlepark, rotterdam, chinatown, exchange, happiness", client, [200, 200, 200, 255]);
+    messageClient("=== TELEPORT LOCATIONS ===", client, COLOUR_ORANGE);
+    messageClient("-- Algonquin --", client, COLOUR_INFO);
+    messageClient("starjunction, middlepark, rotterdam, chinatown, exchange, happiness", client, COLOUR_GRAY);
 
-    messageClient("-- Broker/Dukes --", client, [100, 200, 255, 255]);
-    messageClient("broker, firefly, outlook, beach, hove, meadows, willis, airport", client, [200, 200, 200, 255]);
+    messageClient("-- Broker/Dukes --", client, COLOUR_INFO);
+    messageClient("broker, firefly, outlook, beach, hove, meadows, willis, airport", client, COLOUR_GRAY);
 
-    messageClient("-- Bohan --", client, [100, 200, 255, 255]);
-    messageClient("bohan, northholland, industrial", client, [200, 200, 200, 255]);
+    messageClient("-- Bohan --", client, COLOUR_INFO);
+    messageClient("bohan, northholland, industrial", client, COLOUR_GRAY);
 
-    messageClient("-- Alderney --", client, [100, 200, 255, 255]);
-    messageClient("alderney, alderneyport, westdyke, acter, berchem, tudor, leftwood", client, [200, 200, 200, 255]);
+    messageClient("-- Alderney --", client, COLOUR_INFO);
+    messageClient("alderney, alderneyport, westdyke, acter, berchem, tudor, leftwood", client, COLOUR_GRAY);
 
-    messageClient("-- Points of Interest --", client, [100, 200, 255, 255]);
-    messageClient("hospital, hospitalalg, police, bowling, cabaret, burgershot, helipad", client, [200, 200, 200, 255]);
+    messageClient("-- Points of Interest --", client, COLOUR_INFO);
+    messageClient("hospital, hospitalalg, police, bowling, cabaret, burgershot, helipad", client, COLOUR_GRAY);
 
-    messageClient("[TIP] Use /tpsearch <name> to find specific locations", client, [255, 200, 100, 255]);
+    messageClient("[TIP] Use /tpsearch <name> to find specific locations", client, COLOUR_ORANGE);
 }
 
 function searchLocations(client, searchTerm) {
@@ -247,18 +255,18 @@ function searchLocations(client, searchTerm) {
     }
 
     if (found.length > 0) {
-        messageClient("=== LOCATIONS MATCHING '" + searchTerm.toUpperCase() + "' ===", client, [255, 200, 100, 255]);
+        messageClient("=== LOCATIONS MATCHING '" + searchTerm.toUpperCase() + "' ===", client, COLOUR_ORANGE);
         for (let i = 0; i < found.length; i++) {
-            messageClient(found[i], client, [200, 200, 200, 255]);
+            messageClient(found[i], client, COLOUR_GRAY);
         }
     } else {
-        messageClient("[TELEPORT] No locations found matching '" + searchTerm + "'", client, [255, 100, 100, 255]);
+        messageClient("[TELEPORT] No locations found matching '" + searchTerm + "'", client, COLOUR_ERROR);
     }
 }
 
 function saveWaypoint(client, waypointName) {
     if (!client.player) {
-        messageClient("[WAYPOINT] You need to spawn first!", client, [255, 100, 100, 255]);
+        messageClient("[WAYPOINT] You need to spawn first!", client, COLOUR_ERROR);
         return;
     }
 
@@ -269,35 +277,35 @@ function saveWaypoint(client, waypointName) {
     }
 
     playerWaypoints[client.index][waypointName] = {
-        x: pos[0],
-        y: pos[1],
-        z: pos[2]
+        x: pos.x,
+        y: pos.y,
+        z: pos.z
     };
 
-    messageClient("[WAYPOINT] Saved waypoint: " + waypointName, client, [100, 255, 100, 255]);
-    messageClient("[WAYPOINT] Use /tpwp " + waypointName + " to teleport here", client, [200, 200, 200, 255]);
+    messageClient("[WAYPOINT] Saved waypoint: " + waypointName, client, COLOUR_SUCCESS);
+    messageClient("[WAYPOINT] Use /tpwp " + waypointName + " to teleport here", client, COLOUR_GRAY);
 }
 
 function deleteWaypoint(client, waypointName) {
     if (playerWaypoints[client.index] && playerWaypoints[client.index][waypointName]) {
         delete playerWaypoints[client.index][waypointName];
-        messageClient("[WAYPOINT] Deleted waypoint: " + waypointName, client, [100, 255, 100, 255]);
+        messageClient("[WAYPOINT] Deleted waypoint: " + waypointName, client, COLOUR_SUCCESS);
     } else {
-        messageClient("[WAYPOINT] Waypoint not found: " + waypointName, client, [255, 100, 100, 255]);
+        messageClient("[WAYPOINT] Waypoint not found: " + waypointName, client, COLOUR_ERROR);
     }
 }
 
 function showWaypoints(client) {
     if (!playerWaypoints[client.index] || Object.keys(playerWaypoints[client.index]).length === 0) {
-        messageClient("[WAYPOINT] You have no saved waypoints", client, [255, 200, 100, 255]);
-        messageClient("[TIP] Use /savewaypoint <name> to save your current position", client, [200, 200, 200, 255]);
+        messageClient("[WAYPOINT] You have no saved waypoints", client, COLOUR_ORANGE);
+        messageClient("[TIP] Use /savewaypoint <name> to save your current position", client, COLOUR_GRAY);
         return;
     }
 
-    messageClient("=== YOUR WAYPOINTS ===", client, [255, 200, 100, 255]);
+    messageClient("=== YOUR WAYPOINTS ===", client, COLOUR_ORANGE);
     for (let name in playerWaypoints[client.index]) {
         let wp = playerWaypoints[client.index][name];
-        messageClient(name + " - X:" + wp.x.toFixed(1) + " Y:" + wp.y.toFixed(1) + " Z:" + wp.z.toFixed(1), client, [200, 200, 200, 255]);
+        messageClient(name + " - X:" + wp.x.toFixed(1) + " Y:" + wp.y.toFixed(1) + " Z:" + wp.z.toFixed(1), client, COLOUR_GRAY);
     }
 }
 
@@ -305,9 +313,9 @@ function teleportToWaypoint(client, waypointName) {
     if (playerWaypoints[client.index] && playerWaypoints[client.index][waypointName]) {
         let wp = playerWaypoints[client.index][waypointName];
         teleportPlayer(client, wp.x, wp.y, wp.z);
-        messageClient("[WAYPOINT] Teleported to: " + waypointName, client, [100, 255, 100, 255]);
+        messageClient("[WAYPOINT] Teleported to: " + waypointName, client, COLOUR_SUCCESS);
     } else {
-        messageClient("[WAYPOINT] Waypoint not found: " + waypointName, client, [255, 100, 100, 255]);
+        messageClient("[WAYPOINT] Waypoint not found: " + waypointName, client, COLOUR_ERROR);
     }
 }
 

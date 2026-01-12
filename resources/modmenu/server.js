@@ -3,6 +3,10 @@
 // Handles all server-side actions triggered from the client menu
 // ============================================================================
 
+// Color constants using toColour for integer format
+const COLOUR_ORANGE = toColour(255, 200, 100, 255);
+const COLOUR_WORLD = toColour(100, 200, 255, 255);
+
 // Vehicle model hashes for spawning
 const vehicleModels = {
     // Sports Cars
@@ -137,7 +141,7 @@ addEventHandler("OnPlayerJoined", function(event, client) {
     playerToggles[client.index] = {};
 
     // Inform player about the menu
-    messageClient("[MOD MENU] Press F5 to open the mod menu!", client, [255, 200, 100, 255]);
+    messageClient("[MOD MENU] Press F5 to open the mod menu!", client, COLOUR_ORANGE);
 });
 
 addEventHandler("OnPlayerQuit", function(event, client, reason) {
@@ -195,7 +199,9 @@ addNetworkHandler("ModMenu:SelfOption", function(client, option) {
                 { x: 1243.0, y: -196.0, z: 26.0 }
             ];
             let spawn = spawns[Math.floor(Math.random() * spawns.length)];
-            client.spawn([spawn.x, spawn.y, spawn.z], 0, -1667301416);
+            let spawnPos = new Vec3(spawn.x, spawn.y, spawn.z);
+            client.despawnPlayer();
+            client.spawnPlayer(spawnPos, 0.0, -1667301416);
             break;
 
         case "suicide":
@@ -260,12 +266,13 @@ addNetworkHandler("ModMenu:SpawnVehicle", function(client, vehicleName) {
     let pos = client.player.position;
     let heading = client.player.heading;
 
-    let spawnX = pos[0] + (Math.sin(heading) * 4);
-    let spawnY = pos[1] + (Math.cos(heading) * 4);
-    let spawnZ = pos[2] + 1;
+    let spawnX = pos.x + (Math.sin(heading) * 4);
+    let spawnY = pos.y + (Math.cos(heading) * 4);
+    let spawnZ = pos.z + 1;
 
     // Create vehicle
-    let vehicle = gta.createVehicle(modelHash, [spawnX, spawnY, spawnZ], heading);
+    let spawnPos = new Vec3(spawnX, spawnY, spawnZ);
+    let vehicle = gta.createVehicle(modelHash, spawnPos, heading);
 
     if (vehicle) {
         if (!playerVehicles[client.index]) {
@@ -327,7 +334,7 @@ addNetworkHandler("ModMenu:VehicleOption", function(client, option) {
 
         case "flip":
             let rot = vehicle.rotation;
-            vehicle.rotation = [0, 0, rot[2]];
+            vehicle.rotation = new Vec3(0, 0, rot.z);
             break;
 
         case "clean":
@@ -344,11 +351,12 @@ addNetworkHandler("ModMenu:VehicleOption", function(client, option) {
             let pos = vehicle.position;
             let heading = vehicle.heading;
             let boost = 50;
-            vehicle.position = [
-                pos[0] + (Math.sin(heading) * boost),
-                pos[1] + (Math.cos(heading) * boost),
-                pos[2]
-            ];
+            let newPos = new Vec3(
+                pos.x + (Math.sin(heading) * boost),
+                pos.y + (Math.cos(heading) * boost),
+                pos.z
+            );
+            vehicle.position = newPos;
             break;
     }
 
@@ -396,10 +404,11 @@ addNetworkHandler("ModMenu:Teleport", function(client, x, y, z) {
         return;
     }
 
+    let newPos = new Vec3(x, y, z);
     if (client.player.vehicle) {
-        client.player.vehicle.position = [x, y, z];
+        client.player.vehicle.position = newPos;
     } else {
-        client.player.position = [x, y, z];
+        client.player.position = newPos;
     }
 
     console.log("[ModMenu] " + client.name + " teleported to: " + x + ", " + y + ", " + z);
@@ -428,10 +437,11 @@ addNetworkHandler("ModMenu:TeleportToPlayer", function(client, targetId) {
 
     if (target && target.player) {
         let pos = target.player.position;
+        let newPos = new Vec3(pos.x + 3, pos.y, pos.z);
         if (client.player.vehicle) {
-            client.player.vehicle.position = [pos[0] + 3, pos[1], pos[2]];
+            client.player.vehicle.position = newPos;
         } else {
-            client.player.position = [pos[0] + 3, pos[1], pos[2]];
+            client.player.position = newPos;
         }
         triggerNetworkEvent("ModMenu:Notification", client, "Teleported to: " + target.name);
         console.log("[ModMenu] " + client.name + " teleported to " + target.name);
@@ -465,13 +475,13 @@ addNetworkHandler("ModMenu:GetPlayers", function(client) {
 
 addNetworkHandler("ModMenu:WorldTime", function(client, hour) {
     gta.time = [hour, 0];
-    message("[WORLD] " + client.name + " changed time to: " + hour + ":00", [100, 200, 255, 255]);
+    message("[WORLD] " + client.name + " changed time to: " + hour + ":00", COLOUR_WORLD);
     console.log("[ModMenu] " + client.name + " changed time to: " + hour);
 });
 
 addNetworkHandler("ModMenu:WorldWeather", function(client, weatherId) {
     gta.weather = weatherId;
-    message("[WORLD] " + client.name + " changed the weather", [100, 200, 255, 255]);
+    message("[WORLD] " + client.name + " changed the weather", COLOUR_WORLD);
     console.log("[ModMenu] " + client.name + " changed weather to: " + weatherId);
 });
 
@@ -485,7 +495,7 @@ addNetworkHandler("ModMenu:GiveWeapon", function(client, weaponId) {
         return;
     }
 
-    client.giveWeapon(weaponId, 500);
+    client.player.giveWeapon(weaponId, 500);
     console.log("[ModMenu] " + client.name + " got weapon: " + weaponId);
 });
 
@@ -493,20 +503,20 @@ function giveAllWeapons(client) {
     if (!client.player) return;
 
     // GTA IV Weapons
-    client.giveWeapon(1, 1);      // Bat
-    client.giveWeapon(2, 1);      // Knife
-    client.giveWeapon(5, 500);    // Pistol
-    client.giveWeapon(6, 500);    // Deagle
-    client.giveWeapon(9, 200);    // Shotgun
-    client.giveWeapon(10, 200);   // Combat Shotgun
-    client.giveWeapon(11, 500);   // Micro SMG
-    client.giveWeapon(12, 500);   // SMG
-    client.giveWeapon(14, 500);   // AK47
-    client.giveWeapon(15, 500);   // M4
-    client.giveWeapon(16, 100);   // Sniper
-    client.giveWeapon(18, 20);    // RPG
-    client.giveWeapon(19, 20);    // Grenades
-    client.giveWeapon(20, 20);    // Molotov
+    client.player.giveWeapon(1, 1);      // Bat
+    client.player.giveWeapon(2, 1);      // Knife
+    client.player.giveWeapon(5, 500);    // Pistol
+    client.player.giveWeapon(6, 500);    // Deagle
+    client.player.giveWeapon(9, 200);    // Shotgun
+    client.player.giveWeapon(10, 200);   // Combat Shotgun
+    client.player.giveWeapon(11, 500);   // Micro SMG
+    client.player.giveWeapon(12, 500);   // SMG
+    client.player.giveWeapon(14, 500);   // AK47
+    client.player.giveWeapon(15, 500);   // M4
+    client.player.giveWeapon(16, 100);   // Sniper
+    client.player.giveWeapon(18, 20);    // RPG
+    client.player.giveWeapon(19, 20);    // Grenades
+    client.player.giveWeapon(20, 20);    // Molotov
 }
 
 // ============================================================================
@@ -523,7 +533,8 @@ addNetworkHandler("ModMenu:Fun", function(client, option) {
 
     switch(option) {
         case "launch":
-            client.player.position = [pos[0], pos[1], pos[2] + 50];
+            let launchPos = new Vec3(pos.x, pos.y, pos.z + 50);
+            client.player.position = launchPos;
             break;
 
         case "explode":
@@ -533,7 +544,8 @@ addNetworkHandler("ModMenu:Fun", function(client, option) {
         case "ped":
             // Spawn a random ped near player
             let pedSkin = skinModels[Math.floor(Math.random() * skinModels.length)];
-            let ped = gta.createPed(pedSkin, [pos[0] + 3, pos[1] + 3, pos[2]], 0);
+            let pedPos = new Vec3(pos.x + 3, pos.y + 3, pos.z);
+            let ped = gta.createPed(pedSkin, pedPos, 0);
             if (ped) {
                 console.log("[ModMenu] " + client.name + " spawned a ped");
             }
