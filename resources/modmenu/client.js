@@ -831,65 +831,29 @@ addEventHandler("OnDrawnHUD", function(event) {
     }
 });
 
-// Helper drawing functions using native drawing
+// Helper drawing functions using GTAC graphics API
 function drawRect(x, y, width, height, colour) {
-    // Use natives for drawing rectangles
-    if (typeof natives !== "undefined" && natives.drawRect) {
-        // GTA IV native drawing - normalized coordinates (0-1)
-        let screenW = game.width || 1920;
-        let screenH = game.height || 1080;
-
-        let nx = (x + width/2) / screenW;
-        let ny = (y + height/2) / screenH;
-        let nw = width / screenW;
-        let nh = height / screenH;
-
-        // Extract RGBA from colour
-        let r = (colour >> 24) & 0xFF;
-        let g = (colour >> 16) & 0xFF;
-        let b = (colour >> 8) & 0xFF;
-        let a = colour & 0xFF;
-
-        natives.drawRect(nx, ny, nw, nh, r, g, b, a);
-    } else {
-        // Fallback to graphics drawing
-        try {
-            graphics.drawRectangle(null, [x, y], [width, height], colour, colour, 0, 0, 0);
-        } catch(e) {
-            // Silent fail
-        }
+    // Use graphics.drawRectangle with Vec2 objects
+    // Signature: graphics.drawRectangle(surface, Vec2 position, Vec2 size, colour1, colour2, colour3, colour4, rotation)
+    try {
+        let pos = new Vec2(x, y);
+        let size = new Vec2(width, height);
+        graphics.drawRectangle(null, pos, size, colour, colour, colour, colour, 0);
+    } catch(e) {
+        // Silent fail
     }
 }
 
 function drawText(text, x, y, colour, centered, scale) {
-    // Use natives for drawing text
-    if (typeof natives !== "undefined" && natives.setTextScale) {
-        let screenW = game.width || 1920;
-        let screenH = game.height || 1080;
-
-        let nx = x / screenW;
-        let ny = y / screenH;
-
-        let r = (colour >> 24) & 0xFF;
-        let g = (colour >> 16) & 0xFF;
-        let b = (colour >> 8) & 0xFF;
-        let a = colour & 0xFF;
-
-        natives.setTextFont(0);
-        natives.setTextScale(scale || 0.35, scale || 0.35);
-        natives.setTextColour(r, g, b, a);
-        if (centered) {
-            natives.setTextCentre(true);
-        }
-        natives.setTextDropshadow(2, 0, 0, 0, 255);
-        natives.displayTextWithLiteralString(nx, ny, "STRING", text);
-    } else {
-        // Fallback
-        try {
-            graphics.drawText(text, [x, y], colour, scale || 1.0, "arial", centered || false);
-        } catch(e) {
-            // Silent fail
-        }
+    // Use font.render with Vec2 position
+    // Signature: font.render(text, Vec2 position, width, align, justify, size, colour, wordWrap, colourCodes, ignoreColourCodes, shadow)
+    try {
+        let pos = new Vec2(x, y);
+        let textScale = (scale || 1.0) * 14;  // Convert scale to pixel size
+        let align = centered ? 0.5 : 0.0;     // 0.5 = center, 0.0 = left
+        font.render(text, pos, 500, align, 0.0, textScale, colour, false, false, false, true);
+    } catch(e) {
+        // Silent fail
     }
 }
 
