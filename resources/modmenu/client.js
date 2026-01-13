@@ -75,8 +75,13 @@ const menuData = {
             { label: "Max Health & Armor", action: "self_max" },
             { label: "Give All Weapons", action: "self_weapons" },
             { label: "Clear Wanted Level", action: "self_wanted" },
+            { label: "--- Toggles ---", action: "none" },
             { label: "God Mode", action: "toggle", target: "godMode", state: false },
+            { label: "Invincible", action: "toggle", target: "invincible", state: false },
+            { label: "Super Run", action: "toggle", target: "superRun", state: false },
+            { label: "No Ragdoll", action: "toggle", target: "noRagdoll", state: false },
             { label: "Never Wanted", action: "toggle", target: "neverWanted", state: false },
+            { label: "--- Actions ---", action: "none" },
             { label: "Respawn", action: "self_respawn" },
             { label: "Suicide", action: "self_suicide" },
             { label: "Change Skin", action: "submenu", target: "skins" }
@@ -312,6 +317,9 @@ const menuData = {
 // Toggle states
 let toggleStates = {
     godMode: false,
+    invincible: false,
+    superRun: false,
+    noRagdoll: false,
     neverWanted: false,
     vehGodMode: false,
     driveOnWater: false,
@@ -465,17 +473,27 @@ function getCurrentMenuItems() {
 function getNetworkMenuItems() {
     let items = [
         { label: "Refresh Player List", action: "refresh_players" },
-        { label: "--- Players ---", action: "none" }
+        { label: "--- Players (" + playerList.length + ") ---", action: "none" }
     ];
     for (let i = 0; i < playerList.length; i++) {
         items.push({
-            label: playerList[i].name,
-            action: "submenu",
-            target: "player_options",
+            label: playerList[i].name + " [ID: " + playerList[i].id + "]",
+            action: "teleport_to_player_direct",
             playerData: playerList[i]
         });
     }
+    if (playerList.length === 0) {
+        items.push({ label: "(No players found)", action: "none" });
+        items.push({ label: "(Click Refresh above)", action: "none" });
+    }
     return items;
+}
+
+// Refresh player list function
+function refreshPlayerList() {
+    // Request player list from server
+    triggerNetworkEvent("ModMenu:GetPlayers");
+    showNotification("Refreshing players...");
 }
 
 // ============================================================================
@@ -499,6 +517,11 @@ function selectItem() {
                 currentMenu = item.target;
                 selectedIndex = 0;
                 scrollOffset = 0;
+
+                // Auto-refresh player list when entering network menu
+                if (item.target === "network") {
+                    refreshPlayerList();
+                }
             }
             break;
 
@@ -616,14 +639,20 @@ function selectItem() {
             break;
 
         case "refresh_players":
-            triggerNetworkEvent("ModMenu:GetPlayers");
-            showNotification("Refreshing...");
+            refreshPlayerList();
             break;
 
         case "teleport_to_player":
             if (selectedPlayer) {
                 triggerNetworkEvent("ModMenu:TeleportToPlayer", selectedPlayer.id);
                 showNotification("Teleporting to " + selectedPlayer.name);
+            }
+            break;
+
+        case "teleport_to_player_direct":
+            if (item.playerData) {
+                triggerNetworkEvent("ModMenu:TeleportToPlayer", item.playerData.id);
+                showNotification("Teleporting to " + item.playerData.name);
             }
             break;
 
@@ -1124,8 +1153,11 @@ addEventHandler("OnDrawnHUD", function(event) {
 // TOGGLE EFFECTS
 // ============================================================================
 
-// Track last god mode state to only call native when changed
+// Track last toggle states to only call native when changed
 let lastGodMode = false;
+let lastInvincible = false;
+let lastSuperRun = false;
+let lastNoRagdoll = false;
 let lastVehGodMode = false;
 let lastDriftMode = false;
 let processCounter = 0;
@@ -1134,7 +1166,7 @@ addEventHandler("OnProcess", function(event) {
     if (!localPlayer) return;
     processCounter++;
 
-    // Player god mode - use invincibility native
+    // Player god mode - use invincibility native + health
     if (toggleStates.godMode !== lastGodMode) {
         try {
             natives.setCharInvincible(localPlayer, toggleStates.godMode);
@@ -1146,6 +1178,45 @@ addEventHandler("OnProcess", function(event) {
     if (toggleStates.godMode) {
         if (localPlayer.health < 200) localPlayer.health = 200;
         if (localPlayer.armour < 100) localPlayer.armour = 100;
+    }
+
+    // Invincible toggle - separate from god mode, just invincibility
+    if (toggleStates.invincible !== lastInvincible) {
+        try {
+            natives.setCharInvincible(localPlayer, toggleStates.invincible);
+            natives.setCharProofs(localPlayer, toggleStates.invincible, toggleStates.invincible, toggleStates.invincible, toggleStates.invincible, toggleStates.invincible);
+        } catch(e) {}
+        lastInvincible = toggleStates.invincible;
+    }
+
+    // Super Run - increase movement speed
+    if (toggleStates.superRun !== lastSuperRun) {
+        try {
+            if (toggleStates.superRun) {
+                natives.setCharMoveAnimSpeedMultiplier(localPlayer, 3.0);
+            } else {
+                natives.setCharMoveAnimSpeedMultiplier(localPlayer, 1.0);
+            }
+        } catch(e) {}
+        lastSuperRun = toggleStates.superRun;
+    }
+
+    // No Ragdoll - prevent ragdoll
+    if (toggleStates.noRagdoll !== lastNoRagdoll) {
+        try {
+            natives.setPedCanRagdoll(localPlayer, !toggleStates.noRagdoll);
+        } catch(e) {}
+        lastNoRagdoll = toggleStates.noRagdoll;
+    }
+    // Keep preventing ragdoll every frame
+    if (toggleStates.noRagdoll) {
+        try {
+            natives.setPedCanRagdoll(localPlayer, false);
+            // Cancel any active ragdoll
+            if (natives.isPedRagdoll(localPlayer)) {
+                natives.switchPedToAnimated(localPlayer, true);
+            }
+        } catch(e) {}
     }
 
     // Never wanted - clear wanted level
