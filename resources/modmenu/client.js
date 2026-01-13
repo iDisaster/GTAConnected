@@ -280,13 +280,21 @@ let toggleStates = {
 
 addEventHandler("OnResourceReady", function(event, resource) {
     // Use built-in default font (no external TTF file needed)
+    // Signature: lucasFont.createDefaultFont(float size, string family, [string style = "Regular"])
     try {
-        menuFont = lucasFont.createDefaultFont(16.0, "Tahoma", false, false);
+        menuFont = lucasFont.createDefaultFont(16.0, "Arial", "Regular");
         if (menuFont != null) {
             console.log("[ModMenu] Default font created successfully");
         }
     } catch(e) {
         console.log("[ModMenu] Could not create default font: " + e);
+        // Try alternative font
+        try {
+            menuFont = lucasFont.createDefaultFont(16.0, "Tahoma");
+            console.log("[ModMenu] Fallback font created");
+        } catch(e2) {
+            console.log("[ModMenu] Fallback font also failed: " + e2);
+        }
     }
 
     if (menuFont == null) {
