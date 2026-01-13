@@ -139,9 +139,15 @@ addNetworkHandler("ModMenu:TeleportToPlayer", function(client, targetId) {
     let clients = getClients();
     for (let i = 0; i < clients.length; i++) {
         if (clients[i].index == targetId) {
-            triggerNetworkEvent("ModMenu:Notification", client, "Teleporting to: " + clients[i].name);
-            // Client will handle the actual teleport
-            triggerNetworkEvent("ModMenu:ExecuteTeleportToPlayer", client, targetId);
+            // Get target player's position from server
+            if (clients[i].player) {
+                let targetPos = clients[i].player.position;
+                triggerNetworkEvent("ModMenu:Notification", client, "Teleporting to: " + clients[i].name);
+                // Send position directly to client
+                triggerNetworkEvent("ModMenu:ExecuteTeleport", client, targetPos.x + 2, targetPos.y, targetPos.z);
+            } else {
+                triggerNetworkEvent("ModMenu:Notification", client, "Player not spawned!");
+            }
             return;
         }
     }
@@ -156,13 +162,24 @@ addNetworkHandler("ModMenu:GetPlayers", function(client) {
     let clients = getClients();
     let playerList = [];
 
+    console.log("[ModMenu] Getting players, found " + clients.length + " clients");
+
     for (let i = 0; i < clients.length; i++) {
-        playerList.push({
-            id: clients[i].index,
-            name: clients[i].name
-        });
+        let c = clients[i];
+        // Skip the requesting player (optional - include self for testing)
+        // if (c.index === client.index) continue;
+
+        // Only add players with valid data
+        if (c && c.name) {
+            playerList.push({
+                id: c.index,
+                name: c.name || ("Player " + c.index)
+            });
+            console.log("[ModMenu] Added player: " + c.name + " (ID: " + c.index + ")");
+        }
     }
 
+    console.log("[ModMenu] Sending " + playerList.length + " players to " + client.name);
     triggerNetworkEvent("ModMenu:PlayerList", client, playerList);
 });
 
