@@ -191,7 +191,29 @@ const menuData = {
             { label: "Flip Vehicle", action: "veh_flip" },
             { label: "Vehicle Colors", action: "submenu", target: "veh_colors" },
             { label: "God Mode", action: "toggle", target: "vehGodMode", state: false },
-            { label: "Nitro Boost", action: "veh_nitro" }
+            { label: "Nitro Boost", action: "veh_nitro" },
+            { label: "Drive On Water", action: "toggle", target: "driveOnWater", state: false },
+            { label: "Rainbow Color", action: "toggle", target: "rainbowCar", state: false },
+            { label: "Drift Mode", action: "toggle", target: "driftMode", state: false },
+            { label: "Neon Lights", action: "submenu", target: "veh_neons" },
+            { label: "Fly Mode", action: "toggle", target: "flyMode", state: false },
+            { label: "Shoot RPG", action: "toggle", target: "vehShootRPG", state: false }
+        ]
+    },
+
+    veh_neons: {
+        title: "NEON LIGHTS",
+        items: [
+            { label: "Toggle Neons", action: "toggle", target: "neonLights", state: false },
+            { label: "Red Neons", action: "neon_color", value: { r: 255, g: 0, b: 0 } },
+            { label: "Blue Neons", action: "neon_color", value: { r: 0, g: 100, b: 255 } },
+            { label: "Green Neons", action: "neon_color", value: { r: 0, g: 255, b: 0 } },
+            { label: "Purple Neons", action: "neon_color", value: { r: 255, g: 0, b: 255 } },
+            { label: "Pink Neons", action: "neon_color", value: { r: 255, g: 100, b: 200 } },
+            { label: "Yellow Neons", action: "neon_color", value: { r: 255, g: 255, b: 0 } },
+            { label: "White Neons", action: "neon_color", value: { r: 255, g: 255, b: 255 } },
+            { label: "Cyan Neons", action: "neon_color", value: { r: 0, g: 255, b: 255 } },
+            { label: "Orange Neons", action: "neon_color", value: { r: 255, g: 150, b: 0 } }
         ]
     },
 
@@ -238,7 +260,25 @@ const menuData = {
             { label: "Sunny", action: "world_weather", value: 1 },
             { label: "Cloudy", action: "world_weather", value: 3 },
             { label: "Rainy", action: "world_weather", value: 4 },
-            { label: "Thunder", action: "world_weather", value: 7 }
+            { label: "Thunder", action: "world_weather", value: 7 },
+            { label: "--- Sky Effects ---", action: "none" },
+            { label: "Rainbow Sky", action: "toggle", target: "rainbowSky", state: false },
+            { label: "Sky Colors", action: "submenu", target: "sky_colors" }
+        ]
+    },
+
+    sky_colors: {
+        title: "SKY COLORS",
+        items: [
+            { label: "Default Sky", action: "sky_color", value: 0 },
+            { label: "Red Sky", action: "sky_color", value: 1 },
+            { label: "Blue Sky", action: "sky_color", value: 2 },
+            { label: "Green Sky", action: "sky_color", value: 3 },
+            { label: "Purple Sky", action: "sky_color", value: 4 },
+            { label: "Orange Sky", action: "sky_color", value: 5 },
+            { label: "Pink Sky", action: "sky_color", value: 6 },
+            { label: "Yellow Sky", action: "sky_color", value: 7 },
+            { label: "Cyan Sky", action: "sky_color", value: 8 }
         ]
     },
 
@@ -246,6 +286,8 @@ const menuData = {
         title: "WEAPONS",
         items: [
             { label: "Get All Weapons", action: "weapon_all" },
+            { label: "Explosive Ammo", action: "toggle", target: "explosiveAmmo", state: false },
+            { label: "--- Give Weapon ---", action: "none" },
             { label: "Pistol", action: "weapon", value: 5 },
             { label: "Desert Eagle", action: "weapon", value: 6 },
             { label: "Shotgun", action: "weapon", value: 9 },
@@ -271,8 +313,40 @@ const menuData = {
 let toggleStates = {
     godMode: false,
     neverWanted: false,
-    vehGodMode: false
+    vehGodMode: false,
+    driveOnWater: false,
+    rainbowCar: false,
+    driftMode: false,
+    neonLights: false,
+    flyMode: false,
+    vehShootRPG: false,
+    rainbowSky: false,
+    explosiveAmmo: false
 };
+
+// Neon objects storage
+let neonObjects = [];
+let neonColor = { r: 255, g: 0, b: 255 }; // Default purple
+
+// Rainbow color cycling
+let rainbowHue = 0;
+let skyColorIndex = 0;
+
+// Sky colors for selection
+const skyColors = [
+    { name: "Default", r: -1, g: -1, b: -1 },
+    { name: "Red", r: 255, g: 50, b: 50 },
+    { name: "Blue", r: 50, g: 100, b: 255 },
+    { name: "Green", r: 50, g: 255, b: 100 },
+    { name: "Purple", r: 180, g: 50, b: 255 },
+    { name: "Orange", r: 255, g: 150, b: 50 },
+    { name: "Pink", r: 255, g: 100, b: 200 },
+    { name: "Yellow", r: 255, g: 255, b: 100 },
+    { name: "Cyan", r: 100, g: 255, b: 255 }
+];
+
+// Last shot time for RPG vehicle
+let lastVehShot = 0;
 
 // ============================================================================
 // FONT LOADING
@@ -569,6 +643,24 @@ function selectItem() {
 
         case "fun_ragdoll":
             triggerNetworkEvent("ModMenu:Fun", "ragdoll");
+            break;
+
+        case "neon_color":
+            neonColor = item.value;
+            showNotification("Neon color: " + item.label.replace(" Neons", ""));
+            break;
+
+        case "sky_color":
+            skyColorIndex = item.value;
+            if (skyColorIndex === 0) {
+                // Reset to default
+                try {
+                    natives.releaseSkybox();
+                } catch(e) {}
+                showNotification("Default sky");
+            } else {
+                showNotification("Sky: " + skyColors[item.value].name);
+            }
             break;
     }
 }
@@ -1035,9 +1127,12 @@ addEventHandler("OnDrawnHUD", function(event) {
 // Track last god mode state to only call native when changed
 let lastGodMode = false;
 let lastVehGodMode = false;
+let lastDriftMode = false;
+let processCounter = 0;
 
 addEventHandler("OnProcess", function(event) {
     if (!localPlayer) return;
+    processCounter++;
 
     // Player god mode - use invincibility native
     if (toggleStates.godMode !== lastGodMode) {
@@ -1058,33 +1153,238 @@ addEventHandler("OnProcess", function(event) {
         try {
             natives.clearWantedLevel(0);
         } catch(e) {
-            // Fallback - set wanted level directly
             localPlayer.wantedLevel = 0;
         }
     }
 
-    // Vehicle god mode
+    // Vehicle-specific toggles
     if (localPlayer.vehicle) {
+        let veh = localPlayer.vehicle;
+
+        // Vehicle god mode
         if (toggleStates.vehGodMode !== lastVehGodMode) {
             try {
-                natives.setCarCanBeDamaged(localPlayer.vehicle, !toggleStates.vehGodMode);
+                natives.setCarCanBeDamaged(veh, !toggleStates.vehGodMode);
             } catch(e) {}
             lastVehGodMode = toggleStates.vehGodMode;
         }
         if (toggleStates.vehGodMode) {
+            try { natives.fixCar(veh); } catch(e) {}
+        }
+
+        // Drive on water - keep vehicle above water level
+        if (toggleStates.driveOnWater) {
             try {
-                natives.fixCar(localPlayer.vehicle);
+                let pos = veh.position;
+                let waterZ = 0; // Sea level in GTA IV
+                if (pos.z < waterZ + 1) {
+                    // Keep car floating on water
+                    let vel = veh.velocity;
+                    veh.position = new Vec3(pos.x, pos.y, waterZ + 0.8);
+                    // Maintain forward momentum but cancel downward
+                    if (vel.z < 0) {
+                        veh.velocity = new Vec3(vel.x, vel.y, 0);
+                    }
+                }
             } catch(e) {}
         }
+
+        // Rainbow car color - cycle through colors
+        if (toggleStates.rainbowCar && processCounter % 5 === 0) {
+            try {
+                rainbowHue = (rainbowHue + 3) % 360;
+                let rgb = hsvToRgb(rainbowHue, 1, 1);
+                // Use closest GTA color (cycle through color indices)
+                let colorIndex = Math.floor(rainbowHue / 3) % 132;
+                natives.changeCarColour(veh, colorIndex, colorIndex);
+            } catch(e) {}
+        }
+
+        // Drift mode - reduce traction
+        if (toggleStates.driftMode !== lastDriftMode) {
+            try {
+                if (toggleStates.driftMode) {
+                    // Make car slide more
+                    natives.setCarCanBeVisiblyDamaged(veh, false);
+                }
+            } catch(e) {}
+            lastDriftMode = toggleStates.driftMode;
+        }
+        if (toggleStates.driftMode) {
+            // Apply sideways slip when turning
+            try {
+                let vel = veh.velocity;
+                let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+                if (speed > 10) {
+                    // Add slight sideways force for drift effect
+                    let heading = veh.heading || 0;
+                    let slideX = Math.cos(heading) * 0.5;
+                    let slideY = -Math.sin(heading) * 0.5;
+                    veh.velocity = new Vec3(vel.x + slideX, vel.y + slideY, vel.z);
+                }
+            } catch(e) {}
+        }
+
+        // Fly mode - WASD controls altitude
+        if (toggleStates.flyMode) {
+            try {
+                let pos = veh.position;
+                let vel = veh.velocity;
+                let heading = veh.heading || 0;
+
+                // Anti-gravity - keep vehicle airborne
+                if (vel.z < 0) {
+                    veh.velocity = new Vec3(vel.x, vel.y, vel.z * 0.5);
+                }
+
+                // Lift vehicle
+                veh.position = new Vec3(pos.x, pos.y, pos.z + 0.1);
+
+                // Apply forward force based on heading
+                let forwardX = Math.sin(heading) * -2;
+                let forwardY = Math.cos(heading) * 2;
+                veh.velocity = new Vec3(vel.x + forwardX * 0.1, vel.y + forwardY * 0.1, 0.5);
+            } catch(e) {}
+        }
+
+        // Vehicle shoots RPG
+        if (toggleStates.vehShootRPG) {
+            let now = Date.now();
+            if (now - lastVehShot > 500) { // Fire every 500ms when key held
+                try {
+                    let pos = veh.position;
+                    let heading = veh.heading || 0;
+                    // Shoot from front of vehicle
+                    let frontX = pos.x + Math.sin(heading) * -5;
+                    let frontY = pos.y + Math.cos(heading) * 5;
+                    let fromPos = new Vec3(frontX, frontY, pos.z + 1);
+                    let toX = frontX + Math.sin(heading) * -100;
+                    let toY = frontY + Math.cos(heading) * 100;
+                    let toPos = new Vec3(toX, toY, pos.z + 1);
+
+                    // Shoot projectile
+                    natives.shootSingleBulletBetweenCoords(
+                        fromPos.x, fromPos.y, fromPos.z,
+                        toPos.x, toPos.y, toPos.z,
+                        100, true, 18, localPlayer, true, true, 100
+                    );
+                    lastVehShot = now;
+                } catch(e) {}
+            }
+        }
+    }
+
+    // Rainbow sky effect
+    if (toggleStates.rainbowSky && processCounter % 3 === 0) {
+        try {
+            rainbowHue = (rainbowHue + 2) % 360;
+            let rgb = hsvToRgb(rainbowHue, 0.7, 1);
+            natives.setSkyboxTint(rgb.r, rgb.g, rgb.b);
+        } catch(e) {}
+    }
+
+    // Static sky color
+    if (!toggleStates.rainbowSky && skyColorIndex > 0) {
+        try {
+            let color = skyColors[skyColorIndex];
+            natives.setSkyboxTint(color.r, color.g, color.b);
+        } catch(e) {}
     }
 
     // Block phone input when menu is open
     if (menuOpen) {
         try {
-            // Destroy any active phone
             natives.destroyMobilePhone();
         } catch(e) {}
     }
+});
+
+// HSV to RGB conversion for rainbow effects
+function hsvToRgb(h, s, v) {
+    let r, g, b;
+    let i = Math.floor(h / 60) % 6;
+    let f = h / 60 - i;
+    let p = v * (1 - s);
+    let q = v * (1 - f * s);
+    let t = v * (1 - (1 - f) * s);
+
+    switch (i) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+    }
+
+    return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+    };
+}
+
+// Neon lights rendering - draw colored lights under vehicle
+addEventHandler("OnDrawnHUD", function(event) {
+    if (!toggleStates.neonLights || !localPlayer || !localPlayer.vehicle) return;
+
+    try {
+        let veh = localPlayer.vehicle;
+        let pos = veh.position;
+
+        // Draw light coronas under the car (simulated neons)
+        let offsets = [
+            { x: 1.5, y: 2, z: -0.3 },   // Front right
+            { x: -1.5, y: 2, z: -0.3 },  // Front left
+            { x: 1.5, y: -2, z: -0.3 },  // Rear right
+            { x: -1.5, y: -2, z: -0.3 }, // Rear left
+            { x: 0, y: 2.5, z: -0.3 },   // Front center
+            { x: 0, y: -2.5, z: -0.3 }   // Rear center
+        ];
+
+        let heading = veh.heading || 0;
+        let cosH = Math.cos(heading);
+        let sinH = Math.sin(heading);
+
+        for (let i = 0; i < offsets.length; i++) {
+            let off = offsets[i];
+            // Rotate offset by vehicle heading
+            let worldX = pos.x + (off.x * cosH - off.y * sinH);
+            let worldY = pos.y + (off.x * sinH + off.y * cosH);
+            let worldZ = pos.z + off.z;
+
+            // Draw corona/light at position
+            natives.drawCorona(
+                worldX, worldY, worldZ,
+                50.0, 0, 0,
+                neonColor.r, neonColor.g, neonColor.b
+            );
+        }
+    } catch(e) {}
+});
+
+// Explosive ammo - detect player shooting
+let lastPlayerPos = null;
+addEventHandler("OnPedWeaponShoot", function(event, ped, weapon) {
+    if (!toggleStates.explosiveAmmo) return;
+    if (ped !== localPlayer) return;
+
+    try {
+        // Create explosion at impact point
+        // Since we can't get exact impact, create small explosion in front
+        let pos = localPlayer.position;
+        let heading = localPlayer.heading || 0;
+        let dist = 20; // Distance in front
+        let expX = pos.x + Math.sin(heading) * -dist;
+        let expY = pos.y + Math.cos(heading) * dist;
+
+        // Small delay then explode
+        setTimeout(function() {
+            try {
+                natives.addExplosion(expX, expY, pos.z, 0, 2.0, true, false, 0.5);
+            } catch(e) {}
+        }, 100);
+    } catch(e) {}
 });
 
 // ============================================================================
