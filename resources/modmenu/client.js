@@ -190,7 +190,7 @@ const menuData = {
             { label: "Repair Vehicle", action: "veh_repair" },
             { label: "Flip Vehicle", action: "veh_flip" },
             { label: "Vehicle Colors", action: "submenu", target: "veh_colors" },
-            { label: "Indestructible", action: "toggle", target: "vehGodMode", state: false },
+            { label: "God Mode", action: "toggle", target: "vehGodMode", state: false },
             { label: "Nitro Boost", action: "veh_nitro" }
         ]
     },
@@ -317,24 +317,36 @@ addEventHandler("OnKeyUp", function(event, key, scanCode, mods) {
             menuStack = [];
             // Show cursor and DISABLE controls (second param = false disables controls)
             gui.showCursor(true, false);
+            // Disable phone
+            natives.setPlayerControlForTextChat(0, false);
         } else {
             // Hide cursor and ENABLE controls (second param = true enables controls)
             gui.showCursor(false, true);
+            // Re-enable phone
+            natives.setPlayerControlForTextChat(0, true);
         }
         return;
     }
 
     if (!menuOpen) return;
 
-    // Navigation
+    // Block phone popup - consume UP key event when menu is open
     if (key === SDLK_UP) {
         navigateUp();
+        event.preventDefault = true;
+        return;
     } else if (key === SDLK_DOWN) {
         navigateDown();
+        event.preventDefault = true;
+        return;
     } else if (key === SDLK_RETURN || key === SDLK_KP_ENTER) {
         selectItem();
+        event.preventDefault = true;
+        return;
     } else if (key === SDLK_BACKSPACE || key === SDLK_ESCAPE) {
         goBack();
+        event.preventDefault = true;
+        return;
     }
 });
 
@@ -657,12 +669,14 @@ addNetworkHandler("ModMenu:ExecuteSelfOption", function(option) {
                 showNotification("All weapons given!");
                 break;
             case "wanted":
-                natives.alterWantedLevel(localPlayer, 0);
-                natives.applyWantedLevelChangeNow(localPlayer);
+                natives.alterWantedLevel(0, 0);
+                natives.applyWantedLevelChangeNow(0);
                 showNotification("Wanted cleared!");
                 break;
             case "suicide":
-                localPlayer.health = 0;
+                // Kill the player properly using explode head native
+                natives.explodeCharHead(localPlayer);
+                showNotification("Goodbye!");
                 break;
         }
     } catch(e) {
@@ -681,6 +695,29 @@ addNetworkHandler("ModMenu:ExecuteTeleport", function(x, y, z) {
         showNotification("Teleported!");
     } catch(e) {
         console.log("[ModMenu] Teleport error: " + e);
+    }
+});
+
+// Execute teleport to player - get target player position and teleport
+addNetworkHandler("ModMenu:ExecuteTeleportToPlayer", function(targetId) {
+    if (!localPlayer) return;
+
+    try {
+        // Find the target player in the player list
+        let clients = getClients();
+        for (let i = 0; i < clients.length; i++) {
+            if (clients[i].index == targetId && clients[i].player) {
+                let targetPos = clients[i].player.position;
+                let pos = new Vec3(targetPos.x + 2, targetPos.y, targetPos.z);
+                localPlayer.position = pos;
+                showNotification("Teleported to player!");
+                return;
+            }
+        }
+        showNotification("Player not found");
+    } catch(e) {
+        console.log("[ModMenu] Teleport to player error: " + e);
+        showNotification("Teleport failed");
     }
 });
 
@@ -740,16 +777,16 @@ addNetworkHandler("ModMenu:ExecuteSpawnVehicle", function(vehicleName) {
         let pos = localPlayer.position;
         let heading = localPlayer.heading || 0;
 
-        // Spawn position slightly in front of player
-        let spawnX = pos.x + (Math.sin(heading) * 5);
-        let spawnY = pos.y + (Math.cos(heading) * 5);
-        let spawnZ = pos.z;
+        // Spawn position at player location
+        let spawnPos = new Vec3(pos.x, pos.y, pos.z);
 
-        // Use native to create car
-        let vehicle = natives.createCar(modelHash, spawnX, spawnY, spawnZ, true);
+        // Use native to create car with Vec3 position
+        let vehicle = natives.createCar(modelHash, spawnPos, true);
 
         if (vehicle) {
             natives.setCarHeading(vehicle, heading);
+            // Warp player into the vehicle
+            natives.warpCharIntoCar(localPlayer, vehicle);
             showNotification("Spawned!");
         } else {
             showNotification("Failed");
@@ -780,8 +817,13 @@ addNetworkHandler("ModMenu:ExecuteVehicleOption", function(option) {
                 showNotification("Vehicle flipped!");
                 break;
             case "nitro":
-                // Boost vehicle forward
-                natives.applyForceToCar(veh, 0, 0, 50, 0, 0, 0);
+                // Boost vehicle forward using velocity
+                let heading = veh.heading || 0;
+                let speed = 50.0;
+                let vx = Math.sin(heading) * speed * -1;
+                let vy = Math.cos(heading) * speed;
+                let vel = new Vec3(vx, vy, 5);
+                veh.velocity = vel;
                 showNotification("NITRO!");
                 break;
         }
@@ -850,7 +892,8 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
             let skins = [-1667301416, -163448165, 1936355839, -1938475496, 970234525];
             skinId = skins[Math.floor(Math.random() * skins.length)];
         }
-        natives.changePlayerModel(localPlayer, skinId);
+        // GTA IV uses changePlayerModel with player index 0
+        natives.changePlayerModel(0, skinId);
         showNotification("Skin changed!");
     } catch(e) {
         console.log("[ModMenu] Skin change error: " + e);
@@ -969,20 +1012,44 @@ addEventHandler("OnDrawnHUD", function(event) {
 // TOGGLE EFFECTS
 // ============================================================================
 
+// Track last god mode state to only call native when changed
+let lastGodMode = false;
+let lastVehGodMode = false;
+
 addEventHandler("OnProcess", function(event) {
     if (!localPlayer) return;
 
+    // Player god mode - use invincibility native
+    if (toggleStates.godMode !== lastGodMode) {
+        natives.setCharInvincible(localPlayer, toggleStates.godMode);
+        lastGodMode = toggleStates.godMode;
+    }
+
+    // Keep health topped up in god mode as backup
     if (toggleStates.godMode) {
-        localPlayer.health = 200;
-        localPlayer.armour = 100;
+        if (localPlayer.health < 200) localPlayer.health = 200;
+        if (localPlayer.armour < 100) localPlayer.armour = 100;
     }
 
+    // Never wanted - clear wanted level
     if (toggleStates.neverWanted) {
-        localPlayer.wantedLevel = 0;
+        natives.clearWantedLevel(0);
     }
 
-    if (localPlayer.vehicle && toggleStates.vehGodMode) {
-        localPlayer.vehicle.health = 1000;
+    // Vehicle god mode
+    if (localPlayer.vehicle) {
+        if (toggleStates.vehGodMode !== lastVehGodMode) {
+            natives.setCarCanBeDamaged(localPlayer.vehicle, !toggleStates.vehGodMode);
+            lastVehGodMode = toggleStates.vehGodMode;
+        }
+        if (toggleStates.vehGodMode) {
+            natives.fixCar(localPlayer.vehicle);
+        }
+    }
+
+    // Disable phone when menu is open
+    if (menuOpen) {
+        natives.setPlayerControlForTextChat(0, false);
     }
 });
 
