@@ -280,13 +280,21 @@ let toggleStates = {
 
 addEventHandler("OnResourceReady", function(event, resource) {
     // Use built-in default font (no external TTF file needed)
+    // Signature: lucasFont.createDefaultFont(float size, string family, [string style = "Regular"])
     try {
-        menuFont = lucasFont.createDefaultFont(16.0, "Tahoma", false, false);
+        menuFont = lucasFont.createDefaultFont(16.0, "Arial", "Regular");
         if (menuFont != null) {
             console.log("[ModMenu] Default font created successfully");
         }
     } catch(e) {
         console.log("[ModMenu] Could not create default font: " + e);
+        // Try alternative font
+        try {
+            menuFont = lucasFont.createDefaultFont(16.0, "Tahoma");
+            console.log("[ModMenu] Fallback font created");
+        } catch(e2) {
+            console.log("[ModMenu] Fallback font also failed: " + e2);
+        }
     }
 
     if (menuFont == null) {
@@ -592,6 +600,264 @@ addNetworkHandler("ModMenu:Notification", function(msg) {
 });
 
 // ============================================================================
+// EXECUTE HANDLERS - Client-side natives execution
+// ============================================================================
+
+// Execute weather change using GTA IV native
+addNetworkHandler("ModMenu:ExecuteWeather", function(weatherId) {
+    try {
+        natives.forceWeatherNow(weatherId);
+        showNotification("Weather changed!");
+    } catch(e) {
+        console.log("[ModMenu] Weather error: " + e);
+    }
+});
+
+// Execute time change using GTA IV native
+addNetworkHandler("ModMenu:ExecuteTime", function(hour) {
+    try {
+        natives.forceTimeOfDay(hour, 0);
+        showNotification("Time: " + hour + ":00");
+    } catch(e) {
+        console.log("[ModMenu] Time error: " + e);
+    }
+});
+
+// Execute self options using natives
+addNetworkHandler("ModMenu:ExecuteSelfOption", function(option) {
+    if (!localPlayer) {
+        showNotification("Player not ready");
+        return;
+    }
+
+    try {
+        switch(option) {
+            case "health":
+                localPlayer.health = 200;
+                showNotification("Health restored!");
+                break;
+            case "armor":
+                localPlayer.armour = 100;
+                showNotification("Armor restored!");
+                break;
+            case "max":
+                localPlayer.health = 200;
+                localPlayer.armour = 100;
+                showNotification("Max health & armor!");
+                break;
+            case "weapons":
+                // Give weapons using natives
+                natives.giveWeaponToChar(localPlayer, 5, 500, false);  // Pistol
+                natives.giveWeaponToChar(localPlayer, 6, 500, false);  // Deagle
+                natives.giveWeaponToChar(localPlayer, 9, 100, false);  // Shotgun
+                natives.giveWeaponToChar(localPlayer, 12, 500, false); // SMG
+                natives.giveWeaponToChar(localPlayer, 14, 500, false); // AK
+                natives.giveWeaponToChar(localPlayer, 16, 50, false);  // Sniper
+                natives.giveWeaponToChar(localPlayer, 18, 10, false);  // RPG
+                showNotification("All weapons given!");
+                break;
+            case "wanted":
+                natives.alterWantedLevel(localPlayer, 0);
+                natives.applyWantedLevelChangeNow(localPlayer);
+                showNotification("Wanted cleared!");
+                break;
+            case "suicide":
+                localPlayer.health = 0;
+                break;
+        }
+    } catch(e) {
+        console.log("[ModMenu] Self option error: " + e);
+        showNotification("Action failed");
+    }
+});
+
+// Execute teleport
+addNetworkHandler("ModMenu:ExecuteTeleport", function(x, y, z) {
+    if (!localPlayer) return;
+
+    try {
+        let pos = new Vec3(x, y, z);
+        localPlayer.position = pos;
+        showNotification("Teleported!");
+    } catch(e) {
+        console.log("[ModMenu] Teleport error: " + e);
+    }
+});
+
+// Vehicle model hashes for GTA IV
+const vehicleHashes = {
+    "infernus": 0x18F25AC7,
+    "turismo": 0x185484E1,
+    "comet": 0x067BC037,
+    "banshee": 0xC1E908D2,
+    "sultan": 0x39DA2754,
+    "coquette": 0x067BC037,
+    "feltzer": 0x8911B9F5,
+    "buffalo": 0xEDD516C6,
+    "sabregt": 0x9B909C94,
+    "stalion": 0x72A4C31E,
+    "vigero": 0xCEC6B9B7,
+    "dukes": 0x2B26F456,
+    "phoenix": 0x831A21D5,
+    "patriot": 0xCFCFEB3B,
+    "cavalcade": 0x779F23AA,
+    "huntley": 0x1D06D681,
+    "landstalker": 0x4BA4E8DC,
+    "nrg900": 0x6F039A67,
+    "pcj600": 0xC9CEAF06,
+    "sanchez": 0x2EF89E46,
+    "faggio": 0x9229E4EB,
+    "police": 0x79FBB0C5,
+    "police2": 0x9F05F101,
+    "fbi": 0x432EA949,
+    "ambulance": 0x45D56ADA,
+    "firetruk": 0x73920F8E,
+    "annihilator": 0x31F0B376,
+    "maverick": 0x9D0450CA,
+    "polmav": 0x1517D4D9,
+    "jetmax": 0x33581161,
+    "predator": 0xE2E7D4AB,
+    "tropic": 0x1149422F,
+    "taxi": 0xC703DB5F,
+    "stretch": 0x8B13F083,
+    "bus": 0xD577C962
+};
+
+// Execute vehicle spawn using natives
+addNetworkHandler("ModMenu:ExecuteSpawnVehicle", function(vehicleName) {
+    try {
+        if (!localPlayer) {
+            showNotification("Not ready");
+            return;
+        }
+
+        let modelHash = vehicleHashes[vehicleName];
+        if (!modelHash) {
+            showNotification("Unknown vehicle");
+            return;
+        }
+
+        let pos = localPlayer.position;
+        let heading = localPlayer.heading || 0;
+
+        // Spawn position slightly in front of player
+        let spawnX = pos.x + (Math.sin(heading) * 5);
+        let spawnY = pos.y + (Math.cos(heading) * 5);
+        let spawnZ = pos.z;
+
+        // Use native to create car
+        let vehicle = natives.createCar(modelHash, spawnX, spawnY, spawnZ, true);
+
+        if (vehicle) {
+            natives.setCarHeading(vehicle, heading);
+            showNotification("Spawned!");
+        } else {
+            showNotification("Failed");
+        }
+    } catch(e) {
+        console.log("[ModMenu] Vehicle error: " + e);
+        showNotification("Error");
+    }
+});
+
+// Execute vehicle options
+addNetworkHandler("ModMenu:ExecuteVehicleOption", function(option) {
+    if (!localPlayer || !localPlayer.vehicle) {
+        showNotification("Get in a vehicle first!");
+        return;
+    }
+
+    try {
+        let veh = localPlayer.vehicle;
+        switch(option) {
+            case "repair":
+                natives.fixCar(veh);
+                showNotification("Vehicle repaired!");
+                break;
+            case "flip":
+                let rot = veh.rotation;
+                veh.rotation = new Vec3(0, 0, rot.z);
+                showNotification("Vehicle flipped!");
+                break;
+            case "nitro":
+                // Boost vehicle forward
+                natives.applyForceToCar(veh, 0, 0, 50, 0, 0, 0);
+                showNotification("NITRO!");
+                break;
+        }
+    } catch(e) {
+        console.log("[ModMenu] Vehicle option error: " + e);
+    }
+});
+
+// Execute vehicle color change
+addNetworkHandler("ModMenu:ExecuteVehicleColor", function(color1, color2) {
+    if (!localPlayer || !localPlayer.vehicle) {
+        showNotification("Get in a vehicle first!");
+        return;
+    }
+
+    try {
+        natives.changeCarColour(localPlayer.vehicle, color1, color2);
+        showNotification("Color changed!");
+    } catch(e) {
+        console.log("[ModMenu] Color change error: " + e);
+    }
+});
+
+// Execute weapon give
+addNetworkHandler("ModMenu:ExecuteGiveWeapon", function(weaponId) {
+    if (!localPlayer) return;
+
+    try {
+        natives.giveWeaponToChar(localPlayer, weaponId, 500, false);
+        showNotification("Weapon given!");
+    } catch(e) {
+        console.log("[ModMenu] Weapon error: " + e);
+    }
+});
+
+// Execute fun options
+addNetworkHandler("ModMenu:ExecuteFun", function(option) {
+    if (!localPlayer) return;
+
+    try {
+        let pos = localPlayer.position;
+        switch(option) {
+            case "launch":
+                let launchPos = new Vec3(pos.x, pos.y, pos.z + 50);
+                localPlayer.position = launchPos;
+                showNotification("LAUNCH!");
+                break;
+            case "explode":
+                natives.addExplosion(pos.x, pos.y, pos.z, 0, 5.0, true, false, 1.0);
+                break;
+            case "ragdoll":
+                natives.switchPedToRagdoll(localPlayer, 1000, 1000, 0, true, true, false);
+                break;
+        }
+    } catch(e) {
+        console.log("[ModMenu] Fun option error: " + e);
+    }
+});
+
+// Execute skin change
+addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
+    if (!localPlayer) return;
+
+    try {
+        if (skinId === "random") {
+            let skins = [-1667301416, -163448165, 1936355839, -1938475496, 970234525];
+            skinId = skins[Math.floor(Math.random() * skins.length)];
+        }
+        natives.changePlayerModel(localPlayer, skinId);
+        showNotification("Skin changed!");
+    } catch(e) {
+        console.log("[ModMenu] Skin change error: " + e);
+    }
+});
+
+// ============================================================================
 // RENDERING
 // ============================================================================
 
@@ -670,7 +936,7 @@ function showNotification(text) {
     notifications.push({
         text: text,
         time: Date.now(),
-        duration: 3000
+        duration: 1000
     });
 }
 
@@ -683,7 +949,8 @@ addEventHandler("OnDrawnHUD", function(event) {
         let elapsed = now - notif.time;
 
         if (elapsed < notif.duration) {
-            let alpha = elapsed < notif.duration - 500 ? 200 : Math.floor(200 * (notif.duration - elapsed) / 500);
+            // Quick fade: start fading at 700ms, fully gone by 1000ms
+            let alpha = elapsed < 700 ? 200 : Math.floor(200 * (notif.duration - elapsed) / 300);
             let bgColor = toColour(20, 20, 20, alpha);
             let textColor = toColour(255, 255, 100, Math.min(255, alpha + 55));
 
