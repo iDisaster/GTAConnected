@@ -317,36 +317,24 @@ addEventHandler("OnKeyUp", function(event, key, scanCode, mods) {
             menuStack = [];
             // Show cursor and DISABLE controls (second param = false disables controls)
             gui.showCursor(true, false);
-            // Disable phone
-            natives.setPlayerControlForTextChat(0, false);
         } else {
             // Hide cursor and ENABLE controls (second param = true enables controls)
             gui.showCursor(false, true);
-            // Re-enable phone
-            natives.setPlayerControlForTextChat(0, true);
         }
         return;
     }
 
     if (!menuOpen) return;
 
-    // Block phone popup - consume UP key event when menu is open
+    // Navigation - simple key handling
     if (key === SDLK_UP) {
         navigateUp();
-        event.preventDefault = true;
-        return;
     } else if (key === SDLK_DOWN) {
         navigateDown();
-        event.preventDefault = true;
-        return;
     } else if (key === SDLK_RETURN || key === SDLK_KP_ENTER) {
         selectItem();
-        event.preventDefault = true;
-        return;
     } else if (key === SDLK_BACKSPACE || key === SDLK_ESCAPE) {
         goBack();
-        event.preventDefault = true;
-        return;
     }
 });
 
@@ -774,26 +762,42 @@ addNetworkHandler("ModMenu:ExecuteSpawnVehicle", function(vehicleName) {
             return;
         }
 
-        let pos = localPlayer.position;
-        let heading = localPlayer.heading || 0;
+        // Request the model first
+        natives.requestModel(modelHash);
 
-        // Spawn position at player location
-        let spawnPos = new Vec3(pos.x, pos.y, pos.z);
+        // Wait for model to load then spawn
+        let attempts = 0;
+        let spawnInterval = setInterval(function() {
+            attempts++;
+            if (natives.hasModelLoaded(modelHash)) {
+                clearInterval(spawnInterval);
 
-        // Use native to create car with Vec3 position
-        let vehicle = natives.createCar(modelHash, spawnPos, true);
+                let pos = localPlayer.position;
+                let heading = localPlayer.heading || 0;
+                let spawnPos = new Vec3(pos.x, pos.y, pos.z + 1);
 
-        if (vehicle) {
-            natives.setCarHeading(vehicle, heading);
-            // Warp player into the vehicle
-            natives.warpCharIntoCar(localPlayer, vehicle);
-            showNotification("Spawned!");
-        } else {
-            showNotification("Failed");
-        }
+                // Create the car
+                let vehicle = natives.createCar(modelHash, spawnPos, true);
+
+                if (vehicle) {
+                    natives.setCarHeading(vehicle, heading);
+                    // Warp player into the vehicle
+                    natives.warpCharIntoCar(localPlayer, vehicle);
+                    showNotification("Spawned: " + vehicleName);
+                } else {
+                    showNotification("Failed to create");
+                }
+
+                // Mark model as no longer needed
+                natives.markModelAsNoLongerNeeded(modelHash);
+            } else if (attempts > 50) {
+                clearInterval(spawnInterval);
+                showNotification("Model load timeout");
+            }
+        }, 100);
     } catch(e) {
         console.log("[ModMenu] Vehicle error: " + e);
-        showNotification("Error");
+        showNotification("Error: " + e);
     }
 });
 
@@ -892,9 +896,25 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
             let skins = [-1667301416, -163448165, 1936355839, -1938475496, 970234525];
             skinId = skins[Math.floor(Math.random() * skins.length)];
         }
-        // GTA IV uses changePlayerModel with player index 0
-        natives.changePlayerModel(0, skinId);
-        showNotification("Skin changed!");
+
+        // Request the model first
+        natives.requestModel(skinId);
+
+        // Wait for model to load then change skin
+        let attempts = 0;
+        let skinInterval = setInterval(function() {
+            attempts++;
+            if (natives.hasModelLoaded(skinId)) {
+                clearInterval(skinInterval);
+                // Change player model using player index 0
+                natives.changePlayerModel(0, skinId);
+                natives.markModelAsNoLongerNeeded(skinId);
+                showNotification("Skin changed!");
+            } else if (attempts > 50) {
+                clearInterval(skinInterval);
+                showNotification("Skin load failed");
+            }
+        }, 100);
     } catch(e) {
         console.log("[ModMenu] Skin change error: " + e);
     }
@@ -1021,7 +1041,9 @@ addEventHandler("OnProcess", function(event) {
 
     // Player god mode - use invincibility native
     if (toggleStates.godMode !== lastGodMode) {
-        natives.setCharInvincible(localPlayer, toggleStates.godMode);
+        try {
+            natives.setCharInvincible(localPlayer, toggleStates.godMode);
+        } catch(e) {}
         lastGodMode = toggleStates.godMode;
     }
 
@@ -1033,23 +1055,35 @@ addEventHandler("OnProcess", function(event) {
 
     // Never wanted - clear wanted level
     if (toggleStates.neverWanted) {
-        natives.clearWantedLevel(0);
+        try {
+            natives.clearWantedLevel(0);
+        } catch(e) {
+            // Fallback - set wanted level directly
+            localPlayer.wantedLevel = 0;
+        }
     }
 
     // Vehicle god mode
     if (localPlayer.vehicle) {
         if (toggleStates.vehGodMode !== lastVehGodMode) {
-            natives.setCarCanBeDamaged(localPlayer.vehicle, !toggleStates.vehGodMode);
+            try {
+                natives.setCarCanBeDamaged(localPlayer.vehicle, !toggleStates.vehGodMode);
+            } catch(e) {}
             lastVehGodMode = toggleStates.vehGodMode;
         }
         if (toggleStates.vehGodMode) {
-            natives.fixCar(localPlayer.vehicle);
+            try {
+                natives.fixCar(localPlayer.vehicle);
+            } catch(e) {}
         }
     }
 
-    // Disable phone when menu is open
+    // Block phone input when menu is open
     if (menuOpen) {
-        natives.setPlayerControlForTextChat(0, false);
+        try {
+            // Destroy any active phone
+            natives.destroyMobilePhone();
+        } catch(e) {}
     }
 });
 
