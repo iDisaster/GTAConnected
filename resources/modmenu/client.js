@@ -1,5 +1,5 @@
 // ============================================================================
-// MOD MENU - Client Side
+// REVOLUTION MOD MENU - Client Side
 // Interactive GUI menu for all players
 // Press F5 to open/close menu, Arrow keys to navigate, Enter to select
 // ============================================================================
@@ -11,29 +11,27 @@ let selectedIndex = 0;
 let menuStack = [];
 let scrollOffset = 0;
 
+// Animation state
+let animTime = 0;
+let smoothScrollY = 0;
+let targetScrollY = 0;
+let titlePulse = 0;
+let menuOpenAnim = 0;
+let selectedPulse = 0;
+
 // Font for text rendering (will be loaded on resource start)
 let menuFont = null;
-
-// Menu colors using toColour for integer format
-const colors = {
-    background: toColour(20, 20, 20, 200),
-    header: toColour(200, 50, 50, 255),
-    item: toColour(40, 40, 40, 200),
-    selected: toColour(200, 50, 50, 220),
-    text: toColour(255, 255, 255, 255),
-    footer: toColour(30, 30, 30, 200),
-    subText: toColour(180, 180, 180, 255)
-};
+let titleFont = null;
 
 // Menu dimensions in pixels - positioned on right side
 const menu = {
     x: 1050,
-    y: 120,
-    width: 320,
-    headerHeight: 45,
-    itemHeight: 38,
-    footerHeight: 32,
-    maxVisibleItems: 12
+    y: 100,
+    width: 340,
+    headerHeight: 60,
+    itemHeight: 42,
+    footerHeight: 35,
+    maxVisibleItems: 11
 };
 
 // Player list cache
@@ -54,7 +52,7 @@ let handlingMods = {
 
 const menuData = {
     main: {
-        title: "MOD MENU",
+        title: "REVOLUTION",
         items: [
             { label: "Self Options", action: "submenu", target: "self" },
             { label: "Vehicle Spawner", action: "submenu", target: "vehicles" },
@@ -1042,11 +1040,32 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
 });
 
 // ============================================================================
-// RENDERING
+// RENDERING - REVOLUTION MOD MENU (Eye-Melting Animated UI)
 // ============================================================================
 
+// Animation update
+addEventHandler("OnProcess", function(event) {
+    // Update animation time
+    animTime += 0.05;
+    titlePulse += 0.08;
+    selectedPulse += 0.12;
+
+    // Smooth scroll interpolation
+    smoothScrollY += (targetScrollY - smoothScrollY) * 0.2;
+
+    // Menu open animation
+    if (menuOpen && menuOpenAnim < 1) {
+        menuOpenAnim += 0.1;
+        if (menuOpenAnim > 1) menuOpenAnim = 1;
+    } else if (!menuOpen && menuOpenAnim > 0) {
+        menuOpenAnim -= 0.15;
+        if (menuOpenAnim < 0) menuOpenAnim = 0;
+    }
+});
+
+// Main menu rendering
 addEventHandler("OnDrawnHUD", function(event) {
-    if (!menuOpen) return;
+    if (menuOpenAnim <= 0) return;
 
     let currentData = menuData[currentMenu];
     let items = getCurrentMenuItems();
@@ -1055,63 +1074,228 @@ addEventHandler("OnDrawnHUD", function(event) {
     let visibleCount = Math.min(items.length, menu.maxVisibleItems);
     let totalHeight = menu.headerHeight + (visibleCount * menu.itemHeight) + menu.footerHeight;
 
-    // Draw background
-    drawRect(menu.x - 5, menu.y - 5, menu.width + 10, totalHeight + 10, colors.background);
+    // Animation scale effect
+    let scale = menuOpenAnim;
+    let animAlpha = Math.floor(255 * menuOpenAnim);
 
-    // Draw header
-    drawRect(menu.x, menu.y, menu.width, menu.headerHeight, colors.header);
-    drawText(title, menu.x + 10, menu.y + 12, colors.text, 18);
+    // Calculate animated position (slide in from right)
+    let slideOffset = (1 - menuOpenAnim) * 100;
+    let baseX = menu.x + slideOffset;
+    let baseY = menu.y;
 
-    // Draw items
-    let yPos = menu.y + menu.headerHeight;
+    // ===== OUTER GLOW EFFECT =====
+    let glowPulse = Math.sin(animTime * 2) * 0.3 + 0.7;
+    let glowSize = 8 + Math.sin(animTime * 3) * 3;
+
+    // Rainbow glow colors cycling
+    let glowHue = (animTime * 50) % 360;
+    let glowRGB = hsvToRgb(glowHue, 1, 1);
+    let glowColor = toColour(glowRGB.r, glowRGB.g, glowRGB.b, Math.floor(80 * glowPulse * menuOpenAnim));
+
+    // Draw multiple glow layers
+    for (let g = 3; g >= 1; g--) {
+        let gAlpha = Math.floor((30 / g) * menuOpenAnim);
+        let gCol = toColour(glowRGB.r, glowRGB.g, glowRGB.b, gAlpha);
+        drawRect(baseX - glowSize * g, baseY - glowSize * g,
+                 menu.width + glowSize * g * 2, totalHeight + glowSize * g * 2 + 10, gCol);
+    }
+
+    // ===== MAIN BACKGROUND =====
+    // Gradient background effect (dark with subtle color)
+    let bgHue = (animTime * 20) % 360;
+    let bgRGB = hsvToRgb(bgHue, 0.3, 0.15);
+    let bgColor = toColour(bgRGB.r, bgRGB.g, bgRGB.b, Math.floor(230 * menuOpenAnim));
+    drawRect(baseX, baseY, menu.width, totalHeight + 10, bgColor);
+
+    // Inner border glow
+    let borderHue = (animTime * 60) % 360;
+    let borderRGB = hsvToRgb(borderHue, 1, 1);
+    let borderColor = toColour(borderRGB.r, borderRGB.g, borderRGB.b, Math.floor(150 * menuOpenAnim));
+    drawRect(baseX, baseY, menu.width, 3, borderColor); // Top
+    drawRect(baseX, baseY + totalHeight + 7, menu.width, 3, borderColor); // Bottom
+    drawRect(baseX, baseY, 3, totalHeight + 10, borderColor); // Left
+    drawRect(baseX + menu.width - 3, baseY, 3, totalHeight + 10, borderColor); // Right
+
+    // ===== HEADER =====
+    // Animated gradient header
+    let headerHue1 = (animTime * 40) % 360;
+    let headerHue2 = (animTime * 40 + 60) % 360;
+    let headerRGB1 = hsvToRgb(headerHue1, 0.8, 0.6);
+    let headerRGB2 = hsvToRgb(headerHue2, 0.8, 0.4);
+
+    // Draw gradient header (left to right color transition)
+    let headerLeft = toColour(headerRGB1.r, headerRGB1.g, headerRGB1.b, animAlpha);
+    let headerRight = toColour(headerRGB2.r, headerRGB2.g, headerRGB2.b, animAlpha);
+    drawGradientRect(baseX + 3, baseY + 3, menu.width - 6, menu.headerHeight - 3, headerLeft, headerRight);
+
+    // ===== TITLE WITH GLOW =====
+    let titleGlow = Math.sin(titlePulse) * 0.4 + 0.6;
+    let titleHue = (animTime * 80) % 360;
+    let titleRGB = hsvToRgb(titleHue, 0.6, 1);
+    let titleColor = toColour(
+        Math.floor(255 * titleGlow + titleRGB.r * (1 - titleGlow)),
+        Math.floor(255 * titleGlow + titleRGB.g * (1 - titleGlow)),
+        Math.floor(255 * titleGlow + titleRGB.b * (1 - titleGlow)),
+        animAlpha
+    );
+
+    // Draw glowing title text
+    let titleY = baseY + 8;
+
+    // Title shadow/glow layers
+    let shadowColor = toColour(0, 0, 0, Math.floor(150 * menuOpenAnim));
+    drawText("REVOLUTION", baseX + 12, titleY + 2, shadowColor, 22);
+
+    // Main title
+    drawText("REVOLUTION", baseX + 10, titleY, titleColor, 22);
+
+    // Subtitle (Beta)
+    let betaColor = toColour(200, 200, 200, Math.floor(180 * menuOpenAnim));
+    drawText("ModMenu (Beta)", baseX + 10, titleY + 26, betaColor, 12);
+
+    // Animated decoration line under title
+    let lineWidth = 80 + Math.sin(animTime * 4) * 20;
+    let lineHue = (animTime * 100) % 360;
+    let lineRGB = hsvToRgb(lineHue, 1, 1);
+    let lineColor = toColour(lineRGB.r, lineRGB.g, lineRGB.b, Math.floor(200 * menuOpenAnim));
+    drawRect(baseX + menu.width/2 - lineWidth/2, baseY + menu.headerHeight - 5, lineWidth, 2, lineColor);
+
+    // ===== MENU ITEMS =====
+    let yPos = baseY + menu.headerHeight;
+    targetScrollY = scrollOffset * menu.itemHeight;
+
     for (let i = scrollOffset; i < scrollOffset + visibleCount && i < items.length; i++) {
         let item = items[i];
         let isSelected = (i === selectedIndex);
-        let bgColor = isSelected ? colors.selected : colors.item;
+        let itemY = yPos + (i - scrollOffset) * menu.itemHeight;
 
-        drawRect(menu.x, yPos, menu.width, menu.itemHeight, bgColor);
+        // Smooth selection animation offset
+        let selectOffset = 0;
+        let selectGlow = 0;
 
-        let label = item.label;
+        if (isSelected) {
+            selectOffset = Math.sin(selectedPulse) * 3;
+            selectGlow = Math.sin(selectedPulse * 2) * 0.3 + 0.7;
+        }
+
+        // Item background
+        if (isSelected) {
+            // Selected item - rainbow pulsing background
+            let selHue = (animTime * 60 + i * 30) % 360;
+            let selRGB = hsvToRgb(selHue, 0.7, 0.5);
+            let selColor = toColour(selRGB.r, selRGB.g, selRGB.b, Math.floor((180 + selectGlow * 50) * menuOpenAnim));
+
+            // Selection glow
+            let selGlowColor = toColour(selRGB.r, selRGB.g, selRGB.b, Math.floor(60 * menuOpenAnim));
+            drawRect(baseX + 3, itemY - 2, menu.width - 6, menu.itemHeight + 4, selGlowColor);
+            drawRect(baseX + 5 + selectOffset, itemY, menu.width - 10, menu.itemHeight - 2, selColor);
+
+            // Selection indicator bar
+            let barColor = toColour(255, 255, 255, Math.floor(230 * menuOpenAnim));
+            drawRect(baseX + 5, itemY, 4, menu.itemHeight - 2, barColor);
+        } else if (item.action === "none") {
+            // Separator - darker with subtle color
+            let sepColor = toColour(60, 60, 80, Math.floor(150 * menuOpenAnim));
+            drawRect(baseX + 5, itemY, menu.width - 10, menu.itemHeight - 2, sepColor);
+        } else {
+            // Normal item - subtle gradient
+            let normColor = toColour(35, 35, 50, Math.floor(180 * menuOpenAnim));
+            drawRect(baseX + 5, itemY, menu.width - 10, menu.itemHeight - 2, normColor);
+        }
+
+        // Item text
+        let textX = baseX + 20 + (isSelected ? selectOffset + 5 : 0);
+        let textColor = toColour(255, 255, 255, Math.floor((isSelected ? 255 : 200) * menuOpenAnim));
+
+        if (item.action === "none") {
+            // Separator text - dimmer, centered
+            let sepTextColor = toColour(150, 150, 180, Math.floor(180 * menuOpenAnim));
+            drawText(item.label, baseX + 15, itemY + 12, sepTextColor, 12);
+        } else {
+            drawText(item.label, textX, itemY + 12, textColor, 14);
+        }
+
+        // Toggle state indicator with colors
         if (item.action === "toggle") {
-            label += toggleStates[item.target] ? " [ON]" : " [OFF]";
-        }
-        if (item.action === "submenu") {
-            label += " >>";
+            let isOn = toggleStates[item.target];
+            let stateText = isOn ? "ON" : "OFF";
+            let stateX = baseX + menu.width - 55;
+
+            if (isOn) {
+                // Green pulsing ON
+                let greenPulse = Math.sin(animTime * 5) * 30 + 225;
+                let onColor = toColour(50, Math.floor(greenPulse), 50, animAlpha);
+                let onTextColor = toColour(100, 255, 100, animAlpha);
+                drawRect(stateX - 5, itemY + 8, 45, 22, onColor);
+                drawText(stateText, stateX + 5, itemY + 12, onTextColor, 12);
+            } else {
+                // Red OFF
+                let offColor = toColour(120, 40, 40, animAlpha);
+                let offTextColor = toColour(255, 100, 100, animAlpha);
+                drawRect(stateX - 5, itemY + 8, 45, 22, offColor);
+                drawText(stateText, stateX + 3, itemY + 12, offTextColor, 12);
+            }
         }
 
-        drawText(label, menu.x + 15, yPos + 10, colors.text, 14);
-        yPos += menu.itemHeight;
+        // Submenu arrow with animation
+        if (item.action === "submenu") {
+            let arrowX = baseX + menu.width - 30 + (isSelected ? Math.sin(animTime * 8) * 3 : 0);
+            let arrowColor = toColour(200, 200, 255, Math.floor((isSelected ? 255 : 150) * menuOpenAnim));
+            drawText(">>", arrowX, itemY + 12, arrowColor, 14);
+        }
     }
 
-    // Draw footer
-    drawRect(menu.x, yPos, menu.width, menu.footerHeight, colors.footer);
-    drawText("UP/DOWN | ENTER | BACKSPACE", menu.x + 10, yPos + 8, colors.subText, 12);
+    // ===== FOOTER =====
+    let footerY = yPos + visibleCount * menu.itemHeight;
+    let footerHue = (animTime * 30 + 180) % 360;
+    let footerRGB = hsvToRgb(footerHue, 0.5, 0.2);
+    let footerColor = toColour(footerRGB.r, footerRGB.g, footerRGB.b, Math.floor(200 * menuOpenAnim));
+    drawRect(baseX + 3, footerY, menu.width - 6, menu.footerHeight, footerColor);
+
+    // Footer text
+    let footerTextColor = toColour(180, 180, 200, Math.floor(200 * menuOpenAnim));
+    drawText("UP/DOWN  |  ENTER  |  BACK", baseX + 20, footerY + 10, footerTextColor, 11);
 
     // Scroll indicator
     if (items.length > menu.maxVisibleItems) {
-        let scrollText = (scrollOffset + 1) + "-" + Math.min(scrollOffset + visibleCount, items.length) + "/" + items.length;
-        drawText(scrollText, menu.x + menu.width - 60, menu.y + 12, colors.subText, 12);
+        let scrollPct = scrollOffset / (items.length - visibleCount);
+        let scrollBarH = 100;
+        let scrollBarY = baseY + menu.headerHeight + scrollPct * (visibleCount * menu.itemHeight - scrollBarH);
+        let scrollColor = toColour(255, 255, 255, Math.floor(100 * menuOpenAnim));
+        drawRect(baseX + menu.width - 8, scrollBarY, 4, scrollBarH, scrollColor);
     }
 });
 
 // Draw rectangle using graphics API
 function drawRect(x, y, w, h, colour) {
-    let pos = new Vec2(x, y);
-    let size = new Vec2(w, h);
-    graphics.drawRectangle(null, pos, size, colour, colour, colour, colour);
+    try {
+        let pos = new Vec2(x, y);
+        let size = new Vec2(w, h);
+        graphics.drawRectangle(null, pos, size, colour, colour, colour, colour);
+    } catch(e) {}
+}
+
+// Draw gradient rectangle (left color to right color)
+function drawGradientRect(x, y, w, h, colourLeft, colourRight) {
+    try {
+        let pos = new Vec2(x, y);
+        let size = new Vec2(w, h);
+        graphics.drawRectangle(null, pos, size, colourLeft, colourRight, colourLeft, colourRight);
+    } catch(e) {}
 }
 
 // Draw text using loaded font or fallback
 function drawText(text, x, y, colour, size) {
     if (menuFont != null) {
-        let pos = new Vec2(x, y);
-        menuFont.render(text, pos, menu.width, 0.0, 0.0, size, colour, false, false, false, true);
+        try {
+            let pos = new Vec2(x, y);
+            menuFont.render(text, pos, menu.width, 0.0, 0.0, size, colour, false, false, false, true);
+        } catch(e) {}
     }
-    // If no font, text won't render but menu boxes will still show
 }
 
 // ============================================================================
-// NOTIFICATIONS
+// NOTIFICATIONS - Animated
 // ============================================================================
 
 let notifications = [];
@@ -1120,27 +1304,46 @@ function showNotification(text) {
     notifications.push({
         text: text,
         time: Date.now(),
-        duration: 1000
+        duration: 1500
     });
 }
 
 addEventHandler("OnDrawnHUD", function(event) {
     let now = Date.now();
-    let yPos = 200;
+    let yPos = 180;
 
     for (let i = 0; i < notifications.length; i++) {
         let notif = notifications[i];
         let elapsed = now - notif.time;
 
         if (elapsed < notif.duration) {
-            // Quick fade: start fading at 700ms, fully gone by 1000ms
-            let alpha = elapsed < 700 ? 200 : Math.floor(200 * (notif.duration - elapsed) / 300);
-            let bgColor = toColour(20, 20, 20, alpha);
-            let textColor = toColour(255, 255, 100, Math.min(255, alpha + 55));
+            // Animated notification
+            let progress = elapsed / notif.duration;
+            let slideIn = Math.min(1, elapsed / 200) * 300;
+            let fadeOut = elapsed > notif.duration - 300 ? (notif.duration - elapsed) / 300 : 1;
+            let alpha = Math.floor(220 * fadeOut);
 
-            drawRect(10, yPos, 280, 30, bgColor);
-            drawText(notif.text, 20, yPos + 8, textColor, 14);
-            yPos += 35;
+            // Rainbow border
+            let notifHue = (animTime * 80 + i * 60) % 360;
+            let notifRGB = hsvToRgb(notifHue, 0.8, 0.8);
+
+            // Glow
+            let glowCol = toColour(notifRGB.r, notifRGB.g, notifRGB.b, Math.floor(40 * fadeOut));
+            drawRect(10 - slideIn + 300, yPos - 3, 290, 36, glowCol);
+
+            // Background
+            let bgColor = toColour(20, 20, 30, alpha);
+            drawRect(15 - slideIn + 300, yPos, 280, 30, bgColor);
+
+            // Border
+            let borderCol = toColour(notifRGB.r, notifRGB.g, notifRGB.b, alpha);
+            drawRect(15 - slideIn + 300, yPos, 3, 30, borderCol);
+
+            // Text
+            let textColor = toColour(255, 255, 255, alpha);
+            drawText(notif.text, 25 - slideIn + 300, yPos + 8, textColor, 13);
+
+            yPos += 40;
         }
     }
 
@@ -1362,10 +1565,24 @@ addEventHandler("OnProcess", function(event) {
         } catch(e) {}
     }
 
-    // Block phone input when menu is open
+    // COMPLETELY disable phone when menu is open
     if (menuOpen) {
         try {
+            // Destroy any active phone
             natives.destroyMobilePhone();
+            // Prevent phone from being created
+            natives.scriptIsUsingMobilePhone(true);
+            // Disable phone input
+            natives.setPlayerControlForPhone(0, false);
+            // Block cellphone functionality
+            natives.disablePlayerSprint(0, true);
+        } catch(e) {}
+    } else {
+        try {
+            // Re-enable phone controls when menu closed
+            natives.scriptIsUsingMobilePhone(false);
+            natives.setPlayerControlForPhone(0, true);
+            natives.disablePlayerSprint(0, false);
         } catch(e) {}
     }
 });
