@@ -600,6 +600,216 @@ addNetworkHandler("ModMenu:Notification", function(msg) {
 });
 
 // ============================================================================
+// EXECUTE HANDLERS - Client-side natives execution
+// ============================================================================
+
+// Execute weather change using GTA IV native
+addNetworkHandler("ModMenu:ExecuteWeather", function(weatherId) {
+    try {
+        natives.forceWeatherNow(weatherId);
+        showNotification("Weather changed!");
+    } catch(e) {
+        console.log("[ModMenu] Weather error: " + e);
+    }
+});
+
+// Execute time change using GTA IV native
+addNetworkHandler("ModMenu:ExecuteTime", function(hour) {
+    try {
+        natives.forceTimeOfDay(hour, 0);
+        showNotification("Time: " + hour + ":00");
+    } catch(e) {
+        console.log("[ModMenu] Time error: " + e);
+    }
+});
+
+// Execute self options using natives
+addNetworkHandler("ModMenu:ExecuteSelfOption", function(option) {
+    if (!localPlayer) {
+        showNotification("Player not ready");
+        return;
+    }
+
+    try {
+        switch(option) {
+            case "health":
+                localPlayer.health = 200;
+                showNotification("Health restored!");
+                break;
+            case "armor":
+                localPlayer.armour = 100;
+                showNotification("Armor restored!");
+                break;
+            case "max":
+                localPlayer.health = 200;
+                localPlayer.armour = 100;
+                showNotification("Max health & armor!");
+                break;
+            case "weapons":
+                // Give weapons using natives
+                natives.giveWeaponToChar(localPlayer, 5, 500, false);  // Pistol
+                natives.giveWeaponToChar(localPlayer, 6, 500, false);  // Deagle
+                natives.giveWeaponToChar(localPlayer, 9, 100, false);  // Shotgun
+                natives.giveWeaponToChar(localPlayer, 12, 500, false); // SMG
+                natives.giveWeaponToChar(localPlayer, 14, 500, false); // AK
+                natives.giveWeaponToChar(localPlayer, 16, 50, false);  // Sniper
+                natives.giveWeaponToChar(localPlayer, 18, 10, false);  // RPG
+                showNotification("All weapons given!");
+                break;
+            case "wanted":
+                natives.alterWantedLevel(localPlayer, 0);
+                natives.applyWantedLevelChangeNow(localPlayer);
+                showNotification("Wanted cleared!");
+                break;
+            case "suicide":
+                localPlayer.health = 0;
+                break;
+        }
+    } catch(e) {
+        console.log("[ModMenu] Self option error: " + e);
+        showNotification("Action failed");
+    }
+});
+
+// Execute teleport
+addNetworkHandler("ModMenu:ExecuteTeleport", function(x, y, z) {
+    if (!localPlayer) return;
+
+    try {
+        let pos = new Vec3(x, y, z);
+        localPlayer.position = pos;
+        showNotification("Teleported!");
+    } catch(e) {
+        console.log("[ModMenu] Teleport error: " + e);
+    }
+});
+
+// Execute vehicle spawn
+addNetworkHandler("ModMenu:ExecuteSpawnVehicle", function(vehicleName) {
+    try {
+        if (!localPlayer) return;
+
+        let pos = localPlayer.position;
+        let heading = localPlayer.heading || 0;
+
+        // Spawn position slightly in front of player
+        let spawnX = pos.x + (Math.sin(heading) * 5);
+        let spawnY = pos.y + (Math.cos(heading) * 5);
+        let spawnZ = pos.z + 1;
+
+        let spawnPos = new Vec3(spawnX, spawnY, spawnZ);
+
+        // Request and create vehicle using model name
+        let vehicle = gta.createVehicle(getHashKey(vehicleName), spawnPos, heading);
+        if (vehicle) {
+            showNotification("Spawned: " + vehicleName);
+        } else {
+            showNotification("Could not spawn vehicle");
+        }
+    } catch(e) {
+        console.log("[ModMenu] Vehicle spawn error: " + e);
+        showNotification("Spawn failed");
+    }
+});
+
+// Execute vehicle options
+addNetworkHandler("ModMenu:ExecuteVehicleOption", function(option) {
+    if (!localPlayer || !localPlayer.vehicle) {
+        showNotification("Get in a vehicle first!");
+        return;
+    }
+
+    try {
+        let veh = localPlayer.vehicle;
+        switch(option) {
+            case "repair":
+                natives.fixCar(veh);
+                showNotification("Vehicle repaired!");
+                break;
+            case "flip":
+                let rot = veh.rotation;
+                veh.rotation = new Vec3(0, 0, rot.z);
+                showNotification("Vehicle flipped!");
+                break;
+            case "nitro":
+                // Boost vehicle forward
+                natives.applyForceToCar(veh, 0, 0, 50, 0, 0, 0);
+                showNotification("NITRO!");
+                break;
+        }
+    } catch(e) {
+        console.log("[ModMenu] Vehicle option error: " + e);
+    }
+});
+
+// Execute vehicle color change
+addNetworkHandler("ModMenu:ExecuteVehicleColor", function(color1, color2) {
+    if (!localPlayer || !localPlayer.vehicle) {
+        showNotification("Get in a vehicle first!");
+        return;
+    }
+
+    try {
+        natives.changeCarColour(localPlayer.vehicle, color1, color2);
+        showNotification("Color changed!");
+    } catch(e) {
+        console.log("[ModMenu] Color change error: " + e);
+    }
+});
+
+// Execute weapon give
+addNetworkHandler("ModMenu:ExecuteGiveWeapon", function(weaponId) {
+    if (!localPlayer) return;
+
+    try {
+        natives.giveWeaponToChar(localPlayer, weaponId, 500, false);
+        showNotification("Weapon given!");
+    } catch(e) {
+        console.log("[ModMenu] Weapon error: " + e);
+    }
+});
+
+// Execute fun options
+addNetworkHandler("ModMenu:ExecuteFun", function(option) {
+    if (!localPlayer) return;
+
+    try {
+        let pos = localPlayer.position;
+        switch(option) {
+            case "launch":
+                let launchPos = new Vec3(pos.x, pos.y, pos.z + 50);
+                localPlayer.position = launchPos;
+                showNotification("LAUNCH!");
+                break;
+            case "explode":
+                natives.addExplosion(pos.x, pos.y, pos.z, 0, 5.0, true, false, 1.0);
+                break;
+            case "ragdoll":
+                natives.switchPedToRagdoll(localPlayer, 1000, 1000, 0, true, true, false);
+                break;
+        }
+    } catch(e) {
+        console.log("[ModMenu] Fun option error: " + e);
+    }
+});
+
+// Execute skin change
+addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
+    if (!localPlayer) return;
+
+    try {
+        if (skinId === "random") {
+            let skins = [-1667301416, -163448165, 1936355839, -1938475496, 970234525];
+            skinId = skins[Math.floor(Math.random() * skins.length)];
+        }
+        natives.changePlayerModel(localPlayer, skinId);
+        showNotification("Skin changed!");
+    } catch(e) {
+        console.log("[ModMenu] Skin change error: " + e);
+    }
+});
+
+// ============================================================================
 // RENDERING
 // ============================================================================
 
