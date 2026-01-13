@@ -684,10 +684,58 @@ addNetworkHandler("ModMenu:ExecuteTeleport", function(x, y, z) {
     }
 });
 
-// Execute vehicle spawn
+// Vehicle model hashes for GTA IV
+const vehicleHashes = {
+    "infernus": 0x18F25AC7,
+    "turismo": 0x185484E1,
+    "comet": 0x067BC037,
+    "banshee": 0xC1E908D2,
+    "sultan": 0x39DA2754,
+    "coquette": 0x067BC037,
+    "feltzer": 0x8911B9F5,
+    "buffalo": 0xEDD516C6,
+    "sabregt": 0x9B909C94,
+    "stalion": 0x72A4C31E,
+    "vigero": 0xCEC6B9B7,
+    "dukes": 0x2B26F456,
+    "phoenix": 0x831A21D5,
+    "patriot": 0xCFCFEB3B,
+    "cavalcade": 0x779F23AA,
+    "huntley": 0x1D06D681,
+    "landstalker": 0x4BA4E8DC,
+    "nrg900": 0x6F039A67,
+    "pcj600": 0xC9CEAF06,
+    "sanchez": 0x2EF89E46,
+    "faggio": 0x9229E4EB,
+    "police": 0x79FBB0C5,
+    "police2": 0x9F05F101,
+    "fbi": 0x432EA949,
+    "ambulance": 0x45D56ADA,
+    "firetruk": 0x73920F8E,
+    "annihilator": 0x31F0B376,
+    "maverick": 0x9D0450CA,
+    "polmav": 0x1517D4D9,
+    "jetmax": 0x33581161,
+    "predator": 0xE2E7D4AB,
+    "tropic": 0x1149422F,
+    "taxi": 0xC703DB5F,
+    "stretch": 0x8B13F083,
+    "bus": 0xD577C962
+};
+
+// Execute vehicle spawn using natives
 addNetworkHandler("ModMenu:ExecuteSpawnVehicle", function(vehicleName) {
     try {
-        if (!localPlayer) return;
+        if (!localPlayer) {
+            showNotification("Not ready");
+            return;
+        }
+
+        let modelHash = vehicleHashes[vehicleName];
+        if (!modelHash) {
+            showNotification("Unknown vehicle");
+            return;
+        }
 
         let pos = localPlayer.position;
         let heading = localPlayer.heading || 0;
@@ -695,20 +743,20 @@ addNetworkHandler("ModMenu:ExecuteSpawnVehicle", function(vehicleName) {
         // Spawn position slightly in front of player
         let spawnX = pos.x + (Math.sin(heading) * 5);
         let spawnY = pos.y + (Math.cos(heading) * 5);
-        let spawnZ = pos.z + 1;
+        let spawnZ = pos.z;
 
-        let spawnPos = new Vec3(spawnX, spawnY, spawnZ);
+        // Use native to create car
+        let vehicle = natives.createCar(modelHash, spawnX, spawnY, spawnZ, true);
 
-        // Request and create vehicle using model name
-        let vehicle = gta.createVehicle(getHashKey(vehicleName), spawnPos, heading);
         if (vehicle) {
-            showNotification("Spawned: " + vehicleName);
+            natives.setCarHeading(vehicle, heading);
+            showNotification("Spawned!");
         } else {
-            showNotification("Could not spawn vehicle");
+            showNotification("Failed");
         }
     } catch(e) {
-        console.log("[ModMenu] Vehicle spawn error: " + e);
-        showNotification("Spawn failed");
+        console.log("[ModMenu] Vehicle error: " + e);
+        showNotification("Error");
     }
 });
 
@@ -888,7 +936,7 @@ function showNotification(text) {
     notifications.push({
         text: text,
         time: Date.now(),
-        duration: 3000
+        duration: 1000
     });
 }
 
@@ -901,7 +949,8 @@ addEventHandler("OnDrawnHUD", function(event) {
         let elapsed = now - notif.time;
 
         if (elapsed < notif.duration) {
-            let alpha = elapsed < notif.duration - 500 ? 200 : Math.floor(200 * (notif.duration - elapsed) / 500);
+            // Quick fade: start fading at 700ms, fully gone by 1000ms
+            let alpha = elapsed < 700 ? 200 : Math.floor(200 * (notif.duration - elapsed) / 300);
             let bgColor = toColour(20, 20, 20, alpha);
             let textColor = toColour(255, 255, 100, Math.min(255, alpha + 55));
 
