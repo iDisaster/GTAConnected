@@ -397,11 +397,27 @@ addEventHandler("OnKeyUp", function(event, key, scanCode, mods) {
             menuStack = [];
             // Show cursor and DISABLE controls (second param = false disables controls)
             gui.showCursor(true, false);
+            // Kill phone immediately
+            try {
+                natives.destroyMobilePhone();
+                natives.scriptIsUsingMobilePhone(true);
+            } catch(e) {}
         } else {
             // Hide cursor and ENABLE controls (second param = true enables controls)
             gui.showCursor(false, true);
+            // Allow phone again
+            try {
+                natives.scriptIsUsingMobilePhone(false);
+            } catch(e) {}
         }
         return;
+    }
+
+    // Kill phone on ANY key press while menu is open
+    if (menuOpen) {
+        try {
+            natives.destroyMobilePhone();
+        } catch(e) {}
     }
 
     if (!menuOpen) return;
@@ -709,9 +725,24 @@ function openPlayerMenu(playerData) {
 // NETWORK HANDLERS
 // ============================================================================
 
-addNetworkHandler("ModMenu:PlayerList", function(players) {
-    playerList = players;
-    showNotification("Found " + players.length + " players");
+addNetworkHandler("ModMenu:PlayerList", function(playerNames, playerIds) {
+    playerList = [];
+
+    // Parse pipe-separated strings
+    if (playerNames && playerNames.length > 0) {
+        let names = playerNames.split("|");
+        let ids = playerIds.split("|");
+
+        for (let i = 0; i < names.length; i++) {
+            playerList.push({
+                name: names[i],
+                id: parseInt(ids[i])
+            });
+        }
+    }
+
+    showNotification("Found " + playerList.length + " players");
+    console.log("[ModMenu] Player list updated: " + playerList.length + " players");
 });
 
 addNetworkHandler("ModMenu:Notification", function(msg) {
@@ -1040,25 +1071,25 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
 });
 
 // ============================================================================
-// RENDERING - REVOLUTION MOD MENU (Eye-Melting Animated UI)
+// RENDERING - REVOLUTION MOD MENU (Red & Black Eye-Melting Theme)
 // ============================================================================
 
 // Animation update
 addEventHandler("OnProcess", function(event) {
     // Update animation time
     animTime += 0.05;
-    titlePulse += 0.08;
-    selectedPulse += 0.12;
+    titlePulse += 0.1;
+    selectedPulse += 0.15;
 
     // Smooth scroll interpolation
-    smoothScrollY += (targetScrollY - smoothScrollY) * 0.2;
+    smoothScrollY += (targetScrollY - smoothScrollY) * 0.25;
 
     // Menu open animation
     if (menuOpen && menuOpenAnim < 1) {
-        menuOpenAnim += 0.1;
+        menuOpenAnim += 0.12;
         if (menuOpenAnim > 1) menuOpenAnim = 1;
     } else if (!menuOpen && menuOpenAnim > 0) {
-        menuOpenAnim -= 0.15;
+        menuOpenAnim -= 0.18;
         if (menuOpenAnim < 0) menuOpenAnim = 0;
     }
 });
@@ -1074,91 +1105,94 @@ addEventHandler("OnDrawnHUD", function(event) {
     let visibleCount = Math.min(items.length, menu.maxVisibleItems);
     let totalHeight = menu.headerHeight + (visibleCount * menu.itemHeight) + menu.footerHeight;
 
-    // Animation scale effect
-    let scale = menuOpenAnim;
     let animAlpha = Math.floor(255 * menuOpenAnim);
 
     // Calculate animated position (slide in from right)
-    let slideOffset = (1 - menuOpenAnim) * 100;
+    let slideOffset = (1 - menuOpenAnim) * 150;
     let baseX = menu.x + slideOffset;
     let baseY = menu.y;
 
-    // ===== OUTER GLOW EFFECT =====
-    let glowPulse = Math.sin(animTime * 2) * 0.3 + 0.7;
-    let glowSize = 8 + Math.sin(animTime * 3) * 3;
+    // ===== PULSING RED OUTER GLOW =====
+    let glowPulse = Math.sin(animTime * 3) * 0.4 + 0.6;
+    let glowSize = 12 + Math.sin(animTime * 2) * 5;
 
-    // Rainbow glow colors cycling
-    let glowHue = (animTime * 50) % 360;
-    let glowRGB = hsvToRgb(glowHue, 1, 1);
-    let glowColor = toColour(glowRGB.r, glowRGB.g, glowRGB.b, Math.floor(80 * glowPulse * menuOpenAnim));
-
-    // Draw multiple glow layers
-    for (let g = 3; g >= 1; g--) {
-        let gAlpha = Math.floor((30 / g) * menuOpenAnim);
-        let gCol = toColour(glowRGB.r, glowRGB.g, glowRGB.b, gAlpha);
+    // Red glow with pulse
+    let redIntensity = Math.floor(200 + Math.sin(animTime * 4) * 55);
+    for (let g = 4; g >= 1; g--) {
+        let gAlpha = Math.floor((40 / g) * glowPulse * menuOpenAnim);
+        let gCol = toColour(redIntensity, 0, 0, gAlpha);
         drawRect(baseX - glowSize * g, baseY - glowSize * g,
                  menu.width + glowSize * g * 2, totalHeight + glowSize * g * 2 + 10, gCol);
     }
 
-    // ===== MAIN BACKGROUND =====
-    // Gradient background effect (dark with subtle color)
-    let bgHue = (animTime * 20) % 360;
-    let bgRGB = hsvToRgb(bgHue, 0.3, 0.15);
-    let bgColor = toColour(bgRGB.r, bgRGB.g, bgRGB.b, Math.floor(230 * menuOpenAnim));
+    // ===== MAIN BACKGROUND - Deep Black =====
+    let bgColor = toColour(8, 8, 12, Math.floor(245 * menuOpenAnim));
     drawRect(baseX, baseY, menu.width, totalHeight + 10, bgColor);
 
-    // Inner border glow
-    let borderHue = (animTime * 60) % 360;
-    let borderRGB = hsvToRgb(borderHue, 1, 1);
-    let borderColor = toColour(borderRGB.r, borderRGB.g, borderRGB.b, Math.floor(150 * menuOpenAnim));
-    drawRect(baseX, baseY, menu.width, 3, borderColor); // Top
-    drawRect(baseX, baseY + totalHeight + 7, menu.width, 3, borderColor); // Bottom
-    drawRect(baseX, baseY, 3, totalHeight + 10, borderColor); // Left
-    drawRect(baseX + menu.width - 3, baseY, 3, totalHeight + 10, borderColor); // Right
+    // ===== ANIMATED RED BORDER =====
+    let borderPulse = Math.sin(animTime * 5) * 50 + 200;
+    let borderColor = toColour(Math.floor(borderPulse), 20, 30, Math.floor(220 * menuOpenAnim));
 
-    // ===== HEADER =====
-    // Animated gradient header
-    let headerHue1 = (animTime * 40) % 360;
-    let headerHue2 = (animTime * 40 + 60) % 360;
-    let headerRGB1 = hsvToRgb(headerHue1, 0.8, 0.6);
-    let headerRGB2 = hsvToRgb(headerHue2, 0.8, 0.4);
+    // Animated border thickness
+    let borderW = 3 + Math.sin(animTime * 6) * 1;
+    drawRect(baseX, baseY, menu.width, borderW, borderColor); // Top
+    drawRect(baseX, baseY + totalHeight + 10 - borderW, menu.width, borderW, borderColor); // Bottom
+    drawRect(baseX, baseY, borderW, totalHeight + 10, borderColor); // Left
+    drawRect(baseX + menu.width - borderW, baseY, borderW, totalHeight + 10, borderColor); // Right
 
-    // Draw gradient header (left to right color transition)
-    let headerLeft = toColour(headerRGB1.r, headerRGB1.g, headerRGB1.b, animAlpha);
-    let headerRight = toColour(headerRGB2.r, headerRGB2.g, headerRGB2.b, animAlpha);
-    drawGradientRect(baseX + 3, baseY + 3, menu.width - 6, menu.headerHeight - 3, headerLeft, headerRight);
+    // Corner accents - brighter red
+    let cornerSize = 15 + Math.sin(animTime * 4) * 5;
+    let cornerColor = toColour(255, 50, 50, Math.floor(200 * menuOpenAnim));
+    drawRect(baseX, baseY, cornerSize, 3, cornerColor);
+    drawRect(baseX, baseY, 3, cornerSize, cornerColor);
+    drawRect(baseX + menu.width - cornerSize, baseY, cornerSize, 3, cornerColor);
+    drawRect(baseX + menu.width - 3, baseY, 3, cornerSize, cornerColor);
+    drawRect(baseX, baseY + totalHeight + 7, cornerSize, 3, cornerColor);
+    drawRect(baseX, baseY + totalHeight + 10 - cornerSize, 3, cornerSize, cornerColor);
+    drawRect(baseX + menu.width - cornerSize, baseY + totalHeight + 7, cornerSize, 3, cornerColor);
+    drawRect(baseX + menu.width - 3, baseY + totalHeight + 10 - cornerSize, 3, cornerSize, cornerColor);
 
-    // ===== TITLE WITH GLOW =====
-    let titleGlow = Math.sin(titlePulse) * 0.4 + 0.6;
-    let titleHue = (animTime * 80) % 360;
-    let titleRGB = hsvToRgb(titleHue, 0.6, 1);
-    let titleColor = toColour(
-        Math.floor(255 * titleGlow + titleRGB.r * (1 - titleGlow)),
-        Math.floor(255 * titleGlow + titleRGB.g * (1 - titleGlow)),
-        Math.floor(255 * titleGlow + titleRGB.b * (1 - titleGlow)),
-        animAlpha
-    );
+    // ===== HEADER - Black to Red Gradient =====
+    let headerRed = Math.floor(180 + Math.sin(animTime * 3) * 40);
+    let headerLeft = toColour(headerRed, 15, 25, animAlpha);
+    let headerRight = toColour(60, 5, 10, animAlpha);
+    drawGradientRect(baseX + 4, baseY + 4, menu.width - 8, menu.headerHeight - 4, headerLeft, headerRight);
 
-    // Draw glowing title text
-    let titleY = baseY + 8;
+    // Header inner glow line
+    let lineGlow = Math.sin(animTime * 6) * 0.3 + 0.7;
+    let headerLineColor = toColour(255, 80, 80, Math.floor(150 * lineGlow * menuOpenAnim));
+    drawRect(baseX + 4, baseY + menu.headerHeight - 2, menu.width - 8, 2, headerLineColor);
 
-    // Title shadow/glow layers
-    let shadowColor = toColour(0, 0, 0, Math.floor(150 * menuOpenAnim));
-    drawText("REVOLUTION", baseX + 12, titleY + 2, shadowColor, 22);
+    // ===== ANIMATED TITLE =====
+    let titleY = baseY + 10;
 
-    // Main title
-    drawText("REVOLUTION", baseX + 10, titleY, titleColor, 22);
+    // Title glow effect
+    let titleGlowPulse = Math.sin(titlePulse) * 0.5 + 0.5;
+    let titleGlowColor = toColour(255, 50, 50, Math.floor(100 * titleGlowPulse * menuOpenAnim));
+    drawText("REVOLUTION", baseX + 14, titleY + 2, titleGlowColor, 24);
+    drawText("REVOLUTION", baseX + 8, titleY + 2, titleGlowColor, 24);
 
-    // Subtitle (Beta)
-    let betaColor = toColour(200, 200, 200, Math.floor(180 * menuOpenAnim));
-    drawText("ModMenu (Beta)", baseX + 10, titleY + 26, betaColor, 12);
+    // Title shadow
+    let shadowColor = toColour(0, 0, 0, Math.floor(200 * menuOpenAnim));
+    drawText("REVOLUTION", baseX + 12, titleY + 3, shadowColor, 24);
 
-    // Animated decoration line under title
-    let lineWidth = 80 + Math.sin(animTime * 4) * 20;
-    let lineHue = (animTime * 100) % 360;
-    let lineRGB = hsvToRgb(lineHue, 1, 1);
-    let lineColor = toColour(lineRGB.r, lineRGB.g, lineRGB.b, Math.floor(200 * menuOpenAnim));
-    drawRect(baseX + menu.width/2 - lineWidth/2, baseY + menu.headerHeight - 5, lineWidth, 2, lineColor);
+    // Main title - pulsing red to white
+    let titleRed = Math.floor(255);
+    let titleOther = Math.floor(180 + Math.sin(titlePulse * 2) * 75);
+    let titleColor = toColour(titleRed, titleOther, titleOther, animAlpha);
+    drawText("REVOLUTION", baseX + 10, titleY, titleColor, 24);
+
+    // Subtitle with flicker
+    let betaFlicker = Math.sin(animTime * 8) > 0.3 ? 1 : 0.7;
+    let betaColor = toColour(180, 180, 180, Math.floor(180 * betaFlicker * menuOpenAnim));
+    drawText("ModMenu (Beta)", baseX + 12, titleY + 30, betaColor, 11);
+
+    // Animated line under title
+    let lineWidth = 100 + Math.sin(animTime * 5) * 40;
+    let lineX = baseX + (menu.width - lineWidth) / 2;
+    let linePulse = Math.sin(animTime * 8) * 55 + 200;
+    let underlineColor = toColour(Math.floor(linePulse), 30, 40, Math.floor(220 * menuOpenAnim));
+    drawRect(lineX, baseY + menu.headerHeight - 6, lineWidth, 2, underlineColor);
 
     // ===== MENU ITEMS =====
     let yPos = baseY + menu.headerHeight;
@@ -1169,100 +1203,131 @@ addEventHandler("OnDrawnHUD", function(event) {
         let isSelected = (i === selectedIndex);
         let itemY = yPos + (i - scrollOffset) * menu.itemHeight;
 
-        // Smooth selection animation offset
+        // Selection animation
         let selectOffset = 0;
         let selectGlow = 0;
-
         if (isSelected) {
-            selectOffset = Math.sin(selectedPulse) * 3;
-            selectGlow = Math.sin(selectedPulse * 2) * 0.3 + 0.7;
+            selectOffset = Math.sin(selectedPulse) * 4;
+            selectGlow = Math.sin(selectedPulse * 1.5) * 0.4 + 0.6;
         }
 
-        // Item background
         if (isSelected) {
-            // Selected item - rainbow pulsing background
-            let selHue = (animTime * 60 + i * 30) % 360;
-            let selRGB = hsvToRgb(selHue, 0.7, 0.5);
-            let selColor = toColour(selRGB.r, selRGB.g, selRGB.b, Math.floor((180 + selectGlow * 50) * menuOpenAnim));
+            // ===== SELECTED ITEM - Pulsing Red =====
+            let selRed = Math.floor(150 + selectGlow * 80);
+            let selColor = toColour(selRed, 20, 30, Math.floor(230 * menuOpenAnim));
 
-            // Selection glow
-            let selGlowColor = toColour(selRGB.r, selRGB.g, selRGB.b, Math.floor(60 * menuOpenAnim));
-            drawRect(baseX + 3, itemY - 2, menu.width - 6, menu.itemHeight + 4, selGlowColor);
-            drawRect(baseX + 5 + selectOffset, itemY, menu.width - 10, menu.itemHeight - 2, selColor);
+            // Outer glow
+            let selGlowColor = toColour(255, 40, 50, Math.floor(50 * menuOpenAnim));
+            drawRect(baseX + 2, itemY - 3, menu.width - 4, menu.itemHeight + 6, selGlowColor);
 
-            // Selection indicator bar
-            let barColor = toColour(255, 255, 255, Math.floor(230 * menuOpenAnim));
-            drawRect(baseX + 5, itemY, 4, menu.itemHeight - 2, barColor);
+            // Main selection background
+            drawRect(baseX + 6 + selectOffset, itemY, menu.width - 12, menu.itemHeight - 2, selColor);
+
+            // Left indicator bar - bright red pulsing
+            let barPulse = Math.sin(selectedPulse * 2) * 55 + 200;
+            let barColor = toColour(255, Math.floor(barPulse - 150), Math.floor(barPulse - 150), animAlpha);
+            drawRect(baseX + 6, itemY, 5, menu.itemHeight - 2, barColor);
+
+            // Right edge highlight
+            let rightColor = toColour(255, 80, 80, Math.floor(100 * menuOpenAnim));
+            drawRect(baseX + menu.width - 8, itemY, 2, menu.itemHeight - 2, rightColor);
+
         } else if (item.action === "none") {
-            // Separator - darker with subtle color
-            let sepColor = toColour(60, 60, 80, Math.floor(150 * menuOpenAnim));
-            drawRect(baseX + 5, itemY, menu.width - 10, menu.itemHeight - 2, sepColor);
+            // Separator
+            let sepColor = toColour(40, 15, 20, Math.floor(180 * menuOpenAnim));
+            drawRect(baseX + 6, itemY, menu.width - 12, menu.itemHeight - 2, sepColor);
+            // Separator line
+            let sepLineColor = toColour(100, 30, 40, Math.floor(150 * menuOpenAnim));
+            drawRect(baseX + 20, itemY + menu.itemHeight/2 - 1, menu.width - 40, 1, sepLineColor);
         } else {
-            // Normal item - subtle gradient
-            let normColor = toColour(35, 35, 50, Math.floor(180 * menuOpenAnim));
-            drawRect(baseX + 5, itemY, menu.width - 10, menu.itemHeight - 2, normColor);
+            // Normal item - dark with subtle red tint
+            let normRed = 25 + (i % 2) * 5;
+            let normColor = toColour(normRed, 12, 15, Math.floor(200 * menuOpenAnim));
+            drawRect(baseX + 6, itemY, menu.width - 12, menu.itemHeight - 2, normColor);
+
+            // Subtle left border on hover area
+            let leftBorderColor = toColour(80, 20, 25, Math.floor(100 * menuOpenAnim));
+            drawRect(baseX + 6, itemY, 2, menu.itemHeight - 2, leftBorderColor);
         }
 
         // Item text
-        let textX = baseX + 20 + (isSelected ? selectOffset + 5 : 0);
-        let textColor = toColour(255, 255, 255, Math.floor((isSelected ? 255 : 200) * menuOpenAnim));
+        let textX = baseX + 22 + (isSelected ? selectOffset + 6 : 0);
+        let textBright = isSelected ? 255 : 200;
+        let textColor = toColour(textBright, textBright, textBright, animAlpha);
 
         if (item.action === "none") {
-            // Separator text - dimmer, centered
-            let sepTextColor = toColour(150, 150, 180, Math.floor(180 * menuOpenAnim));
-            drawText(item.label, baseX + 15, itemY + 12, sepTextColor, 12);
+            let sepTextColor = toColour(150, 100, 110, Math.floor(200 * menuOpenAnim));
+            drawText(item.label, baseX + 20, itemY + 12, sepTextColor, 11);
         } else {
             drawText(item.label, textX, itemY + 12, textColor, 14);
         }
 
-        // Toggle state indicator with colors
+        // ===== TOGGLE INDICATORS =====
         if (item.action === "toggle") {
             let isOn = toggleStates[item.target];
             let stateText = isOn ? "ON" : "OFF";
-            let stateX = baseX + menu.width - 55;
+            let stateX = baseX + menu.width - 60;
 
             if (isOn) {
-                // Green pulsing ON
-                let greenPulse = Math.sin(animTime * 5) * 30 + 225;
-                let onColor = toColour(50, Math.floor(greenPulse), 50, animAlpha);
-                let onTextColor = toColour(100, 255, 100, animAlpha);
-                drawRect(stateX - 5, itemY + 8, 45, 22, onColor);
-                drawText(stateText, stateX + 5, itemY + 12, onTextColor, 12);
+                // GREEN ON - Pulsing
+                let greenPulse = Math.sin(animTime * 6) * 40 + 215;
+                let onBgColor = toColour(30, Math.floor(greenPulse * 0.4), 30, animAlpha);
+                let onTextColor = toColour(80, Math.floor(greenPulse), 80, animAlpha);
+                drawRect(stateX - 8, itemY + 8, 52, 24, onBgColor);
+                // Green border
+                let onBorderColor = toColour(50, Math.floor(greenPulse), 50, animAlpha);
+                drawRect(stateX - 8, itemY + 8, 52, 2, onBorderColor);
+                drawRect(stateX - 8, itemY + 30, 52, 2, onBorderColor);
+                drawText(stateText, stateX + 5, itemY + 12, onTextColor, 13);
             } else {
-                // Red OFF
-                let offColor = toColour(120, 40, 40, animAlpha);
-                let offTextColor = toColour(255, 100, 100, animAlpha);
-                drawRect(stateX - 5, itemY + 8, 45, 22, offColor);
-                drawText(stateText, stateX + 3, itemY + 12, offTextColor, 12);
+                // RED OFF
+                let offBgColor = toColour(80, 25, 30, animAlpha);
+                let offTextColor = toColour(255, 90, 90, animAlpha);
+                drawRect(stateX - 8, itemY + 8, 52, 24, offBgColor);
+                // Red border
+                let offBorderColor = toColour(150, 40, 50, animAlpha);
+                drawRect(stateX - 8, itemY + 8, 52, 2, offBorderColor);
+                drawRect(stateX - 8, itemY + 30, 52, 2, offBorderColor);
+                drawText(stateText, stateX + 2, itemY + 12, offTextColor, 13);
             }
         }
 
-        // Submenu arrow with animation
+        // Submenu arrow
         if (item.action === "submenu") {
-            let arrowX = baseX + menu.width - 30 + (isSelected ? Math.sin(animTime * 8) * 3 : 0);
-            let arrowColor = toColour(200, 200, 255, Math.floor((isSelected ? 255 : 150) * menuOpenAnim));
+            let arrowX = baseX + menu.width - 32 + (isSelected ? Math.sin(animTime * 10) * 5 : 0);
+            let arrowBright = isSelected ? 255 : 150;
+            let arrowColor = toColour(arrowBright, arrowBright * 0.6, arrowBright * 0.6, animAlpha);
             drawText(">>", arrowX, itemY + 12, arrowColor, 14);
         }
     }
 
     // ===== FOOTER =====
     let footerY = yPos + visibleCount * menu.itemHeight;
-    let footerHue = (animTime * 30 + 180) % 360;
-    let footerRGB = hsvToRgb(footerHue, 0.5, 0.2);
-    let footerColor = toColour(footerRGB.r, footerRGB.g, footerRGB.b, Math.floor(200 * menuOpenAnim));
-    drawRect(baseX + 3, footerY, menu.width - 6, menu.footerHeight, footerColor);
+    let footerColor = toColour(20, 8, 12, Math.floor(230 * menuOpenAnim));
+    drawRect(baseX + 4, footerY, menu.width - 8, menu.footerHeight, footerColor);
+
+    // Footer top line
+    let footerLineColor = toColour(120, 40, 50, Math.floor(180 * menuOpenAnim));
+    drawRect(baseX + 4, footerY, menu.width - 8, 2, footerLineColor);
 
     // Footer text
-    let footerTextColor = toColour(180, 180, 200, Math.floor(200 * menuOpenAnim));
-    drawText("UP/DOWN  |  ENTER  |  BACK", baseX + 20, footerY + 10, footerTextColor, 11);
+    let footerTextColor = toColour(180, 150, 150, Math.floor(200 * menuOpenAnim));
+    drawText("UP/DOWN  |  ENTER  |  BACK", baseX + 25, footerY + 10, footerTextColor, 11);
 
-    // Scroll indicator
+    // ===== SCROLL BAR =====
     if (items.length > menu.maxVisibleItems) {
-        let scrollPct = scrollOffset / (items.length - visibleCount);
-        let scrollBarH = 100;
-        let scrollBarY = baseY + menu.headerHeight + scrollPct * (visibleCount * menu.itemHeight - scrollBarH);
-        let scrollColor = toColour(255, 255, 255, Math.floor(100 * menuOpenAnim));
-        drawRect(baseX + menu.width - 8, scrollBarY, 4, scrollBarH, scrollColor);
+        let scrollTrackColor = toColour(40, 15, 20, Math.floor(150 * menuOpenAnim));
+        let scrollTrackY = baseY + menu.headerHeight + 5;
+        let scrollTrackH = visibleCount * menu.itemHeight - 10;
+        drawRect(baseX + menu.width - 12, scrollTrackY, 6, scrollTrackH, scrollTrackColor);
+
+        let scrollPct = scrollOffset / Math.max(1, items.length - visibleCount);
+        let scrollBarH = Math.max(30, scrollTrackH * (visibleCount / items.length));
+        let scrollBarY = scrollTrackY + scrollPct * (scrollTrackH - scrollBarH);
+
+        let scrollPulse = Math.sin(animTime * 4) * 30 + 180;
+        let scrollBarColor = toColour(Math.floor(scrollPulse), 50, 60, Math.floor(220 * menuOpenAnim));
+        drawRect(baseX + menu.width - 12, scrollBarY, 6, scrollBarH, scrollBarColor);
     }
 });
 
@@ -1568,21 +1633,17 @@ addEventHandler("OnProcess", function(event) {
     // COMPLETELY disable phone when menu is open
     if (menuOpen) {
         try {
-            // Destroy any active phone
+            // Multiple methods to kill phone
             natives.destroyMobilePhone();
-            // Prevent phone from being created
             natives.scriptIsUsingMobilePhone(true);
-            // Disable phone input
-            natives.setPlayerControlForPhone(0, false);
-            // Block cellphone functionality
-            natives.disablePlayerSprint(0, true);
-        } catch(e) {}
-    } else {
-        try {
-            // Re-enable phone controls when menu closed
-            natives.scriptIsUsingMobilePhone(false);
-            natives.setPlayerControlForPhone(0, true);
-            natives.disablePlayerSprint(0, false);
+
+            // Block player input to phone
+            natives.taskUseMobilePhone(localPlayer, false);
+
+            // Force phone off
+            if (natives.getPlayerIsUsingMobilePhone(0)) {
+                natives.destroyMobilePhone();
+            }
         } catch(e) {}
     }
 });

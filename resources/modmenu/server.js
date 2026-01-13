@@ -160,27 +160,27 @@ addNetworkHandler("ModMenu:TeleportToPlayer", function(client, targetId) {
 
 addNetworkHandler("ModMenu:GetPlayers", function(client) {
     let clients = getClients();
-    let playerList = [];
+    let playerNames = "";
+    let playerIds = "";
 
     console.log("[ModMenu] Getting players, found " + clients.length + " clients");
 
     for (let i = 0; i < clients.length; i++) {
         let c = clients[i];
-        // Skip the requesting player (optional - include self for testing)
-        // if (c.index === client.index) continue;
-
-        // Only add players with valid data
         if (c && c.name) {
-            playerList.push({
-                id: c.index,
-                name: c.name || ("Player " + c.index)
-            });
+            if (playerNames.length > 0) {
+                playerNames += "|";
+                playerIds += "|";
+            }
+            playerNames += c.name;
+            playerIds += c.index;
             console.log("[ModMenu] Added player: " + c.name + " (ID: " + c.index + ")");
         }
     }
 
-    console.log("[ModMenu] Sending " + playerList.length + " players to " + client.name);
-    triggerNetworkEvent("ModMenu:PlayerList", client, playerList);
+    console.log("[ModMenu] Sending players to " + client.name + ": " + playerNames);
+    // Send as separate strings instead of array
+    triggerNetworkEvent("ModMenu:PlayerList", client, playerNames, playerIds);
 });
 
 // ============================================================================
