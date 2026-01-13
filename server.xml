@@ -27,12 +27,7 @@
 
     <!-- Resources to Load -->
     <resources>
-        <resource src="freeroam" />
-        <resource src="admin" />
-        <resource src="world" />
-        <resource src="chat" />
-        <resource src="teleport" />
-        <resource src="vehicles" />
+        <!-- Only mod menu for now -->
         <resource src="modmenu" />
     </resources>
 </server>

@@ -140,8 +140,22 @@ addEventHandler("OnPlayerJoined", function(event, client) {
     playerVehicles[client.index] = [];
     playerToggles[client.index] = {};
 
+    // Auto-spawn the player at a random location
+    let spawns = [
+        { x: -252.0, y: 947.0, z: 15.0 },   // Star Junction
+        { x: 932.0, y: -495.0, z: 15.0 },    // Broker Bridge
+        { x: -365.0, y: 1163.0, z: 14.0 },   // Middle Park
+        { x: 1243.0, y: -196.0, z: 26.0 }    // South Bohan
+    ];
+    let spawn = spawns[Math.floor(Math.random() * spawns.length)];
+    let spawnPos = new Vec3(spawn.x, spawn.y, spawn.z);
+
+    // Spawn as Niko
+    client.spawnPlayer(spawnPos, 0.0, -1667301416);
+
     // Inform player about the menu
     messageClient("[MOD MENU] Press F5 to open the mod menu!", client, COLOUR_ORANGE);
+    messageClient("[SERVER] You have been auto-spawned. Enjoy!", client, COLOUR_ORANGE);
 });
 
 addEventHandler("OnPlayerQuit", function(event, client, reason) {
