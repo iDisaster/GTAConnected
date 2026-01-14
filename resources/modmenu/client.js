@@ -262,7 +262,9 @@ const menuData = {
             { label: "Patriot", action: "spawn_vehicle", value: "patriot" },
             { label: "Cavalcade", action: "spawn_vehicle", value: "cavalcade" },
             { label: "Huntley", action: "spawn_vehicle", value: "huntley" },
-            { label: "Landstalker", action: "spawn_vehicle", value: "landstalker" }
+            { label: "Landstalker", action: "spawn_vehicle", value: "landstalker" },
+            { label: "Rancher", action: "spawn_vehicle", value: "rancher" },
+            { label: "Bobcat", action: "spawn_vehicle", value: "bobcat" }
         ]
     },
 
@@ -270,9 +272,10 @@ const menuData = {
         title: "MOTORCYCLES",
         items: [
             { label: "NRG 900", action: "spawn_vehicle", value: "nrg900" },
-            { label: "PCJ 600", action: "spawn_vehicle", value: "pcj600" },
+            { label: "PCJ 600", action: "spawn_vehicle", value: "pcj" },
             { label: "Sanchez", action: "spawn_vehicle", value: "sanchez" },
-            { label: "Faggio", action: "spawn_vehicle", value: "faggio" }
+            { label: "Faggio", action: "spawn_vehicle", value: "faggio" },
+            { label: "Freeway", action: "spawn_vehicle", value: "freeway" }
         ]
     },
 
@@ -280,9 +283,13 @@ const menuData = {
         title: "EMERGENCY",
         items: [
             { label: "Police Cruiser", action: "spawn_vehicle", value: "police" },
+            { label: "Police Cruiser 2", action: "spawn_vehicle", value: "police2" },
             { label: "FBI Car", action: "spawn_vehicle", value: "fbi" },
+            { label: "NOOSE Cruiser", action: "spawn_vehicle", value: "noose" },
             { label: "Ambulance", action: "spawn_vehicle", value: "ambulance" },
-            { label: "Fire Truck", action: "spawn_vehicle", value: "firetruk" }
+            { label: "Fire Truck", action: "spawn_vehicle", value: "firetruk" },
+            { label: "Taxi", action: "spawn_vehicle", value: "taxi" },
+            { label: "Stretch Limo", action: "spawn_vehicle", value: "stretch" }
         ]
     },
 
@@ -291,7 +298,8 @@ const menuData = {
         items: [
             { label: "Annihilator", action: "spawn_vehicle", value: "annihilator" },
             { label: "Maverick", action: "spawn_vehicle", value: "maverick" },
-            { label: "Police Maverick", action: "spawn_vehicle", value: "polmav" }
+            { label: "Police Maverick", action: "spawn_vehicle", value: "polmav" },
+            { label: "Tour Maverick", action: "spawn_vehicle", value: "tourmav" }
         ]
     },
 
@@ -1441,8 +1449,8 @@ const vehicleModels = [
 const vehicleHashes = {
     // Sports Cars
     "infernus": 0x18F25AC7,
-    "turismo": 0x185484E1,
-    "comet": 0x067BC037,
+    "turismo": 0x8EF34547,    // Fixed hash
+    "comet": 0x3F637729,      // Fixed hash
     "banshee": 0xC1E908D2,
     "sultan": 0x39DA2754,
     "coquette": 0x108773431,
@@ -1575,6 +1583,8 @@ addNetworkHandler("ModMenu:ExecuteSpawnVehicle", function(vehicleName) {
             return;
         }
 
+        console.log("[ModMenu] Spawning vehicle: " + vehicleName + " (hash: " + modelHash + ")");
+
         // Request the model first
         natives.requestModel(modelHash);
 
@@ -1587,29 +1597,36 @@ addNetworkHandler("ModMenu:ExecuteSpawnVehicle", function(vehicleName) {
 
                 let pos = localPlayer.position;
                 let heading = localPlayer.heading || 0;
-                let spawnPos = new Vec3(pos.x, pos.y, pos.z + 1);
 
-                // Create the car
-                let vehicle = natives.createCar(modelHash, spawnPos, true);
+                // Spawn position in front of player
+                let spawnX = pos.x + Math.sin(-heading) * 5;
+                let spawnY = pos.y + Math.cos(-heading) * 5;
+                let spawnZ = pos.z + 0.5;
+
+                // Create the car using x, y, z coordinates
+                // GTA IV native: CREATE_CAR(hash, x, y, z, outVehicle, bool)
+                let vehicle = natives.createCar(modelHash, spawnX, spawnY, spawnZ, true);
 
                 if (vehicle) {
+                    // Set vehicle heading to match player
                     natives.setCarHeading(vehicle, heading);
                     // Warp player into the vehicle
                     natives.warpCharIntoCar(localPlayer, vehicle);
                     showNotification("Spawned: " + vehicleName);
+                    console.log("[ModMenu] Vehicle spawned successfully");
                 } else {
                     showNotification("Failed to create vehicle");
                 }
 
                 // Mark model as no longer needed
                 natives.markModelAsNoLongerNeeded(modelHash);
-            } else if (attempts > 50) {
+            } else if (attempts > 100) {
                 clearInterval(spawnInterval);
                 showNotification("Model load timeout for: " + vehicleName);
             }
-        }, 100);
+        }, 50);  // Check every 50ms instead of 100ms
     } catch(e) {
-        console.log("[ModMenu] Vehicle error: " + e);
+        console.log("[ModMenu] Vehicle spawn error: " + e);
         showNotification("Error: " + e);
     }
 });
