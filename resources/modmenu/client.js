@@ -215,11 +215,11 @@ const menuData = {
             { label: "Give All Weapons", action: "self_weapons" },
             { label: "Clear Wanted Level", action: "self_wanted" },
             { label: "--- Toggles ---", action: "none" },
-            { label: "God Mode", action: "toggle", target: "godMode", state: false },
-            { label: "Invincible", action: "toggle", target: "invincible", state: false },
-            { label: "Super Run", action: "toggle", target: "superRun", state: false },
-            { label: "No Ragdoll", action: "toggle", target: "noRagdoll", state: false },
-            { label: "Never Wanted", action: "toggle", target: "neverWanted", state: false },
+            { label: "God Mode: <#FF0000>OFF", action: "toggle", target: "godMode", state: false },
+            { label: "Invincible: <#FF0000>OFF", action: "toggle", target: "invincible", state: false },
+            { label: "Super Run: <#FF0000>OFF", action: "toggle", target: "superRun", state: false },
+            { label: "No Ragdoll: <#FF0000>OFF", action: "toggle", target: "noRagdoll", state: false },
+            { label: "Never Wanted: <#FF0000>OFF", action: "toggle", target: "neverWanted", state: false },
             { label: "--- Actions ---", action: "none" },
             { label: "Respawn", action: "self_respawn" },
             { label: "Suicide", action: "self_suicide" },
@@ -445,21 +445,21 @@ const menuData = {
             { label: "Repair Vehicle", action: "veh_repair" },
             { label: "Flip Vehicle", action: "veh_flip" },
             { label: "Vehicle Colors", action: "submenu", target: "veh_colors" },
-            { label: "God Mode", action: "toggle", target: "vehGodMode", state: false },
+            { label: "God Mode: <#FF0000>OFF", action: "toggle", target: "vehGodMode", state: false },
             { label: "Nitro Boost", action: "veh_nitro" },
-            { label: "Drive On Water", action: "toggle", target: "driveOnWater", state: false },
-            { label: "Rainbow Color", action: "toggle", target: "rainbowCar", state: false },
-            { label: "Drift Mode", action: "toggle", target: "driftMode", state: false },
+            { label: "Drive On Water: <#FF0000>OFF", action: "toggle", target: "driveOnWater", state: false },
+            { label: "Rainbow Color: <#FF0000>OFF", action: "toggle", target: "rainbowCar", state: false },
+            { label: "Drift Mode: <#FF0000>OFF", action: "toggle", target: "driftMode", state: false },
             { label: "Neon Lights", action: "submenu", target: "veh_neons" },
-            { label: "Fly Mode", action: "toggle", target: "flyMode", state: false },
-            { label: "Shoot RPG", action: "toggle", target: "vehShootRPG", state: false }
+            { label: "Fly Mode: <#FF0000>OFF", action: "toggle", target: "flyMode", state: false },
+            { label: "Shoot RPG: <#FF0000>OFF", action: "toggle", target: "vehShootRPG", state: false }
         ]
     },
 
     veh_neons: {
         title: "NEON LIGHTS",
         items: [
-            { label: "Toggle Neons", action: "toggle", target: "neonLights", state: false },
+            { label: "Toggle Neons: <#FF0000>OFF", action: "toggle", target: "neonLights", state: false },
             { label: "Red Neons", action: "neon_color", value: { r: 255, g: 0, b: 0 } },
             { label: "Blue Neons", action: "neon_color", value: { r: 0, g: 100, b: 255 } },
             { label: "Green Neons", action: "neon_color", value: { r: 0, g: 255, b: 0 } },
@@ -647,9 +647,9 @@ const menuData = {
             { label: "--- Visual Effects ---", action: "none" },
             { label: "Screen Shake", action: "fun_screen_shake" },
             { label: "Flash Screen", action: "fun_flash" },
-            { label: "Matrix Mode", action: "toggle", target: "matrixMode", state: false },
-            { label: "Thermal Vision", action: "toggle", target: "thermalVision", state: false },
-            { label: "Night Vision", action: "toggle", target: "nightVision", state: false }
+            { label: "Matrix Mode: <#FF0000>OFF", action: "toggle", target: "matrixMode", state: false },
+            { label: "Thermal Vision: <#FF0000>OFF", action: "toggle", target: "thermalVision", state: false },
+            { label: "Night Vision: <#FF0000>OFF", action: "toggle", target: "nightVision", state: false }
         ]
     }
 };
@@ -676,6 +676,40 @@ let toggleStates = {
     thermalVision: false,
     nightVision: false
 };
+
+// Base labels for toggles (used to generate color-coded labels)
+const toggleBaseLabels = {
+    godMode: "God Mode",
+    invincible: "Invincible",
+    superRun: "Super Run",
+    noRagdoll: "No Ragdoll",
+    neverWanted: "Never Wanted",
+    vehGodMode: "God Mode",
+    driveOnWater: "Drive On Water",
+    rainbowCar: "Rainbow Color",
+    driftMode: "Drift Mode",
+    neonLights: "Toggle Neons",
+    flyMode: "Fly Mode",
+    vehShootRPG: "Shoot RPG",
+    rainbowSky: "Rainbow Sky",
+    explosiveAmmo: "Explosive Ammo",
+    moonGravity: "Moon Gravity",
+    drunkMode: "Drunk Mode",
+    matrixMode: "Matrix Mode",
+    thermalVision: "Thermal Vision",
+    nightVision: "Night Vision"
+};
+
+// Helper function to get toggle label with GTAConnected color tags
+function getToggleLabel(toggleKey) {
+    let baseName = toggleBaseLabels[toggleKey] || toggleKey;
+    let isOn = toggleStates[toggleKey];
+    if (isOn) {
+        return baseName + ": <#00FF00>ON";
+    } else {
+        return baseName + ": <#FF0000>OFF";
+    }
+}
 
 // Neon objects storage
 let neonObjects = [];
@@ -909,8 +943,9 @@ function selectItem() {
         case "toggle":
             toggleStates[item.target] = !toggleStates[item.target];
             item.state = toggleStates[item.target];
+            // Update label with color-coded state
+            item.label = getToggleLabel(item.target);
             triggerNetworkEvent("ModMenu:Toggle", item.target, toggleStates[item.target]);
-            showNotification(item.label + ": " + (toggleStates[item.target] ? "ON" : "OFF"));
             break;
 
         case "spawn_vehicle":
@@ -2114,36 +2149,6 @@ addEventHandler("OnDrawnHUD", function(event) {
             drawText(item.label, textX, itemY + 12, textColor, 14);
         }
 
-        // ===== TOGGLE INDICATORS =====
-        if (item.action === "toggle") {
-            let isOn = toggleStates[item.target];
-            let stateText = isOn ? "ON" : "OFF";
-            let stateX = baseX + menu.width - 60;
-
-            if (isOn) {
-                // GREEN ON - Smooth Pulsing
-                let greenPulse = Math.sin(animTime * 3) * 40 + 215;
-                let onBgColor = toColour(30, Math.floor(greenPulse * 0.4), 30, animAlpha);
-                let onTextColor = toColour(80, Math.floor(greenPulse), 80, animAlpha);
-                drawRect(stateX - 8, itemY + 8, 52, 24, onBgColor);
-                // Green border
-                let onBorderColor = toColour(50, Math.floor(greenPulse), 50, animAlpha);
-                drawRect(stateX - 8, itemY + 8, 52, 2, onBorderColor);
-                drawRect(stateX - 8, itemY + 30, 52, 2, onBorderColor);
-                drawText(stateText, stateX + 5, itemY + 12, onTextColor, 13);
-            } else {
-                // RED OFF
-                let offBgColor = toColour(80, 25, 30, animAlpha);
-                let offTextColor = toColour(255, 90, 90, animAlpha);
-                drawRect(stateX - 8, itemY + 8, 52, 24, offBgColor);
-                // Red border
-                let offBorderColor = toColour(150, 40, 50, animAlpha);
-                drawRect(stateX - 8, itemY + 8, 52, 2, offBorderColor);
-                drawRect(stateX - 8, itemY + 30, 52, 2, offBorderColor);
-                drawText(stateText, stateX + 2, itemY + 12, offTextColor, 13);
-            }
-        }
-
         // Submenu arrow - smoother (themed)
         if (item.action === "submenu") {
             let arrowX = baseX + menu.width - 32 + (isSelected ? Math.sin(animTime * 5) * 3 : 0);
@@ -2296,62 +2301,12 @@ function drawText(text, x, y, colour, size) {
 }
 
 // ============================================================================
-// NOTIFICATIONS - Animated
+// NOTIFICATIONS (stub - notifications removed, function kept for compatibility)
 // ============================================================================
 
-let notifications = [];
-
 function showNotification(text) {
-    notifications.push({
-        text: text,
-        time: Date.now(),
-        duration: 1500
-    });
+    // Notifications removed - toggle states now shown in menu labels
 }
-
-addEventHandler("OnDrawnHUD", function(event) {
-    let now = Date.now();
-    let yPos = 180;
-
-    for (let i = 0; i < notifications.length; i++) {
-        let notif = notifications[i];
-        let elapsed = now - notif.time;
-
-        if (elapsed < notif.duration) {
-            // Animated notification
-            let progress = elapsed / notif.duration;
-            let slideIn = Math.min(1, elapsed / 200) * 300;
-            let fadeOut = elapsed > notif.duration - 300 ? (notif.duration - elapsed) / 300 : 1;
-            let alpha = Math.floor(220 * fadeOut);
-
-            // Rainbow border
-            let notifHue = (animTime * 80 + i * 60) % 360;
-            let notifRGB = hsvToRgb(notifHue, 0.8, 0.8);
-
-            // Glow
-            let glowCol = toColour(notifRGB.r, notifRGB.g, notifRGB.b, Math.floor(40 * fadeOut));
-            drawRect(10 - slideIn + 300, yPos - 3, 290, 36, glowCol);
-
-            // Background
-            let bgColor = toColour(20, 20, 30, alpha);
-            drawRect(15 - slideIn + 300, yPos, 280, 30, bgColor);
-
-            // Border
-            let borderCol = toColour(notifRGB.r, notifRGB.g, notifRGB.b, alpha);
-            drawRect(15 - slideIn + 300, yPos, 3, 30, borderCol);
-
-            // Text
-            let textColor = toColour(255, 255, 255, alpha);
-            drawText(notif.text, 25 - slideIn + 300, yPos + 8, textColor, 13);
-
-            yPos += 40;
-        }
-    }
-
-    notifications = notifications.filter(function(n) {
-        return now - n.time < n.duration;
-    });
-});
 
 // ============================================================================
 // STATUS INDICATOR - Shows active toggles at bottom of screen
