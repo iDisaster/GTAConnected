@@ -11,13 +11,118 @@ let selectedIndex = 0;
 let menuStack = [];
 let scrollOffset = 0;
 
-// Animation state
+// Enhanced animation state
 let animTime = 0;
 let smoothScrollY = 0;
 let targetScrollY = 0;
 let titlePulse = 0;
 let menuOpenAnim = 0;
 let selectedPulse = 0;
+let glowIntensity = 0;
+let colorShift = 0;
+let particleTime = 0;
+let screenShake = 0;
+let flashAlpha = 0;
+let currentDescription = "";
+
+// Info bar configuration
+let infoBar = {
+    height: 50
+};
+
+// Item descriptions
+const itemDescriptions = {
+    // Player Options
+    "player_god": "⚡ Makes you invincible - you won't take any damage from bullets, explosions, or falls!",
+    "player_noragdoll": "🛡️ Prevents your character from falling down when hit - stay on your feet always!",
+    "player_superrun": "🏃 Gives you super-speed running abilities - run faster than normal!",
+    "player_neverwanted": "🚫 Removes wanted levels permanently - police won't chase you!",
+    "player_addhealth": "💊 Restores your health to maximum - heals all injuries!",
+    "player_addarmor": "🛡️ Adds full armor protection - bulletproof vest equipped!",
+    "player_wanted": "⭐ Set your wanted level from 0-6 stars - more stars = more police!",
+    "player_teleport": "📍 Instantly teleport to any location on the map!",
+    
+    // Vehicle Options
+    "spawn_vehicle": "🚗 Spawn any vehicle instantly - appears right next to you!",
+    "veh_repair": "🔧 Fully repairs your current vehicle to 100% condition!",
+    "veh_flip": "🔄 Flips your vehicle upright if it's upside down!",
+    "veh_delete": "💥 Removes all vehicles you spawned - clean up the streets!",
+    "veh_color": "🎨 Changes your vehicle's primary and secondary colors!",
+    "veh_god": "🛡️ Makes your current vehicle indestructible - no damage!",
+    "veh_neverdirty": "🧼 Keeps your vehicle permanently clean and shiny!",
+    "veh_nitro": "🚀 Gives your vehicle instant speed boost - hold accelerator!",
+    "veh_drift": "🏁 Enables drift mode - slide around corners like a pro!",
+    "veh_rainbow": "🌈 Makes your vehicle cycle through rainbow colors!",
+    "veh_neon": "💡 Adds neon underglow effects to your vehicle!",
+    "veh_rpg": "💥 Shoots RPG rockets from your vehicle - explosive ammo!",
+    "veh_ghost": "👻 Vehicle becomes ghost - pass through everything!",
+    "veh_flip": "🔄 Quick vehicle flip - gets you back on track instantly!",
+    "veh_repair": "🔧 Instant full repair - no more engine damage!",
+    "veh_siren": "🚔 Activates police sirens and emergency lights!",
+    
+    // Weapon Options
+    "weapon_all": "🔫 Gives you every weapon in the game - full arsenal!",
+    "weapon_remove": "🚫 Removes all weapons from your inventory - go peaceful!",
+    "weapon_rpg": "💥 Gives RPG with unlimited explosive rockets!",
+    "weapon_sniper": "🔭 Gives you a powerful sniper rifle for long-range kills!",
+    "weapon_shotgun": "🔫 Gives you a shotgun - devastating close range damage!",
+    "weapon_machine": "🔫 Gives you a machine gun - rapid fire automatic weapon!",
+    "weapon_pistol": "🔫 Gives you a pistol - reliable sidearm weapon!",
+    "weapon_explosive": "💣 Makes all your weapons explosive - bullets explode on impact!",
+    
+    // World Options
+    "world_time": "🕐 Changes time of day - set any hour from midnight to midnight!",
+    "world_weather": "🌤 Changes weather conditions - control rain, sun, storms!",
+    "world_clear_area": "🧹 Clears all objects, vehicles, and peds around you!",
+    "world_clear_vehicles": "🚗 Removes all vehicles in the area - clean streets!",
+    "world_clear_peds": "🚶 Removes all pedestrians in the area - empty streets!",
+    "world_clear_objects": "📦 Removes all objects in the area - clean environment!",
+    "world_traffic": "🚦 Enables/disables traffic - control city vehicle flow!",
+    "world_traffic_density": "📊 Controls how many vehicles spawn - from empty to heavy traffic!",
+    "world_timecycle": "🎨 Applies visual time effects - day/night/cinematic filters!",
+    "sky_color": "🌈 Changes sky color to different atmospheric effects!",
+    
+    // Fun Options
+    "fun_launch": "🚀 Launches you high into the sky - super jump effect!",
+    "fun_superjump": "🦘 Gives you massive jumping ability - reach rooftops easily!",
+    "fun_ragdoll": "🤸 Makes your character go limp and fall - ragdoll physics!",
+    "fun_explode": "💥 Creates explosion at your position - destructive fun!",
+    "fun_random_explosion": "💣 Spawns random explosions nearby - chaos mode!",
+    "fun_car_rain": "🚗 Makes vehicles rain from the sky - vehicle shower!",
+    "fun_ped_invasion": "👥 Spawns many pedestrians around you - crowd control!",
+    "fun_gang": "👨‍👩‍👧‍👦 Creates a gang of armed NPCs - backup crew!",
+    "fun_army": "⚔️ Deploys military forces around you - army protection!",
+    "fun_money_rain": "💰 Makes money pickups fall from the sky - get rich!",
+    "fun_weapon_shower": "🔫 Drops weapons from above - weapon rain effect!",
+    "fun_screen_shake": "📳 Shakes the screen violently - earthquake effect!",
+    "fun_flash": "💡 Creates bright camera flash - temporary blindness!",
+    "fun_drunk": "🍺 Makes screen wobble - drunk vision effect!",
+    "fun_matrix": "💻 Matrix digital rain effect - sci-fi visual!",
+    "fun_thermal": "🌡️ Thermal vision mode - see heat signatures!",
+    "fun_night": "🌙 Night vision mode - see clearly in darkness!",
+    
+    // Toggle States
+    "godMode": "🛡️ GOD MODE - Complete invincibility and unlimited health!",
+    "invincible": "⚡ INVINCIBLE - Cannot be killed or damaged!",
+    "superRun": "🏃 SUPER SPEED - Run 3x faster than normal!",
+    "noRagdoll": "🚶 NO RAGDOLL - Never fall down, always stay standing!",
+    "neverWanted": "🚫 NEVER WANTED - Police ignore you completely!",
+    "vehGodMode": "🛡️ VEHICLE GOD MODE - Your car can't be destroyed!",
+    "driveOnWater": "🌊 DRIVE ON WATER - Cars float and work on water!",
+    "rainbowCar": "🌈 RAINBOW CAR - Vehicle cycles through all colors!",
+    "driftMode": "🏁 DRIFT MODE - Easy drifting and skidding!",
+    "neonLights": "💡 NEON LIGHTS - Glowing underglow effects!",
+    "flyMode": "✈️ FLY MODE - Move freely through the air!",
+    "vehShootRPG": "💥 VEHICLE ROCKETS - Your car shoots explosive ammo!",
+    "rainbowSky": "🌈 RAINBOW SKY - Sky cycles through rainbow colors!",
+    "explosiveAmmo": "💣 EXPLOSIVE AMMO - All bullets create explosions!",
+    "moonGravity": "🌙 MOON GRAVITY - Low gravity physics, super jumps!",
+    "drunkMode": "🍺 DRUNK MODE - Screen wobbles and controls reversed!",
+    "matrixMode": "💻 MATRIX MODE - Digital rain effect overlay!",
+    "thermalVision": "🌡️ THERMAL VISION - See heat signatures in dark!",
+    "nightVision": "🌙 NIGHT VISION - Enhanced vision in darkness!"
+};
+let matrixEffect = 0;
 
 // Font for text rendering (will be loaded on resource start)
 let menuFont = null;
@@ -106,12 +211,20 @@ const menuData = {
         items: [
             { label: "Sports Cars", action: "submenu", target: "veh_sports" },
             { label: "Muscle Cars", action: "submenu", target: "veh_muscle" },
+            { label: "Sedans", action: "submenu", target: "veh_sedans" },
             { label: "SUVs & Trucks", action: "submenu", target: "veh_suv" },
+            { label: "Compacts", action: "submenu", target: "veh_compacts" },
             { label: "Motorcycles", action: "submenu", target: "veh_bikes" },
             { label: "Emergency", action: "submenu", target: "veh_emergency" },
             { label: "Aircraft", action: "submenu", target: "veh_aircraft" },
             { label: "Boats", action: "submenu", target: "veh_boats" },
-            { label: "Delete My Vehicles", action: "vehicle_delete" }
+            { label: "Commercial", action: "submenu", target: "veh_commercial" },
+            { label: "Special", action: "submenu", target: "veh_special" },
+            { label: "Taxis", action: "submenu", target: "veh_taxis" },
+            { label: "--- Vehicle Options ---", action: "none" },
+            { label: "Delete My Vehicles", action: "vehicle_delete" },
+            { label: "Repair Current", action: "veh_repair" },
+            { label: "Flip Current", action: "veh_flip" }
         ]
     },
 
@@ -124,17 +237,21 @@ const menuData = {
             { label: "Banshee", action: "spawn_vehicle", value: "banshee" },
             { label: "Sultan", action: "spawn_vehicle", value: "sultan" },
             { label: "Coquette", action: "spawn_vehicle", value: "coquette" },
-            { label: "Buffalo", action: "spawn_vehicle", value: "buffalo" }
+            { label: "Super GT", action: "spawn_vehicle", value: "super gt" },
+            { label: "Sultan RS", action: "spawn_vehicle", value: "sultan rs" }
         ]
     },
 
     veh_muscle: {
         title: "MUSCLE CARS",
         items: [
-            { label: "Sabre GT", action: "spawn_vehicle", value: "sabregt" },
-            { label: "Stallion", action: "spawn_vehicle", value: "stalion" },
-            { label: "Vigero", action: "spawn_vehicle", value: "vigero" },
+            { label: "Buccaneer", action: "spawn_vehicle", value: "buccaneer" },
             { label: "Dukes", action: "spawn_vehicle", value: "dukes" },
+            { label: "Faction", action: "spawn_vehicle", value: "faction" },
+            { label: "Ruiner", action: "spawn_vehicle", value: "ruiner" },
+            { label: "Sabre", action: "spawn_vehicle", value: "sabre" },
+            { label: "Sabre GT", action: "spawn_vehicle", value: "sabregt" },
+            { label: "Vigero", action: "spawn_vehicle", value: "vigero" },
             { label: "Phoenix", action: "spawn_vehicle", value: "phoenix" }
         ]
     },
@@ -181,9 +298,100 @@ const menuData = {
     veh_boats: {
         title: "BOATS",
         items: [
+            { label: "Dinghy", action: "spawn_vehicle", value: "dinghy" },
             { label: "Jetmax", action: "spawn_vehicle", value: "jetmax" },
+            { label: "Marquis", action: "spawn_vehicle", value: "marquis" },
             { label: "Predator", action: "spawn_vehicle", value: "predator" },
-            { label: "Tropic", action: "spawn_vehicle", value: "tropic" }
+            { label: "Reefer", action: "spawn_vehicle", value: "reefer" },
+            { label: "Squalo", action: "spawn_vehicle", value: "squalo" },
+            { label: "Tropic", action: "spawn_vehicle", value: "tropic" },
+            { label: "Tuga", action: "spawn_vehicle", value: "tuga" }
+        ]
+    },
+
+    veh_sedans: {
+        title: "SEDANS",
+        items: [
+            { label: "Admiral", action: "spawn_vehicle", value: "admiral" },
+            { label: "Cavalcade", action: "spawn_vehicle", value: "cavalcade" },
+            { label: "Cognoscenti", action: "spawn_vehicle", value: "cognoscenti" },
+            { label: "Emperor", action: "spawn_vehicle", value: "emperor" },
+            { label: "Esperanto", action: "spawn_vehicle", value: "esperanto" },
+            { label: "Feroci", action: "spawn_vehicle", value: "feroci" },
+            { label: "Feltzer", action: "spawn_vehicle", value: "feltzer" },
+            { label: "Intruder", action: "spawn_vehicle", value: "intruder" },
+            { label: "Landstalker", action: "spawn_vehicle", value: "landstalker" },
+            { label: "Lokus", action: "spawn_vehicle", value: "lokus" },
+            { label: "Marbella", action: "spawn_vehicle", value: "marbella" },
+            { label: "Merit", action: "spawn_vehicle", value: "merit" },
+            { label: "Oracle", action: "spawn_vehicle", value: "oracle" },
+            { label: "Pinnacle", action: "spawn_vehicle", value: "pinnacle" },
+            { label: "Premiere", action: "spawn_vehicle", value: "premiere" },
+            { label: "Presidente", action: "spawn_vehicle", value: "presidente" },
+            { label: "Primo", action: "spawn_vehicle", value: "primo" },
+            { label: "Rebla", action: "spawn_vehicle", value: "rebla" },
+            { label: "Romero", action: "spawn_vehicle", value: "romero" },
+            { label: "Schafter", action: "spawn_vehicle", value: "schafter" },
+            { label: "Sentinel", action: "spawn_vehicle", value: "sentinel" },
+            { label: "Solair", action: "spawn_vehicle", value: "solair" },
+            { label: "Stratum", action: "spawn_vehicle", value: "stratum" },
+            { label: "Stretch", action: "spawn_vehicle", value: "stretch" },
+            { label: "Vincent", action: "spawn_vehicle", value: "vincent" },
+            { label: "Virgo", action: "spawn_vehicle", value: "virgo" },
+            { label: "Willard", action: "spawn_vehicle", value: "willard" },
+            { label: "Washington", action: "spawn_vehicle", value: "washington" }
+        ]
+    },
+
+    veh_compacts: {
+        title: "COMPACTS",
+        items: [
+            { label: "Blista", action: "spawn_vehicle", value: "blista" },
+            { label: "Futo", action: "spawn_vehicle", value: "futo" },
+            { label: "Ingot", action: "spawn_vehicle", value: "ingot" },
+            { label: "PMP 600", action: "spawn_vehicle", value: "pmp 600" },
+            { label: "Sultan RS", action: "spawn_vehicle", value: "sultan rs" }
+        ]
+    },
+
+    veh_commercial: {
+        title: "COMMERCIAL",
+        items: [
+            { label: "Airtug", action: "spawn_vehicle", value: "airtug" },
+            { label: "Benson", action: "spawn_vehicle", value: "benson" },
+            { label: "Biff", action: "spawn_vehicle", value: "biff" },
+            { label: "Boxville", action: "spawn_vehicle", value: "boxville" },
+            { label: "Burrito", action: "spawn_vehicle", value: "burrito" },
+            { label: "Burrito 2", action: "spawn_vehicle", value: "burrito2" },
+            { label: "Cabby", action: "spawn_vehicle", value: "cabby" },
+            { label: "Flatbed", action: "spawn_vehicle", value: "flatbed" },
+            { label: "Forklift", action: "spawn_vehicle", value: "forklift" },
+            { label: "Mule", action: "spawn_vehicle", value: "mule" },
+            { label: "Packer", action: "spawn_vehicle", value: "packer" },
+            { label: "Pony", action: "spawn_vehicle", value: "pony" },
+            { label: "Speedo", action: "spawn_vehicle", value: "speedo" },
+            { label: "Stockade", action: "spawn_vehicle", value: "stockade" },
+            { label: "Trashmaster", action: "spawn_vehicle", value: "trashmaster" },
+            { label: "Yankee", action: "spawn_vehicle", value: "yankee" }
+        ]
+    },
+
+    veh_special: {
+        title: "SPECIAL VEHICLES",
+        items: [
+            { label: "Mr Tasty", action: "spawn_vehicle", value: "mr tasty" },
+            { label: "Cablecar", action: "spawn_vehicle", value: "cablecar" },
+            { label: "Subway", action: "spawn_vehicle", value: "subway" },
+            { label: "El Train", action: "spawn_vehicle", value: "el train" }
+        ]
+    },
+
+    veh_taxis: {
+        title: "TAXIS",
+        items: [
+            { label: "Taxi", action: "spawn_vehicle", value: "taxi" },
+            { label: "Taxi 2", action: "spawn_vehicle", value: "taxi2" },
+            { label: "Roman's Taxi", action: "spawn_vehicle", value: "roman's taxi" }
         ]
     },
 
@@ -225,10 +433,32 @@ const menuData = {
         items: [
             { label: "Black", action: "veh_color", value: [0, 0] },
             { label: "White", action: "veh_color", value: [1, 1] },
+            { label: "Dark Gray", action: "veh_color", value: [2, 2] },
+            { label: "Light Gray", action: "veh_color", value: [3, 3] },
             { label: "Red", action: "veh_color", value: [27, 27] },
-            { label: "Blue", action: "veh_color", value: [51, 51] },
+            { label: "Dark Red", action: "veh_color", value: [28, 28] },
+            { label: "Orange", action: "veh_color", value: [38, 38] },
             { label: "Yellow", action: "veh_color", value: [42, 42] },
+            { label: "Dark Yellow", action: "veh_color", value: [43, 43] },
             { label: "Green", action: "veh_color", value: [53, 53] },
+            { label: "Dark Green", action: "veh_color", value: [54, 54] },
+            { label: "Blue", action: "veh_color", value: [51, 51] },
+            { label: "Dark Blue", action: "veh_color", value: [52, 52] },
+            { label: "Light Blue", action: "veh_color", value: [55, 55] },
+            { label: "Purple", action: "veh_color", value: [39, 39] },
+            { label: "Pink", action: "veh_color", value: [40, 40] },
+            { label: "Brown", action: "veh_color", value: [41, 41] },
+            { label: "Beige", action: "veh_color", value: [56, 56] },
+            { label: "Bronze", action: "veh_color", value: [57, 57] },
+            { label: "Silver", action: "veh_color", value: [58, 58] },
+            { label: "Gold", action: "veh_color", value: [59, 59] },
+            { label: "Chrome", action: "veh_color", value: [60, 60] },
+            { label: "--- Two Tone ---", action: "none" },
+            { label: "Black/Red", action: "veh_color", value: [0, 27] },
+            { label: "Black/White", action: "veh_color", value: [0, 1] },
+            { label: "Red/Black", action: "veh_color", value: [27, 0] },
+            { label: "Blue/White", action: "veh_color", value: [51, 1] },
+            { label: "Green/White", action: "veh_color", value: [53, 1] },
             { label: "Random", action: "veh_color_random" }
         ]
     },
@@ -256,17 +486,36 @@ const menuData = {
     world: {
         title: "WORLD OPTIONS",
         items: [
+            { label: "--- Time Control ---", action: "none" },
+            { label: "Dawn (5:00)", action: "world_time", value: 5 },
             { label: "Morning (8:00)", action: "world_time", value: 8 },
             { label: "Noon (12:00)", action: "world_time", value: 12 },
+            { label: "Afternoon (15:00)", action: "world_time", value: 15 },
             { label: "Evening (18:00)", action: "world_time", value: 18 },
+            { label: "Dusk (20:00)", action: "world_time", value: 20 },
             { label: "Night (0:00)", action: "world_time", value: 0 },
-            { label: "Sunny", action: "world_weather", value: 1 },
+            { label: "Midnight (23:00)", action: "world_time", value: 23 },
+            { label: "--- Weather Control ---", action: "none" },
+            { label: "Sunny/Clear", action: "world_weather", value: 1 },
             { label: "Cloudy", action: "world_weather", value: 3 },
-            { label: "Rainy", action: "world_weather", value: 4 },
-            { label: "Thunder", action: "world_weather", value: 7 },
-            { label: "--- Sky Effects ---", action: "none" },
+            { label: "Overcast", action: "world_weather", value: 2 },
+            { label: "Light Rain", action: "world_weather", value: 4 },
+            { label: "Heavy Rain", action: "world_weather", value: 5 },
+            { label: "Thunderstorm", action: "world_weather", value: 7 },
+            { label: "Foggy", action: "world_weather", value: 6 },
+            { label: "Snowy", action: "world_weather", value: 8 },
+            { label: "--- Environment ---", action: "none" },
+            { label: "Clear Area", action: "world_clear_area" },
+            { label: "Clear Vehicles", action: "world_clear_vehicles" },
+            { label: "Clear Peds", action: "world_clear_peds" },
+            { label: "Clear Objects", action: "world_clear_objects" },
+            { label: "Traffic ON", action: "world_traffic", value: true },
+            { label: "Traffic OFF", action: "world_traffic", value: false },
+            { label: "Set Traffic Density", action: "submenu", target: "world_traffic_density" },
+            { label: "--- Visual Effects ---", action: "none" },
             { label: "Rainbow Sky", action: "toggle", target: "rainbowSky", state: false },
-            { label: "Sky Colors", action: "submenu", target: "sky_colors" }
+            { label: "Sky Colors", action: "submenu", target: "sky_colors" },
+            { label: "Timecycle Modifier", action: "submenu", target: "world_timecycles" }
         ]
     },
 
@@ -281,7 +530,37 @@ const menuData = {
             { label: "Orange Sky", action: "sky_color", value: 5 },
             { label: "Pink Sky", action: "sky_color", value: 6 },
             { label: "Yellow Sky", action: "sky_color", value: 7 },
-            { label: "Cyan Sky", action: "sky_color", value: 8 }
+            { label: "Cyan Sky", action: "sky_color", value: 8 },
+            { label: "Black Sky", action: "sky_color", value: 9 },
+            { label: "White Sky", action: "sky_color", value: 10 }
+        ]
+    },
+
+    world_traffic_density: {
+        title: "TRAFFIC DENSITY",
+        items: [
+            { label: "No Traffic", action: "world_traffic_density", value: 0.0 },
+            { label: "Very Light", action: "world_traffic_density", value: 0.2 },
+            { label: "Light", action: "world_traffic_density", value: 0.4 },
+            { label: "Normal", action: "world_traffic_density", value: 0.6 },
+            { label: "Heavy", action: "world_traffic_density", value: 0.8 },
+            { label: "Very Heavy", action: "world_traffic_density", value: 1.0 },
+            { label: "Maximum", action: "world_traffic_density", value: 1.5 }
+        ]
+    },
+
+    world_timecycles: {
+        title: "TIMECYCLE MODIFIERS",
+        items: [
+            { label: "Default", action: "world_timecycle", value: "default" },
+            { label: "Bright", action: "world_timecycle", value: "bright" },
+            { label: "Dark", action: "world_timecycle", value: "dark" },
+            { label: "Foggy", action: "world_timecycle", value: "foggy" },
+            { label: "Hazy", action: "world_timecycle", value: "hazy" },
+            { label: "Night", action: "world_timecycle", value: "night" },
+            { label: "Sunset", action: "world_timecycle", value: "sunset" },
+            { label: "Sunrise", action: "world_timecycle", value: "sunrise" },
+            { label: "Clear Modifier", action: "world_timecycle_clear" }
         ]
     },
 
@@ -304,15 +583,34 @@ const menuData = {
     fun: {
         title: "FUN OPTIONS",
         items: [
+            { label: "--- Physics Fun ---", action: "none" },
             { label: "Launch Me Up", action: "fun_launch" },
+            { label: "Super Jump", action: "fun_superjump" },
+            { label: "Moon Gravity", action: "toggle", target: "moonGravity", state: false },
+            { label: "Drunk Mode", action: "toggle", target: "drunkMode", state: false },
+            { label: "Ragdoll", action: "fun_ragdoll" },
+            { label: "--- Chaos Mode ---", action: "none" },
             { label: "Explode Me", action: "fun_explode" },
-            { label: "Spawn Ped", action: "fun_ped" },
-            { label: "Ragdoll", action: "fun_ragdoll" }
+            { label: "Random Explosion", action: "fun_random_explosion" },
+            { label: "Car Rain", action: "fun_car_rain" },
+            { label: "Ped Invasion", action: "fun_ped_invasion" },
+            { label: "Weapon Shower", action: "fun_weapon_shower" },
+            { label: "--- Spawning ---", action: "none" },
+            { label: "Spawn Random Ped", action: "fun_ped" },
+            { label: "Spawn Gang", action: "fun_gang" },
+            { label: "Spawn Army", action: "fun_army" },
+            { label: "Spawn Money Rain", action: "fun_money_rain" },
+            { label: "--- Visual Effects ---", action: "none" },
+            { label: "Screen Shake", action: "fun_screen_shake" },
+            { label: "Flash Screen", action: "fun_flash" },
+            { label: "Matrix Mode", action: "toggle", target: "matrixMode", state: false },
+            { label: "Thermal Vision", action: "toggle", target: "thermalVision", state: false },
+            { label: "Night Vision", action: "toggle", target: "nightVision", state: false }
         ]
     }
 };
 
-// Toggle states
+// Enhanced toggle states
 let toggleStates = {
     godMode: false,
     invincible: false,
@@ -327,7 +625,12 @@ let toggleStates = {
     flyMode: false,
     vehShootRPG: false,
     rainbowSky: false,
-    explosiveAmmo: false
+    explosiveAmmo: false,
+    moonGravity: false,
+    drunkMode: false,
+    matrixMode: false,
+    thermalVision: false,
+    nightVision: false
 };
 
 // Neon objects storage
@@ -387,7 +690,7 @@ addEventHandler("OnResourceReady", function(event, resource) {
 // ============================================================================
 
 addEventHandler("OnKeyUp", function(event, key, scanCode, mods) {
-    // F5 to toggle menu
+    // F5 to toggle menu (NOT F6)
     if (key === SDLK_F5) {
         menuOpen = !menuOpen;
         if (menuOpen) {
@@ -395,25 +698,20 @@ addEventHandler("OnKeyUp", function(event, key, scanCode, mods) {
             selectedIndex = 0;
             scrollOffset = 0;
             menuStack = [];
-            // Show cursor and DISABLE controls (second param = false disables controls)
-            gui.showCursor(true, false);
-            // Kill phone immediately
+            // Show cursor only - NO second param to avoid pause menu
+            gui.showCursor(true);
+            // Block phone when menu opens
             try {
                 natives.destroyMobilePhone();
-                natives.scriptIsUsingMobilePhone(true);
             } catch(e) {}
         } else {
-            // Hide cursor and ENABLE controls (second param = true enables controls)
-            gui.showCursor(false, true);
-            // Allow phone again
-            try {
-                natives.scriptIsUsingMobilePhone(false);
-            } catch(e) {}
+            // Hide cursor only
+            gui.showCursor(false);
         }
         return;
     }
 
-    // Kill phone on ANY key press while menu is open
+    // Block phone on ANY key press while menu is open
     if (menuOpen) {
         try {
             natives.destroyMobilePhone();
@@ -473,7 +771,7 @@ function goBack() {
     } else {
         menuOpen = false;
         // IMPORTANT: Enable controls when closing menu
-        gui.showCursor(false, true);
+        gui.showCursor(false);
     }
 }
 
@@ -516,10 +814,35 @@ function refreshPlayerList() {
 
 let selectedPlayer = null;
 
+// Update current description
+function updateDescription() {
+    let items = getCurrentMenuItems();
+    let item = items[selectedIndex];
+    
+    if (!item) {
+        currentDescription = "";
+        return;
+    }
+
+    // Get description based on action or target
+    if (item.action === "toggle") {
+        currentDescription = itemDescriptions[item.target] || "";
+    } else if (itemDescriptions[item.action]) {
+        currentDescription = itemDescriptions[item.action] || "";
+    } else if (itemDescriptions[item.value]) {
+        currentDescription = itemDescriptions[item.value] || "";
+    } else {
+        currentDescription = "";
+    }
+}
+
 function selectItem() {
     let items = getCurrentMenuItems();
     let item = items[selectedIndex];
     if (!item || item.action === "none") return;
+
+    // Update description before handling action
+    updateDescription();
 
     switch (item.action) {
         case "submenu":
@@ -702,8 +1025,225 @@ function selectItem() {
                 } catch(e) {}
                 showNotification("Default sky");
             } else {
-                showNotification("Sky: " + skyColors[item.value].name);
+                showNotification("Sky: " + item.value);
             }
+            break;
+
+        case "world_clear_area":
+            if (localPlayer) {
+                try {
+                    let pos = localPlayer.position;
+                    natives.clearArea(pos.x, pos.y, pos.z, 50.0, true);
+                    showNotification("Area cleared!");
+                } catch(e) {}
+            }
+            break;
+
+        case "world_clear_vehicles":
+            try {
+                let pos = localPlayer ? localPlayer.position : new Vec3(0, 0, 0);
+                natives.clearAreaOfCars(pos.x, pos.y, pos.z, 100.0);
+                showNotification("Vehicles cleared!");
+            } catch(e) {}
+            break;
+
+        case "world_clear_peds":
+            try {
+                let pos = localPlayer ? localPlayer.position : new Vec3(0, 0, 0);
+                natives.clearAreaOfChars(pos.x, pos.y, pos.z, 100.0);
+                showNotification("Peds cleared!");
+            } catch(e) {}
+            break;
+
+        case "world_clear_objects":
+            try {
+                let pos = localPlayer ? localPlayer.position : new Vec3(0, 0, 0);
+                natives.clearAreaOfObjects(pos.x, pos.y, pos.z, 100.0);
+                showNotification("Objects cleared!");
+            } catch(e) {}
+            break;
+
+        case "world_traffic":
+            try {
+                natives.setTrafficEnabled(item.value);
+                showNotification("Traffic: " + (item.value ? "ENABLED" : "DISABLED"));
+            } catch(e) {}
+            break;
+
+        case "world_traffic_density":
+            try {
+                natives.trafficDensity(item.value);
+                showNotification("Traffic density: " + item.value);
+            } catch(e) {}
+            break;
+
+        case "world_timecycle":
+            try {
+                if (item.value === "clear") {
+                    natives.clearTimecycleModifier();
+                    showNotification("Timecycle cleared!");
+                } else {
+                    natives.setTimecycleModifier(item.value);
+                    showNotification("Timecycle: " + item.value);
+                }
+            } catch(e) {}
+            break;
+
+        case "world_timecycle_clear":
+            try {
+                natives.clearTimecycleModifier();
+                showNotification("Timecycle cleared!");
+            } catch(e) {}
+            break;
+
+        case "fun_superjump":
+            if (localPlayer) {
+                try {
+                    let vel = localPlayer.velocity;
+                    vel.z = 15.0;
+                    localPlayer.velocity = vel;
+                    showNotification("SUPER JUMP!");
+                } catch(e) {}
+            }
+            break;
+
+        case "fun_random_explosion":
+            if (localPlayer) {
+                try {
+                    let pos = localPlayer.position;
+                    let offsetX = (Math.random() - 0.5) * 20;
+                    let offsetY = (Math.random() - 0.5) * 20;
+                    natives.addExplosion(pos.x + offsetX, pos.y + offsetY, pos.z, Math.floor(Math.random() * 26), 5.0, true, false, 1.0);
+                    showNotification("Random explosion!");
+                } catch(e) {}
+            }
+            break;
+
+        case "fun_car_rain":
+            try {
+                let pos = localPlayer ? localPlayer.position : new Vec3(0, 0, 0);
+                let carModels = ["infernus", "banshee", "sultan"];
+                for (let i = 0; i < 10; i++) {
+                    let randomModel = carModels[Math.floor(Math.random() * carModels.length)];
+                    let spawnX = pos.x + (Math.random() - 0.5) * 30;
+                    let spawnY = pos.y + (Math.random() - 0.5) * 30;
+                    let spawnZ = pos.z + 10 + Math.random() * 20;
+                    
+                    let modelHash = vehicleHashes[randomModel];
+                    if (modelHash) {
+                        natives.requestModel(modelHash);
+                        setTimeout(() => {
+                            if (natives.hasModelLoaded(modelHash)) {
+                                let car = natives.createCar(modelHash, new Vec3(spawnX, spawnY, spawnZ), true);
+                                if (car) {
+                                    let vel = new Vec3((Math.random() - 0.5) * 5, (Math.random() - 0.5) * 5, -10);
+                                    car.velocity = vel;
+                                }
+                                natives.markModelAsNoLongerNeeded(modelHash);
+                            }
+                        }, 500);
+                    }
+                }
+                showNotification("CAR RAIN!");
+                screenShake = 1.0;
+            } catch(e) {}
+            break;
+
+        case "fun_ped_invasion":
+            try {
+                let pos = localPlayer ? localPlayer.position : new Vec3(0, 0, 0);
+                for (let i = 0; i < 20; i++) {
+                    let spawnX = pos.x + (Math.random() - 0.5) * 50;
+                    let spawnY = pos.y + (Math.random() - 0.5) * 50;
+                    let spawnZ = pos.z;
+                    
+                    let ped = natives.createChar(4, -1, new Vec3(spawnX, spawnY, spawnZ), true);
+                    if (ped) {
+                        natives.warpCharIntoCar(ped, localPlayer.vehicle);
+                    }
+                }
+                showNotification("PED INVASION!");
+                screenShake = 0.5;
+            } catch(e) {}
+            break;
+
+        case "fun_gang":
+            try {
+                let pos = localPlayer ? localPlayer.position : new Vec3(0, 0, 0);
+                for (let i = 0; i < 8; i++) {
+                    let spawnX = pos.x + (Math.random() - 0.5) * 20;
+                    let spawnY = pos.y + (Math.random() - 0.5) * 20;
+                    let spawnZ = pos.z;
+                    let ped = natives.createChar(4, -1, new Vec3(spawnX, spawnY, spawnZ), true);
+                    if (ped) {
+                        natives.giveWeaponToChar(ped, 14, 500, false); // AK47
+                        natives.giveWeaponToChar(ped, 18, 10, false); // RPG
+                    }
+                }
+                showNotification("GANG SPAWNED!");
+                screenShake = 0.3;
+            } catch(e) {}
+            break;
+
+        case "fun_army":
+            try {
+                let pos = localPlayer ? localPlayer.position : new Vec3(0, 0, 0);
+                let armyModels = ["fbi", "police", "nstockade"];
+                for (let i = 0; i < 15; i++) {
+                    let spawnX = pos.x + (Math.random() - 0.5) * 40;
+                    let spawnY = pos.y + (Math.random() - 0.5) * 40;
+                    let spawnZ = pos.z;
+                    
+                    let ped = natives.createChar(4, -1, new Vec3(spawnX, spawnY, spawnZ), true);
+                    if (ped) {
+                        natives.giveWeaponToChar(ped, 14, 1000, false); // AK47
+                        natives.giveWeaponToChar(ped, 16, 100, false); // Sniper
+                        natives.giveWeaponToChar(ped, 18, 50, false); // RPG
+                    }
+                }
+                showNotification("ARMY DEPLOYED!");
+                screenShake = 0.8;
+            } catch(e) {}
+            break;
+
+        case "fun_money_rain":
+            try {
+                let pos = localPlayer ? localPlayer.position : new Vec3(0, 0, 0);
+                for (let i = 0; i < 50; i++) {
+                    let spawnX = pos.x + (Math.random() - 0.5) * 30;
+                    let spawnY = pos.y + (Math.random() - 0.5) * 30;
+                    let spawnZ = pos.z + 10 + Math.random() * 30;
+                    natives.createMoneyPickup(new Vec3(spawnX, spawnY, spawnZ), 100, true);
+                }
+                showNotification("MONEY RAIN! $$$");
+                flashAlpha = 0.5;
+            } catch(e) {}
+            break;
+
+        case "fun_weapon_shower":
+            try {
+                let pos = localPlayer ? localPlayer.position : new Vec3(0, 0, 0);
+                let weapons = [5, 6, 9, 12, 14, 16, 18]; // Pistol, Deagle, Shotgun, SMG, AK, Sniper, RPG
+                for (let i = 0; i < 30; i++) {
+                    let spawnX = pos.x + (Math.random() - 0.5) * 25;
+                    let spawnY = pos.y + (Math.random() - 0.5) * 25;
+                    let spawnZ = pos.z + 10 + Math.random() * 25;
+                    let weaponId = weapons[Math.floor(Math.random() * weapons.length)];
+                    natives.createPickup(weaponId, 2, new Vec3(spawnX, spawnY, spawnZ), true);
+                }
+                showNotification("WEAPON SHOWER!");
+                screenShake = 0.4;
+            } catch(e) {}
+            break;
+
+        case "fun_screen_shake":
+            screenShake = 1.5;
+            showNotification("SCREEN SHAKE!");
+            break;
+
+        case "fun_flash":
+            flashAlpha = 1.0;
+            showNotification("FLASH!");
             break;
     }
 }
@@ -859,43 +1399,164 @@ addNetworkHandler("ModMenu:ExecuteTeleportToPlayer", function(targetId) {
     }
 });
 
-// Vehicle model hashes for GTA IV
+// Vehicle model names (cleaned up for proper spawning)
+const vehicleModels = [
+    // Sports Cars
+    "infernus", "turismo", "comet", "banshee", "sultan", "coquette",
+    // Muscle Cars  
+    "buccaneer", "dukes", "faction", "ruiner", "sabre", "sabregt", "vigero",
+    // Sedans
+    "admiral", "cavalcade", "cognoscenti", "emperor", "esperanto", "feroci",
+    "feltzer", "intruder", "landstalker", "lokus", "marbella", "merit",
+    "oracle", "pinnacle", "premiere", "presidente", "primo", "rebla",
+    "romero", "schafter", "sentinel", "solair", "stratum", "stretch",
+    "vincent", "virgo", "willard", "washington",
+    // SUVs & Trucks
+    "bobcat", "boxville", "biff", "burrito", "chavos", "dilettante",
+    "flatbed", "forklift", "habanero", "huntley", "moonbeam", "mule",
+    "packer", "patriot", "perennial", "pony", "rancher", "speedo", 
+    "stockade", "trashmaster", "yankee",
+    // Compacts
+    "blista", "futo", "ingot", "pmp600", "sultanrs",
+    // Motorcycles
+    "faggio", "hellfury", "nrg900", "pcj600", "sanchez", "zombie",
+    // Emergency
+    "ambulance", "firetruk", "police", "police2", "police3", "police4",
+    "nstockade", "pstockade", "fbi", "noose",
+    // Helicopters
+    "annihilator", "maverick", "polmav", "tourmav",
+    // Boats
+    "dinghy", "jetmax", "marquis", "predator", "reefer", "squalo", "tropic", "tuga",
+    // Commercial
+    "airtug", "benson", "biff", "boxville", "burrito", "burrito2", "cabby",
+    "flatbed", "forklift", "mule", "packer", "pony", "speedo", "stockade",
+    "trashmaster", "yankee",
+    // Special
+    "mrtasty", "cablecar", "subway", "eltrain",
+    // Taxis
+    "taxi", "taxi2", "romantaxi"
+];
+
+// Vehicle model hashes for GTA IV (matching clean names)
 const vehicleHashes = {
+    // Sports Cars
     "infernus": 0x18F25AC7,
     "turismo": 0x185484E1,
     "comet": 0x067BC037,
     "banshee": 0xC1E908D2,
     "sultan": 0x39DA2754,
-    "coquette": 0x067BC037,
-    "feltzer": 0x8911B9F5,
-    "buffalo": 0xEDD516C6,
-    "sabregt": 0x9B909C94,
-    "stalion": 0x72A4C31E,
-    "vigero": 0xCEC6B9B7,
+    "coquette": 0x108773431,
+    // Muscle Cars
+    "buccaneer": 0x682211828,
     "dukes": 0x2B26F456,
-    "phoenix": 0x831A21D5,
-    "patriot": 0xCFCFEB3B,
-    "cavalcade": 0x779F23AA,
-    "huntley": 0x1D06D681,
-    "landstalker": 0x4BA4E8DC,
+    "faction": 0x2119578145,
+    "ruiner": 0x227741703,
+    "sabre": 0x449022887,
+    "sabregt": 0x9B909C94,
+    "vigero": 0xCEC6B9B7,
+    // Sedans
+    "admiral": 0x1264341792,
+    "cavalcade": 0x2006918058,
+    "cognoscenti": 0x2030171296,
+    "emperor": 0x685276541,
+    "esperanto": 0x276900515,
+    "feroci": 0x974744810,
+    "feltzer": 0x8911B9F5,
+    "intruder": 0x886934177,
+    "landstalker": 0x1269098716,
+    "lokus": 0x37030056,
+    "marbella": 0x1304597482,
+    "merit": 0x1260881538,
+    "oracle": 0x1348744438,
+    "pinnacle": 0x131140572,
+    "premiere": 0x1883869285,
+    "presidente": 0x1962071130,
+    "primo": 0x1150599089,
+    "rebla": 0x83136452,
+    "romero": 0x627094268,
+    "schafter": 0x322343873,
+    "sentinel": 0x1349725314,
+    "solair": 0x1344573448,
+    "stratum": 0x1723137093,
+    "stretch": 0x1961627517,
+    "vincent": 0x583281407,
+    "virgo": 0x498054846,
+    "willard": 0x1937616578,
+    "washington": 0x1777363799,
+    // SUVs & Trucks
+    "bobcat": 0x1075851868,
+    "boxville": 0x1987130134,
+    "biff": 0x850991848,
+    "burrito": 0x1346687836,
+    "chavos": 0x67282078,
+    "dilettante": 0x1130810103,
+    "flatbed": 0x1353720154,
+    "forklift": 0x1491375716,
+    "habanero": 0x884422927,
+    "huntley": 0x486987393,
+    "moonbeam": 0x525509695,
+    "mule": 0x904750859,
+    "packer": 0x569305213,
+    "patriot": 0x808457413,
+    "perennial": 0x2077743597,
+    "pony": 0x119658072,
+    "rancher": 0x1390084576,
+    "speedo": 0x810318068,
+    "stockade": 0x1747439474,
+    "trashmaster": 0x1917016601,
+    "yankee": 0x1099960214,
+    // Compacts
+    "blista": 0x344943009,
+    "futo": 0x2016857647,
+    "ingot": 0x1289722222,
+    "pmp600": 0x1376298265,
+    "sultanrs": 0x295689028,
+    // Motorcycles
+    "faggio": 0x1842748181,
+    "hellfury": 0x584879743,
     "nrg900": 0x6F039A67,
-    "pcj600": 0xC9CEAF06,
-    "sanchez": 0x2EF89E46,
-    "faggio": 0x9229E4EB,
-    "police": 0x79FBB0C5,
-    "police2": 0x9F05F101,
+    "pcj600": 0x909201658,
+    "sanchez": 0x788045382,
+    "zombie": 0x570033273,
+    // Emergency
+    "ambulance": 0x1171614426,
+    "firetruk": 0x1938952078,
+    "police": 0x2046537925,
+    "police2": 0x1627000575,
+    "police3": 0x350085182,
+    "police4": 0x1127131465,
+    "nstockade": 0x1900572838,
+    "pstockade": 0x1911513875,
     "fbi": 0x432EA949,
-    "ambulance": 0x45D56ADA,
-    "firetruk": 0x73920F8E,
-    "annihilator": 0x31F0B376,
-    "maverick": 0x9D0450CA,
-    "polmav": 0x1517D4D9,
-    "jetmax": 0x33581161,
-    "predator": 0xE2E7D4AB,
-    "tropic": 0x1149422F,
-    "taxi": 0xC703DB5F,
-    "stretch": 0x8B13F083,
-    "bus": 0xD577C962
+    "noose": 0x148777611,
+    // Helicopters
+    "annihilator": 0x837858166,
+    "maverick": 0x1660661558,
+    "polmav": 0x353883353,
+    "tourmav": 0x2027357303,
+    // Boats
+    "dinghy": 0x1033245328,
+    "jetmax": 0x861409633,
+    "marquis": 0x1043459709,
+    "predator": 0x488123221,
+    "reefer": 0x1759673526,
+    "squalo": 0x400514754,
+    "tropic": 0x290013743,
+    "tuga": 0x1064455782,
+    // Commercial
+    "airtug": 0x1560980623,
+    "benson": 0x2053223216,
+    "burrito2": 0x907477130,
+    "cabby": 0x1884962369,
+    // Special
+    "mrtasty": 0x583100975,
+    "cablecar": 0x960289747,
+    "subway": 0x800869680,
+    "eltrain": 0x1953988645,
+    // Taxis
+    "taxi": 0x956048545,
+    "taxi2": 0x1208856469,
+    "romantaxi": 0x1932515764
 };
 
 // Execute vehicle spawn using natives
@@ -906,9 +1567,11 @@ addNetworkHandler("ModMenu:ExecuteSpawnVehicle", function(vehicleName) {
             return;
         }
 
-        let modelHash = vehicleHashes[vehicleName];
+        // Clean up vehicle name and map to correct hash
+        let cleanName = vehicleName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+        let modelHash = vehicleHashes[cleanName];
         if (!modelHash) {
-            showNotification("Unknown vehicle");
+            showNotification("Unknown vehicle: " + cleanName);
             return;
         }
 
@@ -935,14 +1598,14 @@ addNetworkHandler("ModMenu:ExecuteSpawnVehicle", function(vehicleName) {
                     natives.warpCharIntoCar(localPlayer, vehicle);
                     showNotification("Spawned: " + vehicleName);
                 } else {
-                    showNotification("Failed to create");
+                    showNotification("Failed to create vehicle");
                 }
 
                 // Mark model as no longer needed
                 natives.markModelAsNoLongerNeeded(modelHash);
             } else if (attempts > 50) {
                 clearInterval(spawnInterval);
-                showNotification("Model load timeout");
+                showNotification("Model load timeout for: " + vehicleName);
             }
         }, 100);
     } catch(e) {
@@ -1074,27 +1737,85 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
 // RENDERING - REVOLUTION MOD MENU (Red & Black Eye-Melting Theme)
 // ============================================================================
 
-// Animation update
+// Smooth animation update with original effects
 addEventHandler("OnProcess", function(event) {
-    // Update animation time
-    animTime += 0.05;
-    titlePulse += 0.1;
-    selectedPulse += 0.15;
+    // Update animation time - SMOOTHED
+    animTime += 0.02;
+    titlePulse += 0.04;
+    selectedPulse += 0.06;
+    colorShift += 0.01;
+    particleTime += 0.05;
+    
+    // Enhanced visual effects
+    glowIntensity = Math.sin(animTime * 3) * 0.5 + 0.5;
+    
+    // Screen shake decay
+    if (screenShake > 0) {
+        screenShake -= 0.1;
+        if (screenShake < 0) screenShake = 0;
+    }
+    
+    // Flash effect decay
+    if (flashAlpha > 0) {
+        flashAlpha -= 0.05;
+        if (flashAlpha < 0) flashAlpha = 0;
+    }
+    
+    // Matrix effect
+    if (toggleStates.matrixMode) {
+        matrixEffect += 0.1;
+    } else {
+        matrixEffect *= 0.9;
+    }
 
-    // Smooth scroll interpolation
-    smoothScrollY += (targetScrollY - smoothScrollY) * 0.25;
+    // Apply continuous effects when menu is closed
+    if (!menuOpen && localPlayer) {
+        try {
+            // Moon gravity
+            if (toggleStates.moonGravity) {
+                localPlayer.gravity = 0.1;
+            } else if (localPlayer.gravity !== 9.8) {
+                localPlayer.gravity = 9.8;
+            }
 
-    // Menu open animation
+            // Drunk mode
+            if (toggleStates.drunkMode) {
+                natives.setGameSpeed(0.8 + Math.sin(animTime * 2) * 0.2);
+                natives.forceCameraShake(0.1, 0.1, 1.0);
+            } else {
+                natives.setGameSpeed(1.0);
+            }
+
+            // Visual effects
+            if (toggleStates.thermalVision) {
+                natives.setDrawInfrared(true);
+                natives.setDrawNightvision(false);
+            } else if (toggleStates.nightVision) {
+                natives.setDrawNightvision(true);
+                natives.setDrawInfrared(false);
+            } else {
+                natives.setDrawInfrared(false);
+                natives.setDrawNightvision(false);
+            }
+        } catch(e) {}
+    }
+
+    // Smooth scroll interpolation - very smooth
+    smoothScrollY += (targetScrollY - smoothScrollY) * 0.15;
+
+    // Menu open animation - smooth transition
     if (menuOpen && menuOpenAnim < 1) {
-        menuOpenAnim += 0.12;
-        if (menuOpenAnim > 1) menuOpenAnim = 1;
+        menuOpenAnim += 0.08;
+        if (menuOpenAnim > 1) {
+            menuOpenAnim = 1;
+        }
     } else if (!menuOpen && menuOpenAnim > 0) {
-        menuOpenAnim -= 0.18;
+        menuOpenAnim -= 0.12;
         if (menuOpenAnim < 0) menuOpenAnim = 0;
     }
 });
 
-// Main menu rendering
+// Enhanced eye-melting menu rendering (optimized)
 addEventHandler("OnDrawnHUD", function(event) {
     if (menuOpenAnim <= 0) return;
 
@@ -1107,17 +1828,17 @@ addEventHandler("OnDrawnHUD", function(event) {
 
     let animAlpha = Math.floor(255 * menuOpenAnim);
 
-    // Calculate animated position (slide in from right)
-    let slideOffset = (1 - menuOpenAnim) * 150;
+    // Calculate animated position (smooth slide in from right)
+    let slideOffset = (1 - menuOpenAnim) * 120;
     let baseX = menu.x + slideOffset;
     let baseY = menu.y;
 
-    // ===== PULSING RED OUTER GLOW =====
-    let glowPulse = Math.sin(animTime * 3) * 0.4 + 0.6;
-    let glowSize = 12 + Math.sin(animTime * 2) * 5;
+    // ===== SMOOTH PULSING RED OUTER GLOW =====
+    let glowPulse = Math.sin(animTime * 2) * 0.3 + 0.7;
+    let glowSize = 10 + Math.sin(animTime * 1.5) * 4;
 
-    // Red glow with pulse
-    let redIntensity = Math.floor(200 + Math.sin(animTime * 4) * 55);
+    // Red glow with smooth pulse
+    let redIntensity = Math.floor(200 + Math.sin(animTime * 2) * 45);
     for (let g = 4; g >= 1; g--) {
         let gAlpha = Math.floor((40 / g) * glowPulse * menuOpenAnim);
         let gCol = toColour(redIntensity, 0, 0, gAlpha);
@@ -1129,19 +1850,19 @@ addEventHandler("OnDrawnHUD", function(event) {
     let bgColor = toColour(8, 8, 12, Math.floor(245 * menuOpenAnim));
     drawRect(baseX, baseY, menu.width, totalHeight + 10, bgColor);
 
-    // ===== ANIMATED RED BORDER =====
-    let borderPulse = Math.sin(animTime * 5) * 50 + 200;
+    // ===== SMOOTH ANIMATED RED BORDER =====
+    let borderPulse = Math.sin(animTime * 3) * 40 + 200;
     let borderColor = toColour(Math.floor(borderPulse), 20, 30, Math.floor(220 * menuOpenAnim));
 
-    // Animated border thickness
-    let borderW = 3 + Math.sin(animTime * 6) * 1;
+    // Smooth border thickness
+    let borderW = 3 + Math.sin(animTime * 3) * 0.8;
     drawRect(baseX, baseY, menu.width, borderW, borderColor); // Top
     drawRect(baseX, baseY + totalHeight + 10 - borderW, menu.width, borderW, borderColor); // Bottom
     drawRect(baseX, baseY, borderW, totalHeight + 10, borderColor); // Left
     drawRect(baseX + menu.width - borderW, baseY, borderW, totalHeight + 10, borderColor); // Right
 
-    // Corner accents - brighter red
-    let cornerSize = 15 + Math.sin(animTime * 4) * 5;
+    // Corner accents - smooth brighter red
+    let cornerSize = 15 + Math.sin(animTime * 2) * 4;
     let cornerColor = toColour(255, 50, 50, Math.floor(200 * menuOpenAnim));
     drawRect(baseX, baseY, cornerSize, 3, cornerColor);
     drawRect(baseX, baseY, 3, cornerSize, cornerColor);
@@ -1152,14 +1873,14 @@ addEventHandler("OnDrawnHUD", function(event) {
     drawRect(baseX + menu.width - cornerSize, baseY + totalHeight + 7, cornerSize, 3, cornerColor);
     drawRect(baseX + menu.width - 3, baseY + totalHeight + 10 - cornerSize, 3, cornerSize, cornerColor);
 
-    // ===== HEADER - Black to Red Gradient =====
-    let headerRed = Math.floor(180 + Math.sin(animTime * 3) * 40);
+    // ===== HEADER - Smooth Black to Red Gradient =====
+    let headerRed = Math.floor(180 + Math.sin(animTime * 2) * 30);
     let headerLeft = toColour(headerRed, 15, 25, animAlpha);
     let headerRight = toColour(60, 5, 10, animAlpha);
     drawGradientRect(baseX + 4, baseY + 4, menu.width - 8, menu.headerHeight - 4, headerLeft, headerRight);
 
-    // Header inner glow line
-    let lineGlow = Math.sin(animTime * 6) * 0.3 + 0.7;
+    // Header smooth glow line
+    let lineGlow = Math.sin(animTime * 4) * 0.3 + 0.7;
     let headerLineColor = toColour(255, 80, 80, Math.floor(150 * lineGlow * menuOpenAnim));
     drawRect(baseX + 4, baseY + menu.headerHeight - 2, menu.width - 8, 2, headerLineColor);
 
@@ -1187,12 +1908,11 @@ addEventHandler("OnDrawnHUD", function(event) {
     let betaColor = toColour(180, 180, 180, Math.floor(180 * betaFlicker * menuOpenAnim));
     drawText("ModMenu (Beta)", baseX + 12, titleY + 30, betaColor, 11);
 
-    // Animated line under title
-    let lineWidth = 100 + Math.sin(animTime * 5) * 40;
-    let lineX = baseX + (menu.width - lineWidth) / 2;
-    let linePulse = Math.sin(animTime * 8) * 55 + 200;
+    // Smooth animated line under title
+    let lineWidth = 100 + Math.sin(animTime * 3) * 30;
+    let linePulse = Math.sin(animTime * 4) * 40 + 200;
     let underlineColor = toColour(Math.floor(linePulse), 30, 40, Math.floor(220 * menuOpenAnim));
-    drawRect(lineX, baseY + menu.headerHeight - 6, lineWidth, 2, underlineColor);
+    drawRect(baseX + (menu.width - lineWidth) / 2, baseY + menu.headerHeight - 6, lineWidth, 2, underlineColor);
 
     // ===== MENU ITEMS =====
     let yPos = baseY + menu.headerHeight;
@@ -1203,12 +1923,12 @@ addEventHandler("OnDrawnHUD", function(event) {
         let isSelected = (i === selectedIndex);
         let itemY = yPos + (i - scrollOffset) * menu.itemHeight;
 
-        // Selection animation
+        // Selection animation - smoother
         let selectOffset = 0;
         let selectGlow = 0;
         if (isSelected) {
-            selectOffset = Math.sin(selectedPulse) * 4;
-            selectGlow = Math.sin(selectedPulse * 1.5) * 0.4 + 0.6;
+            selectOffset = Math.sin(selectedPulse) * 2;
+            selectGlow = Math.sin(selectedPulse * 1.5) * 0.3 + 0.7;
         }
 
         if (isSelected) {
@@ -1223,8 +1943,8 @@ addEventHandler("OnDrawnHUD", function(event) {
             // Main selection background
             drawRect(baseX + 6 + selectOffset, itemY, menu.width - 12, menu.itemHeight - 2, selColor);
 
-            // Left indicator bar - bright red pulsing
-            let barPulse = Math.sin(selectedPulse * 2) * 55 + 200;
+            // Left indicator bar - smooth bright red pulsing
+            let barPulse = Math.sin(selectedPulse * 1.5) * 40 + 200;
             let barColor = toColour(255, Math.floor(barPulse - 150), Math.floor(barPulse - 150), animAlpha);
             drawRect(baseX + 6, itemY, 5, menu.itemHeight - 2, barColor);
 
@@ -1269,8 +1989,8 @@ addEventHandler("OnDrawnHUD", function(event) {
             let stateX = baseX + menu.width - 60;
 
             if (isOn) {
-                // GREEN ON - Pulsing
-                let greenPulse = Math.sin(animTime * 6) * 40 + 215;
+                // GREEN ON - Smooth Pulsing
+                let greenPulse = Math.sin(animTime * 3) * 40 + 215;
                 let onBgColor = toColour(30, Math.floor(greenPulse * 0.4), 30, animAlpha);
                 let onTextColor = toColour(80, Math.floor(greenPulse), 80, animAlpha);
                 drawRect(stateX - 8, itemY + 8, 52, 24, onBgColor);
@@ -1292,9 +2012,9 @@ addEventHandler("OnDrawnHUD", function(event) {
             }
         }
 
-        // Submenu arrow
+        // Submenu arrow - smoother
         if (item.action === "submenu") {
-            let arrowX = baseX + menu.width - 32 + (isSelected ? Math.sin(animTime * 10) * 5 : 0);
+            let arrowX = baseX + menu.width - 32 + (isSelected ? Math.sin(animTime * 5) * 3 : 0);
             let arrowBright = isSelected ? 255 : 150;
             let arrowColor = toColour(arrowBright, arrowBright * 0.6, arrowBright * 0.6, animAlpha);
             drawText(">>", arrowX, itemY + 12, arrowColor, 14);
@@ -1325,9 +2045,51 @@ addEventHandler("OnDrawnHUD", function(event) {
         let scrollBarH = Math.max(30, scrollTrackH * (visibleCount / items.length));
         let scrollBarY = scrollTrackY + scrollPct * (scrollTrackH - scrollBarH);
 
-        let scrollPulse = Math.sin(animTime * 4) * 30 + 180;
+        let scrollPulse = Math.sin(animTime * 2) * 30 + 180;
         let scrollBarColor = toColour(Math.floor(scrollPulse), 50, 60, Math.floor(220 * menuOpenAnim));
         drawRect(baseX + menu.width - 12, scrollBarY, 6, scrollBarH, scrollBarColor);
+    }
+
+    // ===== INFO BAR =====
+    if (currentDescription && currentDescription.length > 0) {
+        let infoY = baseY + totalHeight + 15;
+        let infoBarHeight = infoBar.height;
+        
+        // Background with glow effect
+        let infoGlowPulse = Math.sin(animTime * 2) * 0.3 + 0.7;
+        let infoBgColor = toColour(20, 10, 15, Math.floor(220 * menuOpenAnim));
+        drawRect(baseX, infoY, menu.width, infoBarHeight, infoBgColor);
+        
+        // Animated red border (matching menu style)
+        let infoBorderPulse = Math.sin(animTime * 3) * 40 + 200;
+        let infoBorderColor = toColour(Math.floor(infoBorderPulse), 30, 40, Math.floor(200 * menuOpenAnim));
+        drawRect(baseX, infoY, menu.width, 3, infoBorderColor); // Top
+        drawRect(baseX, infoY + infoBarHeight - 3, menu.width, 3, infoBorderColor); // Bottom
+        drawRect(baseX, infoY, 3, infoBarHeight, infoBorderColor); // Left
+        drawRect(baseX + menu.width - 3, infoY, 3, infoBarHeight, infoBorderColor); // Right
+        
+        // Corner accents (matching menu style)
+        let cornerSize = 12 + Math.sin(animTime * 2) * 3;
+        let cornerColor = toColour(255, 60, 60, Math.floor(180 * menuOpenAnim));
+        drawRect(baseX, infoY, cornerSize, 3, cornerColor);
+        drawRect(baseX, infoY, 3, cornerSize, cornerColor);
+        drawRect(baseX + menu.width - cornerSize, infoY, cornerSize, 3, cornerColor);
+        drawRect(baseX + menu.width - cornerSize, infoY, 3, cornerSize, cornerColor);
+        drawRect(baseX, infoY + infoBarHeight - cornerSize, infoY, 3, cornerSize, cornerColor);
+        drawRect(baseX + menu.width - cornerSize, infoY + infoBarHeight - cornerSize, infoY, 3, cornerSize, cornerColor);
+        
+        // Description text with glow effect
+        let textGlow = Math.sin(animTime * 4) * 0.4 + 0.6;
+        let glowColor = toColour(255, 80, 80, Math.floor(30 * textGlow * menuOpenAnim));
+        drawText(currentDescription, baseX + 14, infoY + 18, glowColor, 14);
+        
+        // Main description text
+        let textColor = toColour(255, 255, 255, Math.floor(255 * menuOpenAnim));
+        drawText(currentDescription, baseX + 12, infoY + 18, textColor, 12);
+        
+        // "INFO" label
+        let labelColor = toColour(200, 100, 100, Math.floor(200 * menuOpenAnim));
+        drawText("ℹ INFO", baseX + 12, infoY + 2, labelColor, 10);
     }
 });
 
