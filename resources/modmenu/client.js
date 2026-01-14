@@ -909,8 +909,11 @@ function selectItem() {
         case "toggle":
             toggleStates[item.target] = !toggleStates[item.target];
             item.state = toggleStates[item.target];
+            // Set status indicator variables for bottom display
+            lastToggledItem = item.target;
+            lastToggleTime = Date.now();
+            lastToggleState = toggleStates[item.target];
             triggerNetworkEvent("ModMenu:Toggle", item.target, toggleStates[item.target]);
-            showNotification(item.label + ": " + (toggleStates[item.target] ? "ON" : "OFF"));
             break;
 
         case "spawn_vehicle":
@@ -2296,71 +2299,23 @@ function drawText(text, x, y, colour, size) {
 }
 
 // ============================================================================
-// NOTIFICATIONS - Animated
+// NOTIFICATIONS (stub - notifications removed, function kept for compatibility)
 // ============================================================================
-
-let notifications = [];
 
 function showNotification(text) {
-    notifications.push({
-        text: text,
-        time: Date.now(),
-        duration: 1500
-    });
+    // Notifications removed - toggle states now shown in menu labels
 }
 
-addEventHandler("OnDrawnHUD", function(event) {
-    let now = Date.now();
-    let yPos = 180;
-
-    for (let i = 0; i < notifications.length; i++) {
-        let notif = notifications[i];
-        let elapsed = now - notif.time;
-
-        if (elapsed < notif.duration) {
-            // Animated notification
-            let progress = elapsed / notif.duration;
-            let slideIn = Math.min(1, elapsed / 200) * 300;
-            let fadeOut = elapsed > notif.duration - 300 ? (notif.duration - elapsed) / 300 : 1;
-            let alpha = Math.floor(220 * fadeOut);
-
-            // Rainbow border
-            let notifHue = (animTime * 80 + i * 60) % 360;
-            let notifRGB = hsvToRgb(notifHue, 0.8, 0.8);
-
-            // Glow
-            let glowCol = toColour(notifRGB.r, notifRGB.g, notifRGB.b, Math.floor(40 * fadeOut));
-            drawRect(10 - slideIn + 300, yPos - 3, 290, 36, glowCol);
-
-            // Background
-            let bgColor = toColour(20, 20, 30, alpha);
-            drawRect(15 - slideIn + 300, yPos, 280, 30, bgColor);
-
-            // Border
-            let borderCol = toColour(notifRGB.r, notifRGB.g, notifRGB.b, alpha);
-            drawRect(15 - slideIn + 300, yPos, 3, 30, borderCol);
-
-            // Text
-            let textColor = toColour(255, 255, 255, alpha);
-            drawText(notif.text, 25 - slideIn + 300, yPos + 8, textColor, 13);
-
-            yPos += 40;
-        }
-    }
-
-    notifications = notifications.filter(function(n) {
-        return now - n.time < n.duration;
-    });
-});
-
 // ============================================================================
-// STATUS INDICATOR - Shows active toggles at bottom of screen
+// STATUS INDICATOR - Shows active toggles at bottom of screen (BetterIV style)
 // ============================================================================
 
-addEventHandler("OnDrawnHUD", function(event) {
-    // Get active toggles
-    let activeToggles = [];
+// Track last toggled item for display
+let lastToggledItem = null;
+let lastToggleTime = 0;
+let lastToggleState = false;
 
+addEventHandler("OnDrawnHUD", function(event) {
     // Define display names for toggles
     let toggleDisplayNames = {
         godMode: "God Mode",
@@ -2384,42 +2339,36 @@ addEventHandler("OnDrawnHUD", function(event) {
         nightVision: "Night Vision"
     };
 
-    // Collect active toggles
-    for (let key in toggleStates) {
-        if (toggleStates[key] === true && toggleDisplayNames[key]) {
-            activeToggles.push(toggleDisplayNames[key]);
+    // Show last toggled item for 3 seconds after toggle
+    let now = Date.now();
+    if (lastToggledItem && (now - lastToggleTime) < 3000) {
+        let displayName = toggleDisplayNames[lastToggledItem] || lastToggledItem;
+        let stateText = lastToggleState ? "On" : "Off";
+
+        // Screen dimensions
+        let screenWidth = 1920;
+        let screenHeight = 1080;
+
+        // Calculate text width and position at bottom center
+        let fullText = displayName + ": " + stateText;
+        let textWidth = fullText.length * 9;
+        let boxX = (screenWidth - textWidth) / 2 - 10;
+        let boxY = screenHeight - 50;
+
+        // Draw name part in white
+        let nameColor = toColour(255, 255, 255, 255);
+        drawText(displayName + ": ", boxX, boxY, nameColor, 16);
+
+        // Draw state in green (On) or red (Off)
+        let stateX = boxX + (displayName.length + 2) * 9;
+        if (lastToggleState) {
+            let onColor = toColour(0, 255, 200, 255); // Cyan-green like BetterIV
+            drawText(stateText, stateX, boxY, onColor, 16);
+        } else {
+            let offColor = toColour(255, 80, 80, 255); // Red
+            drawText(stateText, stateX, boxY, offColor, 16);
         }
     }
-
-    // Only draw if there are active toggles
-    if (activeToggles.length === 0) return;
-
-    // Screen dimensions (approximate - GTAConnected usually uses 1920x1080 ref)
-    let screenWidth = 1920;
-    let screenHeight = 1080;
-
-    // Position at bottom center
-    let statusText = activeToggles.join(" | ");
-    let textWidth = statusText.length * 7; // Approximate character width
-    let boxWidth = textWidth + 40;
-    let boxHeight = 28;
-    let boxX = (screenWidth - boxWidth) / 2;
-    let boxY = screenHeight - 45;
-
-    // Background - dark semi-transparent
-    let bgColor = toColour(15, 15, 20, 180);
-    drawRect(boxX, boxY, boxWidth, boxHeight, bgColor);
-
-    // Border - green to indicate active
-    let borderColor = toColour(50, 200, 80, 220);
-    drawRect(boxX, boxY, boxWidth, 2, borderColor); // Top
-    drawRect(boxX, boxY + boxHeight - 2, boxWidth, 2, borderColor); // Bottom
-    drawRect(boxX, boxY, 2, boxHeight, borderColor); // Left
-    drawRect(boxX + boxWidth - 2, boxY, 2, boxHeight, borderColor); // Right
-
-    // Text - bright green for ON status
-    let textColor = toColour(80, 255, 120, 255);
-    drawText(statusText, boxX + 20, boxY + 6, textColor, 12);
 });
 
 // ============================================================================
