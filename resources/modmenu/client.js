@@ -215,11 +215,11 @@ const menuData = {
             { label: "Give All Weapons", action: "self_weapons" },
             { label: "Clear Wanted Level", action: "self_wanted" },
             { label: "--- Toggles ---", action: "none" },
-            { label: "God Mode: <#FF0000>OFF", action: "toggle", target: "godMode", state: false },
-            { label: "Invincible: <#FF0000>OFF", action: "toggle", target: "invincible", state: false },
-            { label: "Super Run: <#FF0000>OFF", action: "toggle", target: "superRun", state: false },
-            { label: "No Ragdoll: <#FF0000>OFF", action: "toggle", target: "noRagdoll", state: false },
-            { label: "Never Wanted: <#FF0000>OFF", action: "toggle", target: "neverWanted", state: false },
+            { label: "God Mode", action: "toggle", target: "godMode", state: false },
+            { label: "Invincible", action: "toggle", target: "invincible", state: false },
+            { label: "Super Run", action: "toggle", target: "superRun", state: false },
+            { label: "No Ragdoll", action: "toggle", target: "noRagdoll", state: false },
+            { label: "Never Wanted", action: "toggle", target: "neverWanted", state: false },
             { label: "--- Actions ---", action: "none" },
             { label: "Respawn", action: "self_respawn" },
             { label: "Suicide", action: "self_suicide" },
@@ -445,21 +445,21 @@ const menuData = {
             { label: "Repair Vehicle", action: "veh_repair" },
             { label: "Flip Vehicle", action: "veh_flip" },
             { label: "Vehicle Colors", action: "submenu", target: "veh_colors" },
-            { label: "God Mode: <#FF0000>OFF", action: "toggle", target: "vehGodMode", state: false },
+            { label: "God Mode", action: "toggle", target: "vehGodMode", state: false },
             { label: "Nitro Boost", action: "veh_nitro" },
-            { label: "Drive On Water: <#FF0000>OFF", action: "toggle", target: "driveOnWater", state: false },
-            { label: "Rainbow Color: <#FF0000>OFF", action: "toggle", target: "rainbowCar", state: false },
-            { label: "Drift Mode: <#FF0000>OFF", action: "toggle", target: "driftMode", state: false },
+            { label: "Drive On Water", action: "toggle", target: "driveOnWater", state: false },
+            { label: "Rainbow Color", action: "toggle", target: "rainbowCar", state: false },
+            { label: "Drift Mode", action: "toggle", target: "driftMode", state: false },
             { label: "Neon Lights", action: "submenu", target: "veh_neons" },
-            { label: "Fly Mode: <#FF0000>OFF", action: "toggle", target: "flyMode", state: false },
-            { label: "Shoot RPG: <#FF0000>OFF", action: "toggle", target: "vehShootRPG", state: false }
+            { label: "Fly Mode", action: "toggle", target: "flyMode", state: false },
+            { label: "Shoot RPG", action: "toggle", target: "vehShootRPG", state: false }
         ]
     },
 
     veh_neons: {
         title: "NEON LIGHTS",
         items: [
-            { label: "Toggle Neons: <#FF0000>OFF", action: "toggle", target: "neonLights", state: false },
+            { label: "Toggle Neons", action: "toggle", target: "neonLights", state: false },
             { label: "Red Neons", action: "neon_color", value: { r: 255, g: 0, b: 0 } },
             { label: "Blue Neons", action: "neon_color", value: { r: 0, g: 100, b: 255 } },
             { label: "Green Neons", action: "neon_color", value: { r: 0, g: 255, b: 0 } },
@@ -647,9 +647,9 @@ const menuData = {
             { label: "--- Visual Effects ---", action: "none" },
             { label: "Screen Shake", action: "fun_screen_shake" },
             { label: "Flash Screen", action: "fun_flash" },
-            { label: "Matrix Mode: <#FF0000>OFF", action: "toggle", target: "matrixMode", state: false },
-            { label: "Thermal Vision: <#FF0000>OFF", action: "toggle", target: "thermalVision", state: false },
-            { label: "Night Vision: <#FF0000>OFF", action: "toggle", target: "nightVision", state: false }
+            { label: "Matrix Mode", action: "toggle", target: "matrixMode", state: false },
+            { label: "Thermal Vision", action: "toggle", target: "thermalVision", state: false },
+            { label: "Night Vision", action: "toggle", target: "nightVision", state: false }
         ]
     }
 };
@@ -676,40 +676,6 @@ let toggleStates = {
     thermalVision: false,
     nightVision: false
 };
-
-// Base labels for toggles (used to generate color-coded labels)
-const toggleBaseLabels = {
-    godMode: "God Mode",
-    invincible: "Invincible",
-    superRun: "Super Run",
-    noRagdoll: "No Ragdoll",
-    neverWanted: "Never Wanted",
-    vehGodMode: "God Mode",
-    driveOnWater: "Drive On Water",
-    rainbowCar: "Rainbow Color",
-    driftMode: "Drift Mode",
-    neonLights: "Toggle Neons",
-    flyMode: "Fly Mode",
-    vehShootRPG: "Shoot RPG",
-    rainbowSky: "Rainbow Sky",
-    explosiveAmmo: "Explosive Ammo",
-    moonGravity: "Moon Gravity",
-    drunkMode: "Drunk Mode",
-    matrixMode: "Matrix Mode",
-    thermalVision: "Thermal Vision",
-    nightVision: "Night Vision"
-};
-
-// Helper function to get toggle label with GTAConnected color tags
-function getToggleLabel(toggleKey) {
-    let baseName = toggleBaseLabels[toggleKey] || toggleKey;
-    let isOn = toggleStates[toggleKey];
-    if (isOn) {
-        return baseName + ": <#00FF00>ON";
-    } else {
-        return baseName + ": <#FF0000>OFF";
-    }
-}
 
 // Neon objects storage
 let neonObjects = [];
@@ -943,8 +909,6 @@ function selectItem() {
         case "toggle":
             toggleStates[item.target] = !toggleStates[item.target];
             item.state = toggleStates[item.target];
-            // Update label with color-coded state
-            item.label = getToggleLabel(item.target);
             // Set status indicator variables for bottom display
             lastToggledItem = item.target;
             lastToggleTime = Date.now();
