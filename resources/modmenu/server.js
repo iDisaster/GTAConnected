@@ -7,14 +7,42 @@
 const COLOUR_ORANGE = toColour(255, 200, 100, 255);
 const COLOUR_WORLD = toColour(100, 200, 255, 255);
 
-// Vehicle model names (will use game's model loading)
+// Clean GTA IV vehicle model list
 const vehicleModels = [
-    "infernus", "turismo", "comet", "banshee", "sultan", "coquette",
-    "feltzer", "buffalo", "sabregt", "stalion", "vigero", "dukes",
-    "phoenix", "patriot", "cavalcade", "huntley", "landstalker",
-    "nrg900", "pcj600", "sanchez", "faggio", "police", "fbi",
-    "ambulance", "firetruk", "annihilator", "maverick", "polmav",
-    "jetmax", "predator", "tropic", "taxi", "stretch", "bus"
+    // Sports Cars
+    "infernus", "turismo", "comet", "banshee", "sultan", "coquette", "sultanrs",
+    // Muscle Cars  
+    "buccaneer", "dukes", "faction", "ruiner", "sabre", "sabregt", "vigero",
+    // Sedans
+    "admiral", "cavalcade", "cognoscenti", "emperor", "esperanto", "feroci",
+    "feltzer", "intruder", "landstalker", "lokus", "marbella", "merit",
+    "oracle", "pinnacle", "premiere", "presidente", "primo", "rebla",
+    "romero", "schafter", "sentinel", "solair", "stratum", "stretch",
+    "vincent", "virgo", "willard", "washington",
+    // SUVs & Trucks
+    "bobcat", "boxville", "biff", "burrito", "chavos", "dilettante",
+    "flatbed", "forklift", "habanero", "huntley", "moonbeam", "mule",
+    "packer", "patriot", "perennial", "pony", "rancher", "speedo", 
+    "stockade", "trashmaster", "yankee",
+    // Compacts
+    "blista", "futo", "ingot", "pmp600", "sultanrs",
+    // Motorcycles
+    "faggio", "hellfury", "nrg900", "pcj600", "sanchez", "zombie",
+    // Emergency
+    "ambulance", "firetruk", "police", "police2", "police3", "police4",
+    "nstockade", "pstockade", "fbi", "noose",
+    // Helicopters
+    "annihilator", "maverick", "polmav", "tourmav",
+    // Boats
+    "dinghy", "jetmax", "marquis", "predator", "reefer", "squalo", "tropic", "tuga",
+    // Commercial
+    "airtug", "benson", "biff", "boxville", "burrito", "burrito2", "cabby",
+    "flatbed", "forklift", "mule", "packer", "pony", "speedo", "stockade",
+    "trashmaster", "yankee",
+    // Special
+    "mrtasty", "cablecar", "subway", "eltrain",
+    // Taxis
+    "taxi", "taxi2", "romantaxi"
 ];
 
 // Store spawned vehicles per player
