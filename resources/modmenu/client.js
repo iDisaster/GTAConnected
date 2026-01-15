@@ -909,10 +909,6 @@ function selectItem() {
         case "toggle":
             toggleStates[item.target] = !toggleStates[item.target];
             item.state = toggleStates[item.target];
-            // Set status indicator variables for bottom display
-            lastToggledItem = item.target;
-            lastToggleTime = Date.now();
-            lastToggleState = toggleStates[item.target];
             triggerNetworkEvent("ModMenu:Toggle", item.target, toggleStates[item.target]);
             break;
 
@@ -2305,71 +2301,6 @@ function drawText(text, x, y, colour, size) {
 function showNotification(text) {
     // Notifications removed - toggle states now shown in menu labels
 }
-
-// ============================================================================
-// STATUS INDICATOR - Shows active toggles at bottom of screen (BetterIV style)
-// ============================================================================
-
-// Track last toggled item for display
-let lastToggledItem = null;
-let lastToggleTime = 0;
-let lastToggleState = false;
-
-addEventHandler("OnDrawnHUD", function(event) {
-    // Define display names for toggles
-    let toggleDisplayNames = {
-        godMode: "God Mode",
-        invincible: "Invincible",
-        superRun: "Super Run",
-        noRagdoll: "No Ragdoll",
-        neverWanted: "Never Wanted",
-        vehGodMode: "Vehicle God Mode",
-        driveOnWater: "Drive On Water",
-        rainbowCar: "Rainbow Car",
-        driftMode: "Drift Mode",
-        neonLights: "Neon Lights",
-        flyMode: "Fly Mode",
-        vehShootRPG: "Vehicle RPG",
-        rainbowSky: "Rainbow Sky",
-        explosiveAmmo: "Explosive Ammo",
-        moonGravity: "Moon Gravity",
-        drunkMode: "Drunk Mode",
-        matrixMode: "Matrix Mode",
-        thermalVision: "Thermal Vision",
-        nightVision: "Night Vision"
-    };
-
-    // Show last toggled item for 3 seconds after toggle
-    let now = Date.now();
-    if (lastToggledItem && (now - lastToggleTime) < 3000) {
-        let displayName = toggleDisplayNames[lastToggledItem] || lastToggledItem;
-        let stateText = lastToggleState ? "On" : "Off";
-
-        // Screen dimensions
-        let screenWidth = 1920;
-        let screenHeight = 1080;
-
-        // Calculate text width and position at bottom center
-        let fullText = displayName + ": " + stateText;
-        let textWidth = fullText.length * 9;
-        let boxX = (screenWidth - textWidth) / 2 - 10;
-        let boxY = screenHeight - 50;
-
-        // Draw name part in white
-        let nameColor = toColour(255, 255, 255, 255);
-        drawText(displayName + ": ", boxX, boxY, nameColor, 16);
-
-        // Draw state in green (On) or red (Off)
-        let stateX = boxX + (displayName.length + 2) * 9;
-        if (lastToggleState) {
-            let onColor = toColour(0, 255, 200, 255); // Cyan-green like BetterIV
-            drawText(stateText, stateX, boxY, onColor, 16);
-        } else {
-            let offColor = toColour(255, 80, 80, 255); // Red
-            drawText(stateText, stateX, boxY, offColor, 16);
-        }
-    }
-});
 
 // ============================================================================
 // TOGGLE EFFECTS
