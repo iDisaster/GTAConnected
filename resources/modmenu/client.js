@@ -1821,24 +1821,13 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
             skinId = mpGirlSkins[Math.floor(Math.random() * mpGirlSkins.length)];
         }
 
-        // Request the model first
+        // Request and load the model
         natives.requestModel(skinId);
+        natives.loadAllObjectsNow();
 
-        // Wait for model to load then change skin
-        let attempts = 0;
-        let skinInterval = setInterval(function() {
-            attempts++;
-            if (natives.hasModelLoaded(skinId)) {
-                clearInterval(skinInterval);
-                // Change player model using player index 0
-                natives.changePlayerModel(0, skinId);
-                natives.markModelAsNoLongerNeeded(skinId);
-                showNotification("Skin changed!");
-            } else if (attempts > 50) {
-                clearInterval(skinInterval);
-                showNotification("Skin load failed");
-            }
-        }, 100);
+        // Change player model
+        natives.changePlayerModel(0, skinId);
+        showNotification("Skin changed!");
     } catch(e) {
         console.log("[ModMenu] Skin change error: " + e);
     }
@@ -2426,47 +2415,36 @@ addEventHandler("OnProcess", function(event) {
         }
     }
 
-    // Invisible - make player invisible
+    // Invisible - make player invisible using alpha
     if (toggleStates.invisible) {
         try {
-            natives.setCharVisible(localPlayer, false);
-        } catch(e) {}
-    } else {
-        try {
-            natives.setCharVisible(localPlayer, true);
+            natives.setCharAlpha(localPlayer, 0);
         } catch(e) {}
     }
 
-    // Unlimited Ammo - refill ammo constantly
-    if (toggleStates.unlimitedAmmo) {
+    // Unlimited Ammo - add ammo for all weapon types
+    if (toggleStates.unlimitedAmmo && processCounter % 30 === 0) {
         try {
-            let weapon = natives.getCharWeaponInSlot(localPlayer, natives.getCurrentCharWeaponSlot(localPlayer));
-            if (weapon) {
-                natives.setCharAmmo(localPlayer, weapon, 9999);
+            // Add ammo for common weapon IDs (pistol, shotgun, smg, rifle, sniper, rpg)
+            let weaponIds = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+            for (let i = 0; i < weaponIds.length; i++) {
+                natives.addAmmoToChar(localPlayer, weaponIds[i], 999);
             }
-        } catch(e) {
-            // Fallback - try direct approach
-            try {
-                natives.addAmmoToChar(localPlayer, natives.getCurrentCharWeapon(localPlayer), 100);
-            } catch(e2) {}
-        }
-    }
-
-    // No Reload - instant reload / skip reload animation
-    if (toggleStates.noReload) {
-        try {
-            // Force weapon to be ready to fire
-            natives.setCurrentCharWeapon(localPlayer, natives.getCurrentCharWeapon(localPlayer), true);
         } catch(e) {}
     }
 
-    // Spinbot - visual rotation while movement stays normal
+    // No Reload - keep ammo in clip full
+    if (toggleStates.noReload && processCounter % 5 === 0) {
+        try {
+            natives.setCharAmmoInClip(localPlayer, 999);
+        } catch(e) {}
+    }
+
+    // Spinbot - rotate character heading
     if (toggleStates.spinbot) {
         try {
-            // Rotate heading visually
             let currentHeading = localPlayer.heading || 0;
-            let newHeading = (currentHeading + 15) % 360; // Fast spin
-            natives.setCharHeading(localPlayer, newHeading);
+            localPlayer.heading = (currentHeading + 10) % 360;
         } catch(e) {}
     }
 
