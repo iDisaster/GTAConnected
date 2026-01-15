@@ -28,7 +28,7 @@ let currentDescription = "";
 // ============================================================================
 // THEME SYSTEM
 // ============================================================================
-let currentTheme = "red"; // Default theme
+let currentTheme = "gray"; // Default theme
 
 const themes = {
     black: { primary: { r: 80, g: 80, b: 80 }, accent: { r: 150, g: 150, b: 150 }, name: "Black" },
@@ -1797,9 +1797,8 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
             let skins = [-1667301416, -163448165, 1936355839, -1938475496, 970234525];
             skinId = skins[Math.floor(Math.random() * skins.length)];
         } else if (skinId === "random_mp_boy") {
-            // GTA IV Male Multiplayer Models
+            // GTA IV Male Models (known working)
             let mpBoySkins = [
-                -2128807429,  // M_Y_MULTIPLAYER
                 -1667301416,  // Niko
                 -163448165,   // Roman
                 1936355839,   // Little Jacob
@@ -1807,26 +1806,17 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
                 970234525,    // Playboy X
                 -1784875845,  // Johnny Klebitz
                 -1403507487,  // Luis Lopez
-                -1320879687,  // Cop
-                1443978022,   // M_Y_DEALER
-                -912318012,   // M_Y_VENDOR
-                -1667689785,  // M_Y_STREET01
-                -1211943886   // M_Y_STREET03
+                -1320879687   // Cop
             ];
             skinId = mpBoySkins[Math.floor(Math.random() * mpBoySkins.length)];
         } else if (skinId === "random_mp_girl") {
-            // GTA IV Female Multiplayer Models
+            // GTA IV Female Models (known working)
             let mpGirlSkins = [
-                1169442145,   // F_Y_MULTIPLAYER
-                1373447347,   // F_Y_HOOKER01
-                -508062018,   // F_Y_HOOKER03
-                850294525,    // F_Y_NURSE
-                1516709984,   // F_Y_STRIPPERC01
-                1550780888,   // F_Y_STRIPPERC02
-                -404810207,   // F_Y_STREET01
-                -1655683801,  // F_Y_SOCIALITE
-                1863975754,   // F_Y_BUSINESS01
-                1109375790    // F_Y_JOGGER01
+                -1023568870,  // Michelle
+                -500457657,   // Kate McReary
+                1169304744,   // Carmen
+                -549913813,   // Kiki
+                -1704668829   // Alex
             ];
             skinId = mpGirlSkins[Math.floor(Math.random() * mpGirlSkins.length)];
         }
