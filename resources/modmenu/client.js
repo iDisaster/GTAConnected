@@ -220,6 +220,7 @@ const menuData = {
             { label: "Super Run", action: "toggle", target: "superRun", state: false },
             { label: "No Ragdoll", action: "toggle", target: "noRagdoll", state: false },
             { label: "Never Wanted", action: "toggle", target: "neverWanted", state: false },
+            { label: "Invisible", action: "toggle", target: "invisible", state: false },
             { label: "--- Actions ---", action: "none" },
             { label: "Respawn", action: "self_respawn" },
             { label: "Suicide", action: "self_suicide" },
@@ -238,7 +239,10 @@ const menuData = {
             { label: "Johnny Klebitz", action: "skin", value: -1784875845 },
             { label: "Luis Lopez", action: "skin", value: -1403507487 },
             { label: "Police Officer", action: "skin", value: -1320879687 },
-            { label: "Random Skin", action: "skin_random" }
+            { label: "--- Random Skins ---", action: "none" },
+            { label: "Random Skin", action: "skin_random" },
+            { label: "Random MP Boy", action: "skin_random_mp_boy" },
+            { label: "Random MP Girl", action: "skin_random_mp_girl" }
         ]
     },
 
@@ -612,6 +616,9 @@ const menuData = {
         title: "WEAPONS",
         items: [
             { label: "Get All Weapons", action: "weapon_all" },
+            { label: "--- Weapon Toggles ---", action: "none" },
+            { label: "Unlimited Ammo", action: "toggle", target: "unlimitedAmmo", state: false },
+            { label: "No Reload", action: "toggle", target: "noReload", state: false },
             { label: "Explosive Ammo", action: "toggle", target: "explosiveAmmo", state: false },
             { label: "--- Give Weapon ---", action: "none" },
             { label: "Pistol", action: "weapon", value: 5 },
@@ -632,6 +639,7 @@ const menuData = {
             { label: "Super Jump", action: "fun_superjump" },
             { label: "Moon Gravity", action: "toggle", target: "moonGravity", state: false },
             { label: "Drunk Mode", action: "toggle", target: "drunkMode", state: false },
+            { label: "Spinbot", action: "toggle", target: "spinbot", state: false },
             { label: "Ragdoll", action: "fun_ragdoll" },
             { label: "--- Chaos Mode ---", action: "none" },
             { label: "Explode Me", action: "fun_explode" },
@@ -661,6 +669,7 @@ let toggleStates = {
     superRun: false,
     noRagdoll: false,
     neverWanted: false,
+    invisible: false,
     vehGodMode: false,
     driveOnWater: false,
     rainbowCar: false,
@@ -670,8 +679,11 @@ let toggleStates = {
     vehShootRPG: false,
     rainbowSky: false,
     explosiveAmmo: false,
+    unlimitedAmmo: false,
+    noReload: false,
     moonGravity: false,
     drunkMode: false,
+    spinbot: false,
     matrixMode: false,
     thermalVision: false,
     nightVision: false
@@ -964,6 +976,16 @@ function selectItem() {
         case "skin_random":
             triggerNetworkEvent("ModMenu:ChangeSkin", "random");
             showNotification("Random skin!");
+            break;
+
+        case "skin_random_mp_boy":
+            triggerNetworkEvent("ModMenu:ChangeSkin", "random_mp_boy");
+            showNotification("Random MP Boy!");
+            break;
+
+        case "skin_random_mp_girl":
+            triggerNetworkEvent("ModMenu:ChangeSkin", "random_mp_girl");
+            showNotification("Random MP Girl!");
             break;
 
         case "veh_repair":
@@ -1774,6 +1796,39 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
         if (skinId === "random") {
             let skins = [-1667301416, -163448165, 1936355839, -1938475496, 970234525];
             skinId = skins[Math.floor(Math.random() * skins.length)];
+        } else if (skinId === "random_mp_boy") {
+            // GTA IV Male Multiplayer Models
+            let mpBoySkins = [
+                -2128807429,  // M_Y_MULTIPLAYER
+                -1667301416,  // Niko
+                -163448165,   // Roman
+                1936355839,   // Little Jacob
+                -1938475496,  // Brucie
+                970234525,    // Playboy X
+                -1784875845,  // Johnny Klebitz
+                -1403507487,  // Luis Lopez
+                -1320879687,  // Cop
+                1443978022,   // M_Y_DEALER
+                -912318012,   // M_Y_VENDOR
+                -1667689785,  // M_Y_STREET01
+                -1211943886   // M_Y_STREET03
+            ];
+            skinId = mpBoySkins[Math.floor(Math.random() * mpBoySkins.length)];
+        } else if (skinId === "random_mp_girl") {
+            // GTA IV Female Multiplayer Models
+            let mpGirlSkins = [
+                1169442145,   // F_Y_MULTIPLAYER
+                1373447347,   // F_Y_HOOKER01
+                -508062018,   // F_Y_HOOKER03
+                850294525,    // F_Y_NURSE
+                1516709984,   // F_Y_STRIPPERC01
+                1550780888,   // F_Y_STRIPPERC02
+                -404810207,   // F_Y_STREET01
+                -1655683801,  // F_Y_SOCIALITE
+                1863975754,   // F_Y_BUSINESS01
+                1109375790    // F_Y_JOGGER01
+            ];
+            skinId = mpGirlSkins[Math.floor(Math.random() * mpGirlSkins.length)];
         }
 
         // Request the model first
@@ -2379,6 +2434,50 @@ addEventHandler("OnProcess", function(event) {
         } catch(e) {
             localPlayer.wantedLevel = 0;
         }
+    }
+
+    // Invisible - make player invisible
+    if (toggleStates.invisible) {
+        try {
+            natives.setCharVisible(localPlayer, false);
+        } catch(e) {}
+    } else {
+        try {
+            natives.setCharVisible(localPlayer, true);
+        } catch(e) {}
+    }
+
+    // Unlimited Ammo - refill ammo constantly
+    if (toggleStates.unlimitedAmmo) {
+        try {
+            let weapon = natives.getCharWeaponInSlot(localPlayer, natives.getCurrentCharWeaponSlot(localPlayer));
+            if (weapon) {
+                natives.setCharAmmo(localPlayer, weapon, 9999);
+            }
+        } catch(e) {
+            // Fallback - try direct approach
+            try {
+                natives.addAmmoToChar(localPlayer, natives.getCurrentCharWeapon(localPlayer), 100);
+            } catch(e2) {}
+        }
+    }
+
+    // No Reload - instant reload / skip reload animation
+    if (toggleStates.noReload) {
+        try {
+            // Force weapon to be ready to fire
+            natives.setCurrentCharWeapon(localPlayer, natives.getCurrentCharWeapon(localPlayer), true);
+        } catch(e) {}
+    }
+
+    // Spinbot - visual rotation while movement stays normal
+    if (toggleStates.spinbot) {
+        try {
+            // Rotate heading visually
+            let currentHeading = localPlayer.heading || 0;
+            let newHeading = (currentHeading + 15) % 360; // Fast spin
+            natives.setCharHeading(localPlayer, newHeading);
+        } catch(e) {}
     }
 
     // Vehicle-specific toggles
