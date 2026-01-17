@@ -1,3 +1,4 @@
+
 // ============================================================================
 // MOD MENU - Server Side
 // Handles all server-side actions triggered from the client menu
@@ -164,22 +165,42 @@ addNetworkHandler("ModMenu:Teleport", function(client, x, y, z) {
 });
 
 addNetworkHandler("ModMenu:TeleportToPlayer", function(client, targetId) {
+    console.log("[ModMenu] " + client.name + " requesting teleport to player ID: " + targetId);
+
     let clients = getClients();
     for (let i = 0; i < clients.length; i++) {
         if (clients[i].index == targetId) {
+            console.log("[ModMenu] Found target player: " + clients[i].name);
+
             // Get target player's position from server
             if (clients[i].player) {
-                let targetPos = clients[i].player.position;
-                triggerNetworkEvent("ModMenu:Notification", client, "Teleporting to: " + clients[i].name);
-                // Send position directly to client
-                triggerNetworkEvent("ModMenu:ExecuteTeleport", client, targetPos.x + 2, targetPos.y, targetPos.z);
+                try {
+                    let targetPos = clients[i].player.position;
+                    console.log("[ModMenu] Target position: " + targetPos.x + ", " + targetPos.y + ", " + targetPos.z);
+
+                    // Validate position
+                    if (targetPos && typeof targetPos.x === 'number' && !isNaN(targetPos.x)) {
+                        triggerNetworkEvent("ModMenu:Notification", client, "Teleporting to: " + clients[i].name);
+                        // Send position directly to client (offset by 2 units to avoid collision)
+                        triggerNetworkEvent("ModMenu:ExecuteTeleport", client, targetPos.x + 2, targetPos.y, targetPos.z);
+                        console.log("[ModMenu] Teleport event sent to " + client.name);
+                    } else {
+                        triggerNetworkEvent("ModMenu:Notification", client, "Invalid target position!");
+                        console.log("[ModMenu] Invalid position data");
+                    }
+                } catch(e) {
+                    console.log("[ModMenu] Error getting target position: " + e);
+                    triggerNetworkEvent("ModMenu:Notification", client, "Error getting position!");
+                }
             } else {
                 triggerNetworkEvent("ModMenu:Notification", client, "Player not spawned!");
+                console.log("[ModMenu] Target player not spawned");
             }
             return;
         }
     }
     triggerNetworkEvent("ModMenu:Notification", client, "Player not found!");
+    console.log("[ModMenu] Target player ID " + targetId + " not found");
 });
 
 // ============================================================================
