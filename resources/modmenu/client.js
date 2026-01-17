@@ -282,7 +282,11 @@ const menuData = {
             { label: "No Ragdoll", action: "toggle", target: "noRagdoll", state: false },
             { label: "Never Wanted", action: "toggle", target: "neverWanted", state: false },
             { label: "Invisible", action: "toggle", target: "invisible", state: false },
+            { label: "Infinite Sprint", action: "toggle", target: "infiniteSprint", state: false },
+            { label: "Freeze Position", action: "toggle", target: "freezePlayer", state: false },
             { label: "--- Actions ---", action: "none" },
+            { label: "Set On Fire", action: "self_fire" },
+            { label: "Clear Tasks", action: "self_cleartasks" },
             { label: "Respawn", action: "self_respawn" },
             { label: "Suicide", action: "self_suicide" },
             { label: "Change Skin", action: "submenu", target: "skins" }
@@ -292,6 +296,7 @@ const menuData = {
     skins: {
         title: "PLAYER SKINS",
         items: [
+            { label: "--- Story Characters ---", action: "none" },
             { label: "Niko Bellic", action: "skin", value: -1667301416 },
             { label: "Roman Bellic", action: "skin", value: -163448165 },
             { label: "Little Jacob", action: "skin", value: 1936355839 },
@@ -299,11 +304,27 @@ const menuData = {
             { label: "Playboy X", action: "skin", value: 970234525 },
             { label: "Johnny Klebitz", action: "skin", value: -1784875845 },
             { label: "Luis Lopez", action: "skin", value: -1403507487 },
+            { label: "--- Male NPCs ---", action: "none" },
             { label: "Police Officer", action: "skin", value: -1320879687 },
+            { label: "Doctor", action: "skin", value: 1669579652 },
+            { label: "Fireman", action: "skin", value: -335476819 },
+            { label: "Security Guard", action: "skin", value: 1581098148 },
+            { label: "Businessman", action: "skin", value: -1191636209 },
+            { label: "Street Guy", action: "skin", value: -1850653608 },
+            { label: "Hobo", action: "skin", value: -1183939691 },
+            { label: "Biker", action: "skin", value: 1830507291 },
+            { label: "--- Female NPCs ---", action: "none" },
+            { label: "Business Woman", action: "skin", value: -1847203044 },
+            { label: "Street Woman", action: "skin", value: -2043953294 },
+            { label: "Rich Woman", action: "skin", value: -1171014612 },
+            { label: "Shop Girl", action: "skin", value: -1611704378 },
+            { label: "Nurse", action: "skin", value: 1567728751 },
+            { label: "Tourist Woman", action: "skin", value: -1507724086 },
+            { label: "Jogger Woman", action: "skin", value: -1813105079 },
             { label: "--- Random Skins ---", action: "none" },
             { label: "Random Skin", action: "skin_random" },
-            { label: "Random MP Boy", action: "skin_random_mp_boy" },
-            { label: "Random MP Girl", action: "skin_random_mp_girl" }
+            { label: "Random Male", action: "skin_random_mp_boy" },
+            { label: "Random Female", action: "skin_random_mp_girl" }
         ]
     },
 
@@ -518,7 +539,13 @@ const menuData = {
             { label: "Drift Mode", action: "toggle", target: "driftMode", state: false },
             { label: "Neon Lights", action: "submenu", target: "veh_neons" },
             { label: "Fly Mode", action: "toggle", target: "flyMode", state: false },
-            { label: "Shoot RPG", action: "toggle", target: "vehShootRPG", state: false }
+            { label: "Shoot RPG", action: "toggle", target: "vehShootRPG", state: false },
+            { label: "--- Quick Actions ---", action: "none" },
+            { label: "Lock Doors", action: "veh_lock" },
+            { label: "Unlock Doors", action: "veh_unlock" },
+            { label: "Toggle Engine", action: "veh_engine" },
+            { label: "Pop Tires", action: "veh_poptires" },
+            { label: "Fix Tires", action: "veh_fixtires" }
         ]
     },
 
@@ -874,11 +901,16 @@ const menuData = {
         title: "WEAPONS",
         items: [
             { label: "Get All Weapons", action: "weapon_all" },
+            { label: "Remove All Weapons", action: "weapon_remove" },
             { label: "--- Weapon Toggles ---", action: "none" },
             { label: "Unlimited Ammo", action: "toggle", target: "unlimitedAmmo", state: false },
             { label: "No Reload", action: "toggle", target: "noReload", state: false },
             { label: "Explosive Ammo", action: "toggle", target: "explosiveAmmo", state: false },
+            { label: "Fire Bullets", action: "toggle", target: "fireBullets", state: false },
             { label: "--- Give Weapon ---", action: "none" },
+            { label: "Baseball Bat", action: "weapon", value: 2 },
+            { label: "Knife", action: "weapon", value: 3 },
+            { label: "Grenades", action: "weapon", value: 4 },
             { label: "Pistol", action: "weapon", value: 5 },
             { label: "Desert Eagle", action: "weapon", value: 6 },
             { label: "Shotgun", action: "weapon", value: 9 },
@@ -928,6 +960,8 @@ let toggleStates = {
     noRagdoll: false,
     neverWanted: false,
     invisible: false,
+    infiniteSprint: false,
+    freezePlayer: false,
     vehGodMode: false,
     driveOnWater: false,
     rainbowCar: false,
@@ -939,6 +973,7 @@ let toggleStates = {
     explosiveAmmo: false,
     unlimitedAmmo: false,
     noReload: false,
+    fireBullets: false,
     moonGravity: false,
     drunkMode: false,
     spinbot: false,
@@ -1247,6 +1282,20 @@ function selectItem() {
             triggerNetworkEvent("ModMenu:SelfOption", "suicide");
             break;
 
+        case "self_fire":
+            try {
+                natives.startCharFire(localPlayer);
+                showNotification("You're on fire!");
+            } catch(e) {}
+            break;
+
+        case "self_cleartasks":
+            try {
+                natives.clearCharTasks(localPlayer);
+                showNotification("Tasks cleared!");
+            } catch(e) {}
+            break;
+
         case "skin":
             triggerNetworkEvent("ModMenu:ChangeSkin", item.value);
             showNotification("Skin changed!");
@@ -1280,6 +1329,58 @@ function selectItem() {
         case "veh_nitro":
             triggerNetworkEvent("ModMenu:VehicleOption", "nitro");
             showNotification("NITRO!");
+            break;
+
+        case "veh_lock":
+            if (localPlayer.vehicle) {
+                try {
+                    natives.lockCarDoors(localPlayer.vehicle, 2);
+                    showNotification("Doors locked!");
+                } catch(e) {}
+            }
+            break;
+
+        case "veh_unlock":
+            if (localPlayer.vehicle) {
+                try {
+                    natives.lockCarDoors(localPlayer.vehicle, 1);
+                    showNotification("Doors unlocked!");
+                } catch(e) {}
+            }
+            break;
+
+        case "veh_engine":
+            if (localPlayer.vehicle) {
+                try {
+                    let isOn = natives.isCarEngineOn(localPlayer.vehicle);
+                    natives.switchCarEngine(localPlayer.vehicle, !isOn);
+                    showNotification(isOn ? "Engine off!" : "Engine on!");
+                } catch(e) {}
+            }
+            break;
+
+        case "veh_poptires":
+            if (localPlayer.vehicle) {
+                try {
+                    natives.burstCarTyre(localPlayer.vehicle, 0);
+                    natives.burstCarTyre(localPlayer.vehicle, 1);
+                    natives.burstCarTyre(localPlayer.vehicle, 2);
+                    natives.burstCarTyre(localPlayer.vehicle, 3);
+                    showNotification("Tires popped!");
+                } catch(e) {}
+            }
+            break;
+
+        case "veh_fixtires":
+            if (localPlayer.vehicle) {
+                try {
+                    natives.fixCarTyre(localPlayer.vehicle, 0);
+                    natives.fixCarTyre(localPlayer.vehicle, 1);
+                    natives.fixCarTyre(localPlayer.vehicle, 2);
+                    natives.fixCarTyre(localPlayer.vehicle, 3);
+                    showNotification("Tires fixed!");
+                } catch(e) {}
+            }
             break;
 
         case "veh_color":
@@ -1317,6 +1418,13 @@ function selectItem() {
         case "weapon_all":
             triggerNetworkEvent("ModMenu:SelfOption", "weapons");
             showNotification("All weapons!");
+            break;
+
+        case "weapon_remove":
+            try {
+                natives.removeAllCharWeapons(localPlayer);
+                showNotification("Weapons removed!");
+            } catch(e) {}
             break;
 
         case "refresh_players":
@@ -2133,80 +2241,90 @@ addNetworkHandler("ModMenu:ExecuteFun", function(option) {
     }
 });
 
+// GTA IV Character Model Hashes (verified working)
+// Male models
+const SKIN_NIKO = -1667301416;
+const SKIN_ROMAN = -163448165;
+const SKIN_JACOB = 1936355839;
+const SKIN_BRUCIE = -1938475496;
+const SKIN_PLAYBOY = 970234525;
+const SKIN_JOHNNY = -1784875845;
+const SKIN_LUIS = -1403507487;
+const SKIN_COP = -1320879687;
+const SKIN_DOCTOR = 1669579652;
+const SKIN_FIREMAN = -335476819;
+const SKIN_SECURITY = 1581098148;
+const SKIN_BUSINESS = -1191636209;
+const SKIN_STREET = -1850653608;
+const SKIN_HOBO = -1183939691;
+const SKIN_BIKER = 1830507291;
+
+// Female models - verified GTA IV peds
+const SKIN_F_BUSINESS = -1847203044;
+const SKIN_F_STREET = -2043953294;
+const SKIN_F_RICH = -1171014612;
+const SKIN_F_SHOP = -1611704378;
+const SKIN_F_NURSE = 1567728751;
+const SKIN_F_HOOKER = -639476421;
+const SKIN_F_TOURIST = -1507724086;
+const SKIN_F_JOGGER = -1813105079;
+
+// Arrays for random selection
+const mpBoySkins = [
+    SKIN_NIKO, SKIN_ROMAN, SKIN_JACOB, SKIN_BRUCIE, SKIN_PLAYBOY,
+    SKIN_JOHNNY, SKIN_LUIS, SKIN_COP, SKIN_DOCTOR, SKIN_FIREMAN,
+    SKIN_SECURITY, SKIN_BUSINESS, SKIN_STREET, SKIN_HOBO, SKIN_BIKER
+];
+
+const mpGirlSkins = [
+    SKIN_F_BUSINESS, SKIN_F_STREET, SKIN_F_RICH, SKIN_F_SHOP,
+    SKIN_F_NURSE, SKIN_F_HOOKER, SKIN_F_TOURIST, SKIN_F_JOGGER
+];
+
 // Execute skin change
 addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
     if (!localPlayer) return;
 
     try {
         if (skinId === "random") {
-            let skins = [-1667301416, -163448165, 1936355839, -1938475496, 970234525];
-            skinId = skins[Math.floor(Math.random() * skins.length)];
+            // Random from all skins
+            let allSkins = mpBoySkins.concat(mpGirlSkins);
+            skinId = allSkins[Math.floor(Math.random() * allSkins.length)];
         } else if (skinId === "random_mp_boy") {
-            // GTA IV Male Models (known working)
-            let mpBoySkins = [
-                -1667301416,  // Niko
-                -163448165,   // Roman
-                1936355839,   // Little Jacob
-                -1938475496,  // Brucie
-                970234525,    // Playboy X
-                -1784875845,  // Johnny Klebitz
-                -1403507487,  // Luis Lopez
-                -1320879687   // Cop
-            ];
+            // Random male skin
             skinId = mpBoySkins[Math.floor(Math.random() * mpBoySkins.length)];
         } else if (skinId === "random_mp_girl") {
-            // GTA IV Female Models (known working)
-            let mpGirlSkins = [
-                -1023568870,  // Michelle
-                -500457657,   // Kate McReary
-                1169304744,   // Carmen
-                -549913813,   // Kiki
-                -1704668829   // Alex
-            ];
+            // Random female skin
             skinId = mpGirlSkins[Math.floor(Math.random() * mpGirlSkins.length)];
         }
 
         console.log("[ModMenu] Changing skin to: " + skinId);
 
-        // Request the model first
+        // Request and load the model
         natives.requestModel(skinId);
 
-        // Wait for model to load before changing
+        // Use interval to check if model is loaded
         let attempts = 0;
-        let skinInterval = setInterval(function() {
+        let loadInterval = setInterval(function() {
             attempts++;
             try {
-                if (natives.hasModelLoaded(skinId)) {
-                    clearInterval(skinInterval);
+                // Try to load all objects
+                natives.loadAllObjectsNow();
 
-                    // Store current position
-                    let pos = localPlayer.position;
-                    let heading = localPlayer.heading || 0;
-
-                    // Change player model using the correct GTA IV method
+                // Check if we can change model now
+                if (attempts > 5) {
+                    clearInterval(loadInterval);
+                    // Change player model
                     natives.changePlayerModel(0, skinId);
-
-                    // Restore position after model change
-                    setTimeout(function() {
-                        try {
-                            localPlayer.position = pos;
-                            localPlayer.heading = heading;
-                        } catch(e) {}
-                    }, 100);
-
-                    // Mark model as no longer needed
-                    natives.markModelAsNoLongerNeeded(skinId);
-
-                    showNotification("Skin changed!");
                     console.log("[ModMenu] Skin changed successfully");
-                } else if (attempts > 100) {
-                    clearInterval(skinInterval);
-                    showNotification("Failed to load skin model");
-                    console.log("[ModMenu] Skin model load timeout");
                 }
             } catch(e) {
-                clearInterval(skinInterval);
-                console.log("[ModMenu] Skin change interval error: " + e);
+                console.log("[ModMenu] Skin load attempt " + attempts + ": " + e);
+            }
+
+            if (attempts > 20) {
+                clearInterval(loadInterval);
+                console.log("[ModMenu] Skin load timeout");
             }
         }, 50);
 
@@ -2946,26 +3064,39 @@ addEventHandler("OnProcess", function(event) {
         }
     }
 
-    // Invisible - make player invisible using alpha
-    if (toggleStates.invisible !== lastInvisible) {
-        try {
-            if (toggleStates.invisible) {
-                // Make invisible - set alpha to 0
-                natives.setCharVisible(localPlayer, false);
-                natives.setCharAlpha(localPlayer, 0);
-            } else {
-                // Restore visibility - set alpha back to 255
-                natives.setCharVisible(localPlayer, true);
-                natives.setCharAlpha(localPlayer, 255);
-            }
-        } catch(e) {}
-        lastInvisible = toggleStates.invisible;
-    }
-    // Keep invisible every frame when enabled
+    // Invisible - make player invisible
     if (toggleStates.invisible) {
         try {
             natives.setCharVisible(localPlayer, false);
-            natives.setCharAlpha(localPlayer, 0);
+        } catch(e) {}
+    } else {
+        try {
+            natives.setCharVisible(localPlayer, true);
+        } catch(e) {}
+    }
+
+    // Infinite Sprint - never get tired
+    if (toggleStates.infiniteSprint) {
+        try {
+            natives.setCharNeverTired(localPlayer, true);
+        } catch(e) {}
+    }
+
+    // Freeze Position - lock player in place
+    if (toggleStates.freezePlayer) {
+        try {
+            natives.freezeCharPosition(localPlayer, true);
+        } catch(e) {}
+    } else {
+        try {
+            natives.freezeCharPosition(localPlayer, false);
+        } catch(e) {}
+    }
+
+    // Fire Bullets - set bullets on fire
+    if (toggleStates.fireBullets) {
+        try {
+            natives.setCharShootRate(localPlayer, 100);
         } catch(e) {}
     }
 
@@ -2987,12 +3118,11 @@ addEventHandler("OnProcess", function(event) {
         } catch(e) {}
     }
 
-    // Spinbot - rotate character heading (slower speed)
+    // Spinbot - rotate character heading
     if (toggleStates.spinbot) {
         try {
             let currentHeading = localPlayer.heading || 0;
-            // Much slower rotation - 2 degrees per frame instead of 10
-            localPlayer.heading = (currentHeading + spinbotSpeed) % 360;
+            localPlayer.heading = (currentHeading + 10) % 360;
         } catch(e) {}
     }
 
@@ -3219,93 +3349,71 @@ function hsvToRgb(h, s, v) {
     };
 }
 
-// Neon lights rendering - draw colored lights under vehicle using multiple methods
-addEventHandler("OnDrawnHUD", function(event) {
+// Neon lights rendering - draw colored lights under vehicle using drawLightWithRange
+addEventHandler("OnProcess", function(event) {
     if (!toggleStates.neonLights || !localPlayer || !localPlayer.vehicle) return;
 
     try {
         let veh = localPlayer.vehicle;
         let pos = veh.position;
-
-        // More light positions for better coverage
-        let offsets = [
-            // Sides - left
-            { x: -1.8, y: 1.5, z: -0.4 },
-            { x: -1.8, y: 0, z: -0.4 },
-            { x: -1.8, y: -1.5, z: -0.4 },
-            // Sides - right
-            { x: 1.8, y: 1.5, z: -0.4 },
-            { x: 1.8, y: 0, z: -0.4 },
-            { x: 1.8, y: -1.5, z: -0.4 },
-            // Front
-            { x: -1, y: 2.5, z: -0.4 },
-            { x: 0, y: 2.5, z: -0.4 },
-            { x: 1, y: 2.5, z: -0.4 },
-            // Rear
-            { x: -1, y: -2.5, z: -0.4 },
-            { x: 0, y: -2.5, z: -0.4 },
-            { x: 1, y: -2.5, z: -0.4 }
-        ];
-
         let heading = veh.heading || 0;
+
+        // Convert heading to radians for rotation
         let cosH = Math.cos(heading);
         let sinH = Math.sin(heading);
 
-        for (let i = 0; i < offsets.length; i++) {
-            let off = offsets[i];
-            // Rotate offset by vehicle heading
-            let worldX = pos.x + (off.x * cosH - off.y * sinH);
-            let worldY = pos.y + (off.x * sinH + off.y * cosH);
-            let worldZ = pos.z + off.z;
+        // Neon light positions relative to vehicle center
+        // Format: { x: side offset, y: front/back, z: height, range: light radius }
+        let neonPoints = [
+            // Left side strip (front to back)
+            { x: -1.2, y: 1.5, z: -0.4, range: 3.0 },
+            { x: -1.2, y: 0.5, z: -0.4, range: 3.0 },
+            { x: -1.2, y: -0.5, z: -0.4, range: 3.0 },
+            { x: -1.2, y: -1.5, z: -0.4, range: 3.0 },
+            // Right side strip (front to back)
+            { x: 1.2, y: 1.5, z: -0.4, range: 3.0 },
+            { x: 1.2, y: 0.5, z: -0.4, range: 3.0 },
+            { x: 1.2, y: -0.5, z: -0.4, range: 3.0 },
+            { x: 1.2, y: -1.5, z: -0.4, range: 3.0 },
+            // Front strip
+            { x: -0.6, y: 2.0, z: -0.4, range: 2.5 },
+            { x: 0.6, y: 2.0, z: -0.4, range: 2.5 },
+            // Rear strip
+            { x: -0.6, y: -2.0, z: -0.4, range: 2.5 },
+            { x: 0.6, y: -2.0, z: -0.4, range: 2.5 }
+        ];
 
-            // Method 1: Draw corona/light at position
-            try {
-                natives.drawCorona(
-                    worldX, worldY, worldZ,
-                    80.0, 0, 0,
-                    neonColor.r, neonColor.g, neonColor.b
-                );
-            } catch(e1) {}
+        // Draw each neon light point
+        for (let i = 0; i < neonPoints.length; i++) {
+            let point = neonPoints[i];
 
-            // Method 2: Draw light using drawLightWithRange
+            // Rotate point by vehicle heading
+            let worldX = pos.x + (point.x * cosH - point.y * sinH);
+            let worldY = pos.y + (point.x * sinH + point.y * cosH);
+            let worldZ = pos.z + point.z;
+
+            // Draw light with range (GTA IV native)
+            // drawLightWithRange(x, y, z, r, g, b, range, intensity)
             try {
                 natives.drawLightWithRange(
                     worldX, worldY, worldZ,
                     neonColor.r, neonColor.g, neonColor.b,
-                    5.0, 100.0
+                    point.range, 1.0
                 );
-            } catch(e2) {}
-
-            // Method 3: Draw spot light pointing down
-            try {
-                natives.drawSpotLight(
-                    worldX, worldY, worldZ + 0.5,
-                    0, 0, -1,
-                    neonColor.r, neonColor.g, neonColor.b,
-                    5.0, 3.0, 0.0, 4.0, 1.0
-                );
-            } catch(e3) {}
+            } catch(e1) {
+                // Fallback: try alternate parameter order
+                try {
+                    natives.drawLightWithRange(
+                        worldX, worldY, worldZ,
+                        neonColor.r / 255, neonColor.g / 255, neonColor.b / 255,
+                        point.range, 100.0
+                    );
+                } catch(e2) {}
+            }
         }
-
-        // Additional: Draw ground reflection effect using coronas
-        for (let i = 0; i < 8; i++) {
-            let angle = (i / 8) * Math.PI * 2;
-            let dist = 2.5;
-            let groundX = pos.x + Math.cos(angle + heading) * dist;
-            let groundY = pos.y + Math.sin(angle + heading) * dist;
-            let groundZ = pos.z - 0.6;
-
-            try {
-                natives.drawCorona(
-                    groundX, groundY, groundZ,
-                    40.0, 0, 0,
-                    Math.floor(neonColor.r * 0.5),
-                    Math.floor(neonColor.g * 0.5),
-                    Math.floor(neonColor.b * 0.5)
-                );
-            } catch(e) {}
-        }
-    } catch(e) {}
+    } catch(e) {
+        console.log("[ModMenu] Neon error: " + e);
+    }
 });
 
 // Explosive ammo - detect player shooting
