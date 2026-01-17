@@ -1,0 +1,4392 @@
+
+asm sub_0(...)
+{
+    enter 0 5
+    ipush 0
+    spush "Airport"
+    fpush 954.40000000
+    fpush -672.26720000
+    fpush 14.28640000
+    fpush 0.00000000
+    fpush 2206.25400000
+    fpush 671.96690000
+    fpush 5.98740000
+    fpush 328.26270000
+    ipush 2
+    call sub_2502
+    ipush 1
+    spush "Airport"
+    fpush 401.53030000
+    fpush -749.76290000
+    fpush 4.69700000
+    fpush 62.00000000
+    fpush 2206.25400000
+    fpush 671.96690000
+    fpush 5.98740000
+    fpush 328.26270000
+    ipush 2
+    call sub_2502
+    ipush 2
+    spush "Airport"
+    fpush -607.90940000
+    fpush -815.15950000
+    fpush 4.84310000
+    fpush 0.00000000
+    fpush 2206.25400000
+    fpush 671.96690000
+    fpush 5.98740000
+    fpush 328.26270000
+    ipush 2
+    call sub_2502
+    ipush 3
+    spush "Middle Park"
+    fpush 2164.11400000
+    fpush 725.57260000
+    fpush 5.81300000
+    fpush 48.00000000
+    fpush -233.49480000
+    fpush 713.82040000
+    fpush 10.19360000
+    fpush 1.77160000
+    ipush 2
+    call sub_2502
+    ipush 4
+    spush "Happiness Island"
+    fpush 2169.02700000
+    fpush 731.06880000
+    fpush 5.81300000
+    fpush 48.00000000
+    fpush -608.14510000
+    fpush -981.37040000
+    fpush 4.84290000
+    fpush 359.89360000
+    ipush 2
+    call sub_2502
+    ipush 5
+    spush "Prison"
+    fpush 2174.04500000
+    fpush 736.68450000
+    fpush 5.81300000
+    fpush 48.00000000
+    fpush -1120.78600000
+    fpush -461.82130000
+    fpush 2.20520000
+    fpush 12.52170000
+    ipush 2
+    call sub_2502
+    ipush 6
+    spush "Sultan RS Spawn"
+    fpush 2178.98800000
+    fpush 742.22560000
+    fpush 5.81300000
+    fpush 48.00000000
+    fpush -993.09280000
+    fpush 1895.82100000
+    fpush 22.29080000
+    fpush 316.15900000
+    ipush 2
+    call sub_2502
+    ipush 7
+    spush "Rotterdam Tower"
+    fpush 2183.97200000
+    fpush 747.80090000
+    fpush 5.81300000
+    fpush 48.00000000
+    fpush -269.67580000
+    fpush -102.37570000
+    fpush 341.53260000
+    fpush 0.29050000
+    ipush 2
+    call sub_2502
+    ipush 8
+    spush "Majestic Hotel Suite"
+    fpush 2188.90100000
+    fpush 753.32710000
+    fpush 5.81300000
+    fpush 48.00000000
+    fpush -180.50380000
+    fpush 592.98950000
+    fpush 119.29890000
+    fpush 272.88450000
+    ipush 2
+    call sub_2502
+    ipush 9
+    spush "Libertonian Museum"
+    fpush 2193.84200000
+    fpush 758.85860000
+    fpush 5.81300000
+    fpush 48.00000000
+    fpush -107.47220000
+    fpush 813.94640000
+    fpush 19.38130000
+    fpush 179.30800000
+    ipush 2
+    call sub_2502
+    native IS_NETWORK_SESSION 0 1
+    pframe 4
+    pset 
+    pframe 4
+    pget 
+    ipush 0
+    icmpne 
+    pframe 4
+    pset 
+    ipush 0
+    pframe 4
+    pget 
+    icmpeq 
+    if true (...) 
+    {
+    }
+    else
+    {
+        ipush 1732200556
+        ipush 0
+        call sub_2193
+        ipush 1081190986
+        ipush 0
+        call sub_2193
+        ipush -1607885248
+        ipush 0
+        call sub_2193
+        ipush -1493538113
+        ipush 0
+        call sub_2193
+        ipush -2022686288
+        ipush 0
+        call sub_2193
+        ipush -1360947797
+        ipush 0
+        call sub_2193
+    }
+    ipush 0
+    native WAIT 1 0
+    ipush 0
+    pframe 2
+    pset 
+    j @956
+    pframe 2
+    pget 
+    pframe 4
+    pset 
+    pframe 4
+    pget 
+    call sub_12420
+    pframe 2
+    pget 
+    pframe 4
+    pset 
+    pframe 4
+    pget 
+    ipush 1
+    iadd 
+    pframe 4
+    pset 
+    pframe 4
+    pget 
+    pframe 2
+    pset 
+    pframe 2
+    pget 
+    pframe 4
+    pset 
+    pframe 4
+    pget 
+    ipush 20
+    icmple 
+    pframe 4
+    pset 
+    ipush 0
+    pframe 4
+    pget 
+    icmpeq 
+    while (...) 
+    {
+        spush "eb_trainer"
+        native GET_NUMBER_OF_INSTANCES_OF_STREAMED_SCRIPT 1 1
+        pframe 4
+        pset 
+        pframe 4
+        pget 
+        ipush 0
+        icmpeq 
+        pframe 4
+        pset 
+        ipush 0
+        pframe 4
+        pget 
+        icmpeq 
+        if true (...) 
+        {
+        }
+        else
+        {
+            native IS_NETWORK_SESSION 0 1
+            pframe 4
+            pset 
+            pframe 4
+            pget 
+            ipush 0
+            icmpne 
+            pframe 4
+            pset 
+            ipush 0
+            pframe 4
+            pget 
+            icmpeq 
+            if true (...) 
+            {
+            }
+            else
+            {
+                ipush 1732200556
+                ipush 0
+                call sub_2193
+                ipush 1081190986
+                ipush 0
+                call sub_2193
+                ipush -1607885248
+                ipush 0
+                call sub_2193
+                ipush -1493538113
+                ipush 0
+                call sub_2193
+                ipush -2022686288
+                ipush 0
+                call sub_2193
+                ipush -1360947797
+                ipush 0
+                call sub_2193
+            }
+            ipush 0
+            pframe 3
+            pset 
+            j @1922
+            pframe 3
+            pget 
+            pframe 4
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 4
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 4
+            pset 
+            pframe 4
+            pget 
+            ipush 32
+            iadd 
+            pframe 4
+            pset 
+            pframe 4
+            pget 
+            pget 
+            pframe 4
+            pset 
+            pframe 4
+            pget 
+            native DOES_BLIP_EXIST 1 1
+            pframe 4
+            pset 
+            pframe 4
+            pget 
+            ipush 0
+            icmpne 
+            pframe 4
+            pset 
+            ipush 0
+            pframe 4
+            pget 
+            icmpeq 
+            while (...) 
+            {
+                j @1494
+                pframe 3
+                pget 
+                pframe 4
+                pset 
+                ipush 21
+                plocal 0
+                pset 
+                pframe 4
+                pget 
+                ipush 14
+                plocal 0
+                parray 
+                pframe 4
+                pset 
+                pframe 4
+                pget 
+                ipush 32
+                iadd 
+                pframe 4
+                pset 
+                pframe 4
+                pget 
+                pget 
+                pframe 4
+                pset 
+                pframe 4
+                pget 
+                native REMOVE_BLIP 1 0
+                native IS_NETWORK_SESSION 0 1
+                pframe 4
+                pset 
+                pframe 4
+                pget 
+                ipush 0
+                icmpne 
+                pframe 4
+                pset 
+                ipush 0
+                pframe 4
+                pget 
+                icmpeq 
+                if true (...) 
+                {
+                }
+                else
+                {
+                    pframe 3
+                    pget 
+                    pframe 4
+                    pset 
+                    ipush 21
+                    plocal 0
+                    pset 
+                    pframe 4
+                    pget 
+                    ipush 14
+                    plocal 0
+                    parray 
+                    pframe 4
+                    pset 
+                    pframe 4
+                    pget 
+                    ipush 48
+                    iadd 
+                    pframe 4
+                    pset 
+                    pframe 4
+                    pget 
+                    pget 
+                    pframe 4
+                    pset 
+                    pframe 4
+                    pget 
+                    native DOES_OBJECT_EXIST 1 1
+                    pframe 4
+                    pset 
+                    pframe 4
+                    pget 
+                    ipush 0
+                    icmpne 
+                    pframe 4
+                    pset 
+                    ipush 0
+                    pframe 4
+                    pget 
+                    icmpeq 
+                    if true (...) 
+                    {
+                    }
+                    else
+                    {
+                        pframe 3
+                        pget 
+                        pframe 4
+                        pset 
+                        ipush 21
+                        plocal 0
+                        pset 
+                        pframe 4
+                        pget 
+                        ipush 14
+                        plocal 0
+                        parray 
+                        pframe 4
+                        pset 
+                        pframe 4
+                        pget 
+                        ipush 48
+                        iadd 
+                        pframe 4
+                        pset 
+                        pframe 4
+                        pget 
+                        native DELETE_OBJECT 1 0
+                        pframe 3
+                        pget 
+                        pframe 4
+                        pset 
+                        ipush 21
+                        plocal 0
+                        pset 
+                        pframe 4
+                        pget 
+                        ipush 14
+                        plocal 0
+                        parray 
+                        pframe 4
+                        pset 
+                        pframe 4
+                        pget 
+                        ipush 48
+                        iadd 
+                        pframe 4
+                        pset 
+                        pframe 4
+                        pget 
+                        native MARK_OBJECT_AS_NO_LONGER_NEEDED 1 0
+                    }
+                }
+                pframe 3
+                pget 
+                pframe 4
+                pset 
+                pframe 4
+                pget 
+                ipush 1
+                iadd 
+                pframe 4
+                pset 
+                pframe 4
+                pget 
+                pframe 3
+                pset 
+                pframe 3
+                pget 
+                pframe 4
+                pset 
+                pframe 4
+                pget 
+                ipush 20
+                icmple 
+                pframe 4
+                pset 
+                ipush 0
+                pframe 4
+                pget 
+                icmpeq 
+            }
+            native TERMINATE_THIS_SCRIPT 0 0
+        }
+    }
+    ret 0 0
+}
+
+asm sub_1989(...)
+{
+    enter 0 6
+    ipush 0
+    pframe 4
+    pset 
+    call sub_15425
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    native PLAYER_HAS_CHAR 1 1
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    ipush 0
+    icmpne 
+    pframe 5
+    pset 
+    ipush 0
+    pframe 5
+    pget 
+    icmpeq 
+    if true (...) 
+    {
+    }
+    else
+    {
+        call sub_15425
+        pframe 5
+        pset 
+        pframe 5
+        pget 
+        pframe 4
+        native GET_PLAYER_CHAR 2 0
+    }
+    pframe 4
+    pget 
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    pframe 3
+    pset 
+    pframe 3
+    pget 
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    pframe 2
+    pset 
+    pframe 2
+    pget 
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    ret 0 1
+}
+
+asm sub_2193(...)
+{
+    enter 2 7
+    pframe 0
+    pget 
+    pframe 4
+    pset 
+    pframe 1
+    pget 
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    ipush 0
+    icmpne 
+    pframe 6
+    pset 
+    ipush 0
+    pframe 6
+    pget 
+    icmpeq 
+    if true (...) 
+    {
+    }
+    else
+    {
+        pframe 4
+        pget 
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        native HAS_MODEL_LOADED 1 1
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        ipush 0
+        icmpeq 
+        pframe 6
+        pset 
+        ipush 0
+        pframe 6
+        pget 
+        icmpeq 
+        if true (...) 
+        {
+        }
+        else
+        {
+            pframe 4
+            pget 
+            pframe 6
+            pset 
+            pframe 6
+            pget 
+            native REQUEST_MODEL 1 0
+        }
+        j @2499
+    }
+    pframe 4
+    pget 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    native HAS_MODEL_LOADED 1 1
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    ipush 0
+    icmpne 
+    pframe 6
+    pset 
+    ipush 0
+    pframe 6
+    pget 
+    icmpeq 
+    if true (...) 
+    {
+    }
+    else
+    {
+        pframe 4
+        pget 
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        native MARK_MODEL_AS_NO_LONGER_NEEDED 1 0
+    }
+    ret 2 0
+}
+
+asm sub_2502(...)
+{
+    enter 11 33
+    pframe 0
+    pget 
+    pframe 13
+    pset 
+    pframe 1
+    pget 
+    pframe 14
+    pset 
+    pframe 2
+    pget 
+    pframe 15
+    pset 
+    pframe 3
+    pget 
+    pframe 16
+    pset 
+    pframe 4
+    pget 
+    pframe 17
+    pset 
+    pframe 5
+    pget 
+    pframe 18
+    pset 
+    pframe 6
+    pget 
+    pframe 19
+    pset 
+    pframe 7
+    pget 
+    pframe 20
+    pset 
+    pframe 8
+    pget 
+    pframe 21
+    pset 
+    pframe 9
+    pget 
+    pframe 22
+    pset 
+    pframe 10
+    pget 
+    pframe 23
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 40
+    iadd 
+    pframe 28
+    pset 
+    ipush 0
+    pframe 28
+    pget 
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 36
+    iadd 
+    pframe 28
+    pset 
+    pframe 14
+    pget 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pframe 28
+    pget 
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 0
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 0
+    iadd 
+    pframe 28
+    pset 
+    pframe 15
+    pget 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pframe 28
+    pget 
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 0
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 4
+    iadd 
+    pframe 28
+    pset 
+    pframe 16
+    pget 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pframe 28
+    pget 
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 0
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 8
+    iadd 
+    pframe 28
+    pset 
+    pframe 17
+    pget 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pframe 28
+    pget 
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 0
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 12
+    iadd 
+    pframe 28
+    pset 
+    pframe 18
+    pget 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pframe 28
+    pget 
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 16
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 0
+    iadd 
+    pframe 28
+    pset 
+    pframe 19
+    pget 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pframe 28
+    pget 
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 16
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 4
+    iadd 
+    pframe 28
+    pset 
+    pframe 20
+    pget 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pframe 28
+    pget 
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 16
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 8
+    iadd 
+    pframe 28
+    pset 
+    pframe 21
+    pget 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pframe 28
+    pget 
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 16
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 12
+    iadd 
+    pframe 28
+    pset 
+    pframe 22
+    pget 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pframe 28
+    pget 
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 44
+    iadd 
+    pframe 28
+    pset 
+    fpush 0.60000000
+    pframe 28
+    pget 
+    pset 
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 32
+    iadd 
+    pframe 28
+    pset 
+    pframe 13
+    pget 
+    pframe 29
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 29
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    ipush 0
+    iadd 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    ipush 8
+    iadd 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pget 
+    pframe 29
+    pset 
+    pframe 13
+    pget 
+    pframe 30
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 30
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 30
+    pset 
+    pframe 30
+    pget 
+    ipush 0
+    iadd 
+    pframe 30
+    pset 
+    pframe 30
+    pget 
+    ipush 4
+    iadd 
+    pframe 30
+    pset 
+    pframe 30
+    pget 
+    pget 
+    pframe 30
+    pset 
+    pframe 13
+    pget 
+    pframe 31
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 31
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 31
+    pset 
+    pframe 31
+    pget 
+    ipush 0
+    iadd 
+    pframe 31
+    pset 
+    pframe 31
+    pget 
+    ipush 0
+    iadd 
+    pframe 31
+    pset 
+    pframe 31
+    pget 
+    pget 
+    pframe 31
+    pset 
+    pframe 31
+    pget 
+    pframe 30
+    pget 
+    pframe 29
+    pget 
+    pframe 28
+    pget 
+    native ADD_BLIP_FOR_COORD 4 0
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 32
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    pget 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 255
+    native CHANGE_BLIP_ALPHA 2 0
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 32
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    pget 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 62
+    native CHANGE_BLIP_SPRITE 2 0
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 36
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    pget 
+    pframe 28
+    pset 
+    pframe 13
+    pget 
+    pframe 29
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 29
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    ipush 32
+    iadd 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pget 
+    pframe 29
+    pset 
+    pframe 29
+    pget 
+    pframe 28
+    pget 
+    native CHANGE_BLIP_NAME_FROM_ASCII 2 0
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 32
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    pget 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 11
+    native CHANGE_BLIP_COLOUR 2 0
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 32
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    pget 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 2
+    native CHANGE_BLIP_DISPLAY 2 0
+    pframe 13
+    pget 
+    pframe 28
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 28
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 32
+    iadd 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    pget 
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    fpush 0.50000000
+    native CHANGE_BLIP_SCALE 2 0
+    native IS_NETWORK_SESSION 0 1
+    pframe 28
+    pset 
+    pframe 28
+    pget 
+    ipush 0
+    icmpne 
+    pframe 28
+    pset 
+    ipush 0
+    pframe 28
+    pget 
+    icmpeq 
+    if true (...) 
+    {
+    }
+    else
+    {
+        pframe 23
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 0
+        icmpeq 
+        pframe 28
+        pset 
+        ipush 0
+        pframe 28
+        pget 
+        icmpeq 
+        if true (...) 
+        {
+        }
+        else
+        {
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 44
+            iadd 
+            pframe 28
+            pset 
+            fpush 0.60000000
+            pframe 28
+            pget 
+            pset 
+            ipush 1732200556
+            pframe 24
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 8
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            fpush 1.50000000
+            fadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 25
+            pset 
+            fpush 0.00000000
+            pframe 26
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 12
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            fpush 90.00000000
+            fadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 27
+            pset 
+            j @7702
+        }
+        pframe 23
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 1
+        icmpeq 
+        pframe 28
+        pset 
+        ipush 0
+        pframe 28
+        pget 
+        icmpeq 
+        if true (...) 
+        {
+        }
+        else
+        {
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 44
+            iadd 
+            pframe 28
+            pset 
+            fpush 1.00000000
+            pframe 28
+            pget 
+            pset 
+            ipush 1081190986
+            pframe 24
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 8
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            fpush 4.00000000
+            fadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 25
+            pset 
+            fpush 180.00000000
+            pframe 26
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 12
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 27
+            pset 
+            j @7702
+        }
+        pframe 23
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 2
+        icmpeq 
+        pframe 28
+        pset 
+        ipush 0
+        pframe 28
+        pget 
+        icmpeq 
+        if true (...) 
+        {
+        }
+        else
+        {
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 44
+            iadd 
+            pframe 28
+            pset 
+            fpush 1.00000000
+            pframe 28
+            pget 
+            pset 
+            ipush -1607885248
+            pframe 24
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 8
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            fpush 4.00000000
+            fadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 25
+            pset 
+            fpush 180.00000000
+            pframe 26
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 12
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 27
+            pset 
+            j @7702
+        }
+        pframe 23
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 3
+        icmpeq 
+        pframe 28
+        pset 
+        ipush 0
+        pframe 28
+        pget 
+        icmpeq 
+        if true (...) 
+        {
+        }
+        else
+        {
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 44
+            iadd 
+            pframe 28
+            pset 
+            fpush 0.60000000
+            pframe 28
+            pget 
+            pset 
+            ipush -1493538113
+            pframe 24
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 8
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            fpush 1.00000000
+            fsub 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 25
+            pset 
+            fpush 0.00000000
+            pframe 26
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 12
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 27
+            pset 
+            j @7702
+        }
+        pframe 23
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 4
+        icmpeq 
+        pframe 28
+        pset 
+        ipush 0
+        pframe 28
+        pget 
+        icmpeq 
+        if true (...) 
+        {
+        }
+        else
+        {
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 44
+            iadd 
+            pframe 28
+            pset 
+            fpush 1.00000000
+            pframe 28
+            pget 
+            pset 
+            ipush -2022686288
+            pframe 24
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 8
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            fpush 4.00000000
+            fadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 25
+            pset 
+            fpush 180.00000000
+            pframe 26
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 12
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 27
+            pset 
+            j @7702
+        }
+        pframe 23
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 5
+        icmpeq 
+        pframe 28
+        pset 
+        ipush 0
+        pframe 28
+        pget 
+        icmpeq 
+        if true (...) 
+        {
+        }
+        else
+        {
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 44
+            iadd 
+            pframe 28
+            pset 
+            fpush 4.00000000
+            pframe 28
+            pget 
+            pset 
+            ipush -1360947797
+            pframe 24
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 8
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 25
+            pset 
+            fpush 90.00000000
+            pframe 26
+            pset 
+            pframe 13
+            pget 
+            pframe 28
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 28
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 0
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            ipush 12
+            iadd 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pget 
+            pframe 28
+            pset 
+            pframe 28
+            pget 
+            pframe 27
+            pset 
+        }
+        pframe 24
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 1
+        call sub_2193
+        pframe 13
+        pget 
+        pframe 28
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 28
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 48
+        iadd 
+        pframe 28
+        pset 
+        pframe 13
+        pget 
+        pframe 29
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 29
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 29
+        pset 
+        pframe 29
+        pget 
+        ipush 0
+        iadd 
+        pframe 29
+        pset 
+        pframe 29
+        pget 
+        ipush 4
+        iadd 
+        pframe 29
+        pset 
+        pframe 29
+        pget 
+        pget 
+        pframe 29
+        pset 
+        pframe 13
+        pget 
+        pframe 30
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 30
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 30
+        pset 
+        pframe 30
+        pget 
+        ipush 0
+        iadd 
+        pframe 30
+        pset 
+        pframe 30
+        pget 
+        ipush 0
+        iadd 
+        pframe 30
+        pset 
+        pframe 30
+        pget 
+        pget 
+        pframe 30
+        pset 
+        pframe 24
+        pget 
+        pframe 31
+        pset 
+        pframe 25
+        pget 
+        pframe 32
+        pset 
+        pframe 31
+        pget 
+        pframe 30
+        pget 
+        pframe 29
+        pget 
+        pframe 32
+        pget 
+        pframe 28
+        pget 
+        ipush 1
+        native CREATE_OBJECT_NO_OFFSET 6 0
+        j @8111
+        ipush 0
+        native WAIT 1 0
+        pframe 13
+        pget 
+        pframe 28
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 28
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 48
+        iadd 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        native DOES_OBJECT_EXIST 1 1
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 0
+        icmpeq 
+        pframe 28
+        pset 
+        ipush 0
+        pframe 28
+        pget 
+        icmpeq 
+        while (...) 
+        {
+        }
+        pframe 13
+        pget 
+        pframe 28
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 28
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 48
+        iadd 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        pget 
+        pframe 28
+        pset 
+        pframe 26
+        pget 
+        pframe 29
+        pset 
+        pframe 27
+        pget 
+        pframe 30
+        pset 
+        pframe 28
+        pget 
+        pframe 29
+        pget 
+        fpush 0.00000000
+        pframe 30
+        pget 
+        native SET_OBJECT_ROTATION 4 0
+        pframe 13
+        pget 
+        pframe 28
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 28
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 48
+        iadd 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 1
+        native SET_OBJECT_VISIBLE 2 0
+        pframe 13
+        pget 
+        pframe 28
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 28
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 48
+        iadd 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 0
+        native SET_OBJECT_COLLISION 2 0
+        pframe 13
+        pget 
+        pframe 28
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 28
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 48
+        iadd 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 1
+        native SET_OBJECT_INVINCIBLE 2 0
+        pframe 13
+        pget 
+        pframe 28
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 28
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 48
+        iadd 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 1
+        ipush 1
+        ipush 1
+        ipush 1
+        ipush 1
+        native SET_OBJECT_PROOFS 6 0
+        pframe 13
+        pget 
+        pframe 28
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 28
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 48
+        iadd 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 1
+        native FREEZE_OBJECT_POSITION 2 0
+        pframe 13
+        pget 
+        pframe 28
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 28
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 52
+        iadd 
+        pframe 28
+        pset 
+        pframe 13
+        pget 
+        pframe 29
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 29
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 29
+        pset 
+        pframe 29
+        pget 
+        ipush 48
+        iadd 
+        pframe 29
+        pset 
+        pframe 29
+        pget 
+        pget 
+        pframe 29
+        pset 
+        pframe 29
+        pget 
+        pframe 28
+        pget 
+        native GET_NETWORK_ID_FROM_OBJECT 2 0
+        pframe 13
+        pget 
+        pframe 28
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 28
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 52
+        iadd 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        pget 
+        pframe 28
+        pset 
+        pframe 28
+        pget 
+        ipush 0
+        native SET_NETWORK_ID_CAN_MIGRATE 2 0
+    }
+    ret 11 0
+}
+
+asm sub_9244(...)
+{
+    enter 2 10
+    pframe 0
+    pget 
+    pframe 4
+    pset 
+    pframe 1
+    pget 
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    pframe 6
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 6
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    ipush 40
+    iadd 
+    pframe 6
+    pset 
+    ipush 1
+    pframe 6
+    pget 
+    pset 
+    native IS_NETWORK_SESSION 0 1
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    ipush 0
+    icmpne 
+    pframe 6
+    pset 
+    ipush 0
+    pframe 6
+    pget 
+    icmpeq 
+    if true (...) 
+    {
+    }
+    else
+    {
+        pframe 5
+        pget 
+        pframe 6
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 6
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        ipush 48
+        iadd 
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        pget 
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        ipush 0
+        native SET_OBJECT_VISIBLE 2 0
+    }
+    pframe 5
+    pget 
+    pframe 6
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 6
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    ipush 16
+    iadd 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    ipush 8
+    iadd 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    pget 
+    pframe 6
+    pset 
+    pframe 5
+    pget 
+    pframe 7
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 7
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 7
+    pset 
+    pframe 7
+    pget 
+    ipush 16
+    iadd 
+    pframe 7
+    pset 
+    pframe 7
+    pget 
+    ipush 4
+    iadd 
+    pframe 7
+    pset 
+    pframe 7
+    pget 
+    pget 
+    pframe 7
+    pset 
+    pframe 5
+    pget 
+    pframe 8
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 8
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 8
+    pset 
+    pframe 8
+    pget 
+    ipush 16
+    iadd 
+    pframe 8
+    pset 
+    pframe 8
+    pget 
+    ipush 0
+    iadd 
+    pframe 8
+    pset 
+    pframe 8
+    pget 
+    pget 
+    pframe 8
+    pset 
+    pframe 4
+    pget 
+    pframe 9
+    pset 
+    pframe 9
+    pget 
+    pframe 8
+    pget 
+    pframe 7
+    pget 
+    pframe 6
+    pget 
+    native SET_CHAR_COORDINATES 4 0
+    pframe 5
+    pget 
+    pframe 6
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 6
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    ipush 16
+    iadd 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    ipush 12
+    iadd 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    pget 
+    pframe 6
+    pset 
+    pframe 4
+    pget 
+    pframe 7
+    pset 
+    pframe 7
+    pget 
+    pframe 6
+    pget 
+    native SET_CHAR_HEADING 2 0
+    native IS_NETWORK_SESSION 0 1
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    ipush 0
+    icmpne 
+    pframe 6
+    pset 
+    ipush 0
+    pframe 6
+    pget 
+    icmpeq 
+    if true (...) 
+    {
+    }
+    else
+    {
+        pframe 5
+        pget 
+        pframe 6
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 6
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        ipush 48
+        iadd 
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        pget 
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        ipush 1
+        native SET_OBJECT_VISIBLE 2 0
+    }
+    call sub_1989
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    native SET_CAM_BEHIND_PED 1 0
+    pframe 5
+    pget 
+    pframe 6
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 6
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    ipush 40
+    iadd 
+    pframe 6
+    pset 
+    ipush 0
+    pframe 6
+    pget 
+    pset 
+    ret 2 0
+}
+
+asm sub_10313(...)
+{
+    enter 2 13
+    pframe 0
+    pget 
+    pframe 4
+    pset 
+    pframe 1
+    pget 
+    pframe 5
+    pset 
+    pframe 4
+    pget 
+    pframe 7
+    pset 
+    pframe 7
+    pget 
+    native IS_CHAR_IN_ANY_CAR 1 1
+    pframe 7
+    pset 
+    pframe 7
+    pget 
+    ipush 0
+    icmpne 
+    pframe 7
+    pset 
+    ipush 0
+    pframe 7
+    pget 
+    icmpeq 
+    if true (...) 
+    {
+    }
+    else
+    {
+        pframe 5
+        pget 
+        pframe 7
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 7
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 7
+        pset 
+        pframe 7
+        pget 
+        ipush 40
+        iadd 
+        pframe 7
+        pset 
+        ipush 1
+        pframe 7
+        pget 
+        pset 
+        pframe 4
+        pget 
+        pframe 7
+        pset 
+        pframe 7
+        pget 
+        plocal 295
+        native GET_CAR_CHAR_IS_USING 2 0
+        native IS_NETWORK_SESSION 0 1
+        pframe 7
+        pset 
+        pframe 7
+        pget 
+        ipush 0
+        icmpne 
+        pframe 7
+        pset 
+        ipush 0
+        pframe 7
+        pget 
+        icmpeq 
+        if true (...) 
+        {
+        }
+        else
+        {
+            pframe 5
+            pget 
+            pframe 7
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 7
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 7
+            pset 
+            pframe 7
+            pget 
+            ipush 32
+            iadd 
+            pframe 7
+            pset 
+            pframe 7
+            pget 
+            pget 
+            pframe 7
+            pset 
+            pframe 7
+            pget 
+            ipush 0
+            native CHANGE_BLIP_ALPHA 2 0
+            pframe 5
+            pget 
+            pframe 7
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 7
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 7
+            pset 
+            pframe 7
+            pget 
+            ipush 48
+            iadd 
+            pframe 7
+            pset 
+            pframe 7
+            pget 
+            pget 
+            pframe 7
+            pset 
+            pframe 7
+            pget 
+            ipush 0
+            native SET_OBJECT_VISIBLE 2 0
+            plocal 295
+            pget 
+            pframe 7
+            pset 
+            pframe 7
+            pget 
+            pframe 6
+            native GET_NETWORK_ID_FROM_VEHICLE 2 0
+            pframe 6
+            pget 
+            pframe 7
+            pset 
+            pframe 7
+            pget 
+            native REQUEST_CONTROL_OF_NETWORK_ID 1 1
+            pframe 7
+            pset 
+            ipush 0
+            plocal 296
+            pset 
+            j @11351
+            plocal 296
+            pget 
+            pframe 8
+            pset 
+            pframe 8
+            pget 
+            ipush 1
+            iadd 
+            pframe 8
+            pset 
+            pframe 8
+            pget 
+            plocal 296
+            pset 
+            pframe 6
+            pget 
+            pframe 8
+            pset 
+            pframe 8
+            pget 
+            native REQUEST_CONTROL_OF_NETWORK_ID 1 1
+            pframe 8
+            pset 
+            plocal 296
+            pget 
+            pframe 9
+            pset 
+            pframe 9
+            pget 
+            ipush 99
+            icmpgt 
+            pframe 9
+            pset 
+            ipush 0
+            pframe 9
+            pget 
+            icmpeq 
+            while (...) 
+            {
+                j @11339
+                pframe 5
+                pget 
+                pframe 9
+                pset 
+                ipush 21
+                plocal 0
+                pset 
+                pframe 9
+                pget 
+                ipush 14
+                plocal 0
+                parray 
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                ipush 32
+                iadd 
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                pget 
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                ipush 255
+                native CHANGE_BLIP_ALPHA 2 0
+                pframe 5
+                pget 
+                pframe 9
+                pset 
+                ipush 21
+                plocal 0
+                pset 
+                pframe 9
+                pget 
+                ipush 14
+                plocal 0
+                parray 
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                ipush 48
+                iadd 
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                pget 
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                ipush 1
+                native SET_OBJECT_VISIBLE 2 0
+                pframe 5
+                pget 
+                pframe 9
+                pset 
+                ipush 21
+                plocal 0
+                pset 
+                pframe 9
+                pget 
+                ipush 14
+                plocal 0
+                parray 
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                ipush 40
+                iadd 
+                pframe 9
+                pset 
+                ipush 0
+                pframe 9
+                pget 
+                pset 
+                j @12417
+                ipush 0
+                native WAIT 1 0
+                pframe 6
+                pget 
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                native HAS_CONTROL_OF_NETWORK_ID 1 1
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                ipush 0
+                icmpeq 
+                pframe 9
+                pset 
+                ipush 0
+                pframe 9
+                pget 
+                icmpeq 
+            }
+        }
+        pframe 5
+        pget 
+        pframe 9
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 9
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        ipush 16
+        iadd 
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        ipush 8
+        iadd 
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        pget 
+        pframe 9
+        pset 
+        pframe 5
+        pget 
+        pframe 10
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 10
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 10
+        pset 
+        pframe 10
+        pget 
+        ipush 16
+        iadd 
+        pframe 10
+        pset 
+        pframe 10
+        pget 
+        ipush 4
+        iadd 
+        pframe 10
+        pset 
+        pframe 10
+        pget 
+        pget 
+        pframe 10
+        pset 
+        pframe 5
+        pget 
+        pframe 11
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 11
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 11
+        pset 
+        pframe 11
+        pget 
+        ipush 16
+        iadd 
+        pframe 11
+        pset 
+        pframe 11
+        pget 
+        ipush 0
+        iadd 
+        pframe 11
+        pset 
+        pframe 11
+        pget 
+        pget 
+        pframe 11
+        pset 
+        plocal 295
+        pget 
+        pframe 12
+        pset 
+        pframe 12
+        pget 
+        pframe 11
+        pget 
+        pframe 10
+        pget 
+        pframe 9
+        pget 
+        native SET_CAR_COORDINATES 4 0
+        pframe 5
+        pget 
+        pframe 9
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 9
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        ipush 16
+        iadd 
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        ipush 12
+        iadd 
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        pget 
+        pframe 9
+        pset 
+        plocal 295
+        pget 
+        pframe 10
+        pset 
+        pframe 10
+        pget 
+        pframe 9
+        pget 
+        native SET_CAR_HEADING 2 0
+        plocal 295
+        pget 
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        fpush 0.00000000
+        native SET_CAR_FORWARD_SPEED 2 0
+        plocal 295
+        pget 
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        ipush 1
+        native RESET_CAR_WHEELS 2 0
+        plocal 295
+        pget 
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        native FIX_CAR 1 0
+        plocal 295
+        pget 
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        fpush 0.00000000
+        native SET_VEHICLE_DIRT_LEVEL 2 0
+        native IS_NETWORK_SESSION 0 1
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        ipush 0
+        icmpne 
+        pframe 9
+        pset 
+        ipush 0
+        pframe 9
+        pget 
+        icmpeq 
+        if true (...) 
+        {
+        }
+        else
+        {
+            pframe 5
+            pget 
+            pframe 9
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 9
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 9
+            pset 
+            pframe 9
+            pget 
+            ipush 48
+            iadd 
+            pframe 9
+            pset 
+            pframe 9
+            pget 
+            pget 
+            pframe 9
+            pset 
+            pframe 9
+            pget 
+            ipush 1
+            native SET_OBJECT_VISIBLE 2 0
+            pframe 5
+            pget 
+            pframe 9
+            pset 
+            ipush 21
+            plocal 0
+            pset 
+            pframe 9
+            pget 
+            ipush 14
+            plocal 0
+            parray 
+            pframe 9
+            pset 
+            pframe 9
+            pget 
+            ipush 32
+            iadd 
+            pframe 9
+            pset 
+            pframe 9
+            pget 
+            pget 
+            pframe 9
+            pset 
+            pframe 9
+            pget 
+            ipush 255
+            native CHANGE_BLIP_ALPHA 2 0
+        }
+        pframe 5
+        pget 
+        pframe 9
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 9
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 9
+        pset 
+        pframe 9
+        pget 
+        ipush 40
+        iadd 
+        pframe 9
+        pset 
+        ipush 0
+        pframe 9
+        pget 
+        pset 
+    }
+    ret 2 0
+}
+
+asm sub_12420(...)
+{
+    enter 1 12
+    pframe 0
+    pget 
+    pframe 3
+    pset 
+    native IS_NETWORK_SESSION 0 1
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    ipush 0
+    icmpne 
+    pframe 5
+    pset 
+    ipush 0
+    pframe 5
+    pget 
+    icmpeq 
+    if true (...) 
+    {
+    }
+    else
+    {
+        ipush 0
+        pframe 4
+        pset 
+        j @13830
+        pframe 4
+        pget 
+        pframe 5
+        pset 
+        pframe 5
+        pget 
+        native IS_NETWORK_PLAYER_ACTIVE 1 1
+        pframe 5
+        pset 
+        pframe 5
+        pget 
+        ipush 0
+        icmpeq 
+        pframe 5
+        pset 
+        ipush 0
+        pframe 5
+        pget 
+        icmpeq 
+        while (...) 
+        {
+            pframe 4
+            pget 
+            pframe 5
+            pset 
+            pframe 5
+            pget 
+            plocal 297
+            native GET_PLAYER_CHAR 2 0
+            plocal 297
+            pget 
+            pframe 5
+            pset 
+            pframe 5
+            pget 
+            native DOES_CHAR_EXIST 1 1
+            pframe 5
+            pset 
+            pframe 5
+            pget 
+            ipush 0
+            icmpne 
+            pframe 5
+            pset 
+            ipush 0
+            pframe 5
+            pget 
+            icmpeq 
+            if true (...) 
+            {
+            }
+            else
+            {
+                pframe 3
+                pget 
+                pframe 5
+                pset 
+                ipush 21
+                plocal 0
+                pset 
+                pframe 5
+                pget 
+                ipush 14
+                plocal 0
+                parray 
+                pframe 5
+                pset 
+                pframe 5
+                pget 
+                ipush 44
+                iadd 
+                pframe 5
+                pset 
+                pframe 5
+                pget 
+                pget 
+                pframe 5
+                pset 
+                pframe 3
+                pget 
+                pframe 6
+                pset 
+                ipush 21
+                plocal 0
+                pset 
+                pframe 6
+                pget 
+                ipush 14
+                plocal 0
+                parray 
+                pframe 6
+                pset 
+                pframe 6
+                pget 
+                ipush 44
+                iadd 
+                pframe 6
+                pset 
+                pframe 6
+                pget 
+                pget 
+                pframe 6
+                pset 
+                pframe 3
+                pget 
+                pframe 7
+                pset 
+                ipush 21
+                plocal 0
+                pset 
+                pframe 7
+                pget 
+                ipush 14
+                plocal 0
+                parray 
+                pframe 7
+                pset 
+                pframe 7
+                pget 
+                ipush 44
+                iadd 
+                pframe 7
+                pset 
+                pframe 7
+                pget 
+                pget 
+                pframe 7
+                pset 
+                pframe 3
+                pget 
+                pframe 8
+                pset 
+                ipush 21
+                plocal 0
+                pset 
+                pframe 8
+                pget 
+                ipush 14
+                plocal 0
+                parray 
+                pframe 8
+                pset 
+                pframe 8
+                pget 
+                ipush 0
+                iadd 
+                pframe 8
+                pset 
+                pframe 8
+                pget 
+                ipush 8
+                iadd 
+                pframe 8
+                pset 
+                pframe 8
+                pget 
+                pget 
+                pframe 8
+                pset 
+                pframe 3
+                pget 
+                pframe 9
+                pset 
+                ipush 21
+                plocal 0
+                pset 
+                pframe 9
+                pget 
+                ipush 14
+                plocal 0
+                parray 
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                ipush 0
+                iadd 
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                ipush 4
+                iadd 
+                pframe 9
+                pset 
+                pframe 9
+                pget 
+                pget 
+                pframe 9
+                pset 
+                pframe 3
+                pget 
+                pframe 10
+                pset 
+                ipush 21
+                plocal 0
+                pset 
+                pframe 10
+                pget 
+                ipush 14
+                plocal 0
+                parray 
+                pframe 10
+                pset 
+                pframe 10
+                pget 
+                ipush 0
+                iadd 
+                pframe 10
+                pset 
+                pframe 10
+                pget 
+                ipush 0
+                iadd 
+                pframe 10
+                pset 
+                pframe 10
+                pget 
+                pget 
+                pframe 10
+                pset 
+                plocal 297
+                pget 
+                pframe 11
+                pset 
+                pframe 11
+                pget 
+                pframe 10
+                pget 
+                pframe 9
+                pget 
+                pframe 8
+                pget 
+                pframe 7
+                pget 
+                pframe 6
+                pget 
+                pframe 5
+                pget 
+                ipush 0
+                native LOCATE_CHAR_ANY_MEANS_3D 8 1
+                pframe 5
+                pset 
+                pframe 5
+                pget 
+                ipush 0
+                icmpne 
+                pframe 5
+                pset 
+                ipush 0
+                pframe 5
+                pget 
+                icmpeq 
+                if true (...) 
+                {
+                }
+                else
+                {
+                    pframe 3
+                    pget 
+                    pframe 5
+                    pset 
+                    ipush 21
+                    plocal 0
+                    pset 
+                    pframe 5
+                    pget 
+                    ipush 14
+                    plocal 0
+                    parray 
+                    pframe 5
+                    pset 
+                    pframe 5
+                    pget 
+                    ipush 40
+                    iadd 
+                    pframe 5
+                    pset 
+                    pframe 5
+                    pget 
+                    pget 
+                    pframe 5
+                    pset 
+                    pframe 5
+                    pget 
+                    ipush 0
+                    icmpeq 
+                    pframe 5
+                    pset 
+                    ipush 0
+                    pframe 5
+                    pget 
+                    icmpeq 
+                    if true (...) 
+                    {
+                    }
+                    else
+                    {
+                        plocal 297
+                        pget 
+                        pframe 5
+                        pset 
+                        pframe 5
+                        pget 
+                        native IS_CHAR_IN_ANY_CAR 1 1
+                        pframe 5
+                        pset 
+                        pframe 5
+                        pget 
+                        ipush 0
+                        icmpne 
+                        pframe 5
+                        pset 
+                        ipush 0
+                        pframe 5
+                        pget 
+                        icmpeq 
+                        if true (...) 
+                        {
+                        }
+                        else
+                        {
+                            plocal 297
+                            pget 
+                            pframe 5
+                            pset 
+                            pframe 3
+                            pget 
+                            pframe 6
+                            pset 
+                            pframe 5
+                            pget 
+                            pframe 6
+                            pget 
+                            call sub_10313
+                            j @13782
+                        }
+                        call sub_1989
+                        pframe 5
+                        pset 
+                        plocal 297
+                        pget 
+                        pframe 6
+                        pset 
+                        pframe 5
+                        pget 
+                        pframe 6
+                        pget 
+                        icmpeq 
+                        pframe 5
+                        pset 
+                        ipush 0
+                        pframe 5
+                        pget 
+                        icmpeq 
+                        if true (...) 
+                        {
+                        }
+                        else
+                        {
+                            plocal 297
+                            pget 
+                            pframe 5
+                            pset 
+                            pframe 3
+                            pget 
+                            pframe 6
+                            pset 
+                            pframe 5
+                            pget 
+                            pframe 6
+                            pget 
+                            call sub_9244
+                        }
+                    }
+                }
+            }
+            pframe 4
+            pget 
+            pframe 5
+            pset 
+            pframe 5
+            pget 
+            ipush 1
+            iadd 
+            pframe 5
+            pset 
+            pframe 5
+            pget 
+            pframe 4
+            pset 
+            pframe 4
+            pget 
+            pframe 5
+            pset 
+            pframe 5
+            pget 
+            ipush 16
+            icmple 
+            pframe 5
+            pset 
+            ipush 0
+            pframe 5
+            pget 
+            icmpeq 
+        }
+        j @15422
+    }
+    pframe 3
+    pget 
+    pframe 5
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 5
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    ipush 40
+    iadd 
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    pget 
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    ipush 0
+    icmpeq 
+    pframe 5
+    pset 
+    ipush 0
+    pframe 5
+    pget 
+    icmpeq 
+    if true (...) 
+    {
+    }
+    else
+    {
+        pframe 3
+        pget 
+        pframe 5
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 5
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 5
+        pset 
+        pframe 5
+        pget 
+        ipush 0
+        iadd 
+        pframe 5
+        pset 
+        pframe 5
+        pget 
+        ipush 8
+        iadd 
+        pframe 5
+        pset 
+        pframe 5
+        pget 
+        pget 
+        pframe 5
+        pset 
+        pframe 5
+        pget 
+        fpush 1.00000000
+        fsub 
+        pframe 5
+        pset 
+        pframe 3
+        pget 
+        pframe 6
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 6
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        ipush 0
+        iadd 
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        ipush 4
+        iadd 
+        pframe 6
+        pset 
+        pframe 6
+        pget 
+        pget 
+        pframe 6
+        pset 
+        pframe 3
+        pget 
+        pframe 7
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 7
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 7
+        pset 
+        pframe 7
+        pget 
+        ipush 0
+        iadd 
+        pframe 7
+        pset 
+        pframe 7
+        pget 
+        ipush 0
+        iadd 
+        pframe 7
+        pset 
+        pframe 7
+        pget 
+        pget 
+        pframe 7
+        pset 
+        pframe 7
+        pget 
+        pframe 6
+        pget 
+        pframe 5
+        pget 
+        fpush 0.80000000
+        fpush 0.20000000
+        ipush 0
+        ipush 132
+        ipush 202
+        ipush 255
+        native DRAW_COLOURED_CYLINDER 9 0
+    }
+    pframe 3
+    pget 
+    pframe 5
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 5
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    ipush 44
+    iadd 
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    pget 
+    pframe 5
+    pset 
+    pframe 3
+    pget 
+    pframe 6
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 6
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    ipush 44
+    iadd 
+    pframe 6
+    pset 
+    pframe 6
+    pget 
+    pget 
+    pframe 6
+    pset 
+    pframe 3
+    pget 
+    pframe 7
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 7
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 7
+    pset 
+    pframe 7
+    pget 
+    ipush 44
+    iadd 
+    pframe 7
+    pset 
+    pframe 7
+    pget 
+    pget 
+    pframe 7
+    pset 
+    pframe 3
+    pget 
+    pframe 8
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 8
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 8
+    pset 
+    pframe 8
+    pget 
+    ipush 0
+    iadd 
+    pframe 8
+    pset 
+    pframe 8
+    pget 
+    ipush 8
+    iadd 
+    pframe 8
+    pset 
+    pframe 8
+    pget 
+    pget 
+    pframe 8
+    pset 
+    pframe 3
+    pget 
+    pframe 9
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 9
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 9
+    pset 
+    pframe 9
+    pget 
+    ipush 0
+    iadd 
+    pframe 9
+    pset 
+    pframe 9
+    pget 
+    ipush 4
+    iadd 
+    pframe 9
+    pset 
+    pframe 9
+    pget 
+    pget 
+    pframe 9
+    pset 
+    pframe 3
+    pget 
+    pframe 10
+    pset 
+    ipush 21
+    plocal 0
+    pset 
+    pframe 10
+    pget 
+    ipush 14
+    plocal 0
+    parray 
+    pframe 10
+    pset 
+    pframe 10
+    pget 
+    ipush 0
+    iadd 
+    pframe 10
+    pset 
+    pframe 10
+    pget 
+    ipush 0
+    iadd 
+    pframe 10
+    pset 
+    pframe 10
+    pget 
+    pget 
+    pframe 10
+    pset 
+    call sub_1989
+    pframe 11
+    pset 
+    pframe 11
+    pget 
+    pframe 10
+    pget 
+    pframe 9
+    pget 
+    pframe 8
+    pget 
+    pframe 7
+    pget 
+    pframe 6
+    pget 
+    pframe 5
+    pget 
+    ipush 0
+    native LOCATE_CHAR_ANY_MEANS_3D 8 1
+    pframe 5
+    pset 
+    pframe 5
+    pget 
+    ipush 0
+    icmpne 
+    pframe 5
+    pset 
+    ipush 0
+    pframe 5
+    pget 
+    icmpeq 
+    if true (...) 
+    {
+    }
+    else
+    {
+        pframe 3
+        pget 
+        pframe 5
+        pset 
+        ipush 21
+        plocal 0
+        pset 
+        pframe 5
+        pget 
+        ipush 14
+        plocal 0
+        parray 
+        pframe 5
+        pset 
+        pframe 5
+        pget 
+        ipush 40
+        iadd 
+        pframe 5
+        pset 
+        pframe 5
+        pget 
+        pget 
+        pframe 5
+        pset 
+        pframe 5
+        pget 
+        ipush 0
+        icmpeq 
+        pframe 5
+        pset 
+        ipush 0
+        pframe 5
+        pget 
+        icmpeq 
+        if true (...) 
+        {
+        }
+        else
+        {
+            call sub_1989
+            pframe 5
+            pset 
+            pframe 5
+            pget 
+            native IS_CHAR_IN_ANY_CAR 1 1
+            pframe 5
+            pset 
+            pframe 5
+            pget 
+            ipush 0
+            icmpne 
+            pframe 5
+            pset 
+            ipush 0
+            pframe 5
+            pget 
+            icmpeq 
+            if true (...) 
+            {
+            }
+            else
+            {
+                call sub_1989
+                pframe 5
+                pset 
+                pframe 3
+                pget 
+                pframe 6
+                pset 
+                pframe 5
+                pget 
+                pframe 6
+                pget 
+                call sub_10313
+                j @15422
+            }
+            call sub_1989
+            pframe 5
+            pset 
+            pframe 3
+            pget 
+            pframe 6
+            pset 
+            pframe 5
+            pget 
+            pframe 6
+            pget 
+            call sub_9244
+        }
+    }
+    ret 1 0
+}
+
+asm sub_15425(...)
+{
+    enter 0 5
+    native GET_PLAYER_ID 0 1
+    pframe 4
+    pset 
+    pframe 4
+    pget 
+    pframe 3
+    pset 
+    pframe 3
+    pget 
+    pframe 4
+    pset 
+    pframe 4
+    pget 
+    pframe 2
+    pset 
+    pframe 2
+    pget 
+    pframe 4
+    pset 
+    pframe 4
+    pget 
+    ret 0 1
+}

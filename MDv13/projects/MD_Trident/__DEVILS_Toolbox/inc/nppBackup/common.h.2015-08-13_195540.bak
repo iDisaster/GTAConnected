@@ -1,0 +1,155 @@
+/*	---------------------------------------------------------------
+	 This header contains GTAIV/EFLC PC script common functions.
+
+	 This file is a part of scocl project (C) Alexander Blade 2011
+	---------------------------------------------------------------  */
+
+#pragma once
+
+//#include "natives.h"
+//#include "consts.h"
+
+
+void print(char* text){
+CLEAR_PRINTS();
+CLEAR_SMALL_PRINTS();
+ADD_NEXT_MESSAGE_TO_PREVIOUS_BRIEFS(false);
+PRINT_STRING_WITH_LITERAL_STRING_NOW("STRING", text,3500, true);
+}
+
+//Nathans Functions//
+
+bool NETWORK_PLAYER_IS_ON_FRIENDS_LIST(int player_id) 
+{
+	register int i;
+	for(i = 0;i < NETWORK_GET_FRIEND_COUNT(); i++)
+	{
+		if(COMPARE_STRING(GET_PLAYER_NAME(player_id),NETWORK_GET_FRIEND_NAME(i))) return true;
+	}
+	return false;
+}
+
+bool FRIENDS_LIST_CONTAINS_GAMERTAG(char* Gamertag)
+{
+	register int i;
+	for(i = 0;i < NETWORK_GET_FRIEND_COUNT(); i++)
+	{
+		if(COMPARE_STRING(Gamertag,NETWORK_GET_FRIEND_NAME(i))) return true;
+	}
+	return false;
+}
+
+bool IS_THIS_PED_A_PLAYER(Ped query_ped){
+	if(!IS_NETWORK_SESSION()) return false;
+	int i,tmp_ped;
+	for(i=0;i<GET_NUMBER_OF_PLAYERS();i++){
+		if(!IS_NETWORK_PLAYER_ACTIVE(i)) continue;
+		GET_PLAYER_CHAR(i,&tmp_ped);
+		if(tmp_ped == query_ped) return true;
+	}
+	return false;
+}
+//pls add it here 
+
+int GET_PLAYER_INT_FROM_PLAYER_NAME(char* name){
+	int i;
+	for(i = 0; i < 16; i++){ // yeah lol i understood u
+		if(COMPARE_STRING(GET_PLAYER_NAME(CONVERT_INT_TO_PLAYERINDEX(i)), name)) return i;
+	}
+}
+
+
+void GET_CAR_PASSENGERS(int car, int *Passenger1, int *Passenger2, int *Passenger3)
+{
+    GET_CHAR_IN_CAR_PASSENGER_SEAT(car,0,&*Passenger1);
+    GET_CHAR_IN_CAR_PASSENGER_SEAT(car,1,&*Passenger2);
+    GET_CHAR_IN_CAR_PASSENGER_SEAT(car,2,&*Passenger3);
+	return;
+}
+
+void TERMINATE_MD_SCRIPTS(void){
+	#ifndef ultimate
+	TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME("MDv8_Ultimate");
+	#endif
+	#ifndef protections
+	TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME("MDv8_Protections");
+	#endif
+	#ifndef manager
+	TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME("MDv8_Manager");
+	#endif
+	#ifndef loader
+	TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME("load_modmanager");
+	#endif	
+	TERMINATE_THIS_SCRIPT();
+}
+
+void print_two(char* text,char* text2){
+CLEAR_PRINTS();
+CLEAR_SMALL_PRINTS();
+ADD_NEXT_MESSAGE_TO_PREVIOUS_BRIEFS(false);
+PRINT_STRING_WITH_TWO_LITERAL_STRINGS_NOW("STRTNM3", text, text2, 3500, 1);
+}
+
+/////
+
+void print_short(char* text){
+CLEAR_PRINTS();
+CLEAR_SMALL_PRINTS();
+ADD_NEXT_MESSAGE_TO_PREVIOUS_BRIEFS(false);
+PRINT_STRING_WITH_LITERAL_STRING_NOW("STRING", text,2500, true);
+}
+
+void printInt(int num){
+	CLEAR_PRINTS();
+	CLEAR_SMALL_PRINTS();
+	ADD_NEXT_MESSAGE_TO_PREVIOUS_BRIEFS(false);
+	PRINT_WITH_NUMBER_NOW("NUMBR", num, 3500, true);
+}
+
+Ped GetPlayerPed(void){
+	Ped playerped = INVALID_HANDLE;
+	if ( PLAYER_HAS_CHAR(GET_PLAYER_ID())) GET_PLAYER_CHAR(GET_PLAYER_ID(), &playerped);
+	return playerped;
+}
+
+int GetPlayerModel(void){
+	int model;
+	GET_CHAR_MODEL(GetPlayerPed(),&model);
+	return model;
+}
+
+int empty_player_slots(void){
+//if(!IS_NETWORK_SESSION()) return 0;
+return (NETWORK_GET_MAX_SLOTS() - GET_NUMBER_OF_PLAYERS());
+}
+
+bool is_driving(int pd)
+{
+	if(!IS_CHAR_IN_ANY_CAR(pd)) return false;
+	int veh,dvr;
+	GET_CAR_CHAR_IS_USING(pd,&veh);
+	GET_DRIVER_OF_CAR(veh,&dvr);
+	return dvr == pd;
+}
+
+bool is_veh_locked(int veh){
+	int temp;
+	GET_CAR_DOOR_LOCK_STATUS(veh,&temp);
+	return temp == VEHICLE_DOOR_LOCKED_BOTH_SIDES;
+}
+
+void UpdateWeaponOfPed(Ped ped, Weapon weapon){
+	if (HAS_CHAR_GOT_WEAPON(ped, weapon)){
+		SET_CHAR_AMMO(ped, weapon, AMMO_MAX);    
+	} 	
+	else{
+		GIVE_WEAPON_TO_CHAR(ped, weapon, AMMO_MAX, FALSE);
+	}
+}
+
+Vehicle GetPlayerVeh(void){
+	Vehicle vehicle = INVALID_HANDLE;
+	if (IS_CHAR_IN_ANY_CAR(GetPlayerPed()))
+	GET_CAR_CHAR_IS_USING(GetPlayerPed(), &vehicle);
+	return vehicle;
+}
