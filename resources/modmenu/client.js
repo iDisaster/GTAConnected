@@ -1,3 +1,4 @@
+
 // ============================================================================
 // REVOLUTION MOD MENU - Client Side
 // Interactive GUI menu for all players
@@ -140,7 +141,25 @@ const itemDescriptions = {
     "drunkMode": "🍺 DRUNK MODE - Screen wobbles and controls reversed!",
     "matrixMode": "💻 MATRIX MODE - Digital rain effect overlay!",
     "thermalVision": "🌡️ THERMAL VISION - See heat signatures in dark!",
-    "nightVision": "🌙 NIGHT VISION - Enhanced vision in darkness!"
+    "nightVision": "🌙 NIGHT VISION - Enhanced vision in darkness!",
+
+    // Handling Editor descriptions
+    "handling_reset": "🔄 RESET - Restore all handling values to vehicle defaults!",
+    "handling_preset": "⚡ PRESET - Apply a pre-configured handling setup instantly!",
+    "handling_set": "🎛️ ADJUST - Modify this handling parameter value!",
+    "handling_traction_max": "🏎️ TRACTION MAX - Maximum grip your tyres can achieve!",
+    "handling_traction_min": "🏎️ TRACTION MIN - Minimum grip when sliding or braking!",
+    "handling_traction_bias": "⚖️ TRACTION BIAS - Front vs rear grip distribution!",
+    "handling_traction_loss": "💨 TRACTION LOSS - How easily tyres lose grip!",
+    "handling_susp_force": "🔧 SUSPENSION FORCE - Spring stiffness for bumps!",
+    "handling_susp_height": "📏 SUSPENSION HEIGHT - Ride height of the vehicle!",
+    "handling_susp_damp": "🎯 DAMPING - Suspension bounce control!",
+    "handling_power": "⚡ ENGINE POWER - Acceleration and torque!",
+    "handling_speed": "🚀 TOP SPEED - Maximum velocity limit!",
+    "handling_brake": "🛑 BRAKE FORCE - Stopping power of brakes!",
+    "handling_mass": "⚖️ MASS - Vehicle weight affects grip and momentum!",
+    "handling_com": "🎯 CENTER OF MASS - Affects roll and flip tendency!",
+    "handling_steering": "🎮 STEERING - How far wheels can turn!"
 };
 let matrixEffect = 0;
 
@@ -167,9 +186,51 @@ let handlingMods = {
     grip: 1.0,
     acceleration: 1.0,
     topSpeed: 1.0,
-    braking: 1.0,
-    driftMode: false
+    braking: 1.0
 };
+
+// ============================================================================
+// HANDLING EDITOR SYSTEM
+// ============================================================================
+let handlingEditorActive = false;
+let handlingEditorAnim = 0;
+let handlingValues = {
+    // Traction & Grip
+    tractionCurveMax: 2.0,
+    tractionCurveMin: 1.8,
+    tractionBias: 0.5,
+    // Suspension
+    suspensionForce: 2.0,
+    suspensionCompDamp: 1.0,
+    suspensionReboundDamp: 1.2,
+    suspensionUpperLimit: 0.12,
+    suspensionLowerLimit: -0.10,
+    suspensionRaise: 0.0,
+    // Engine & Speed
+    driveForce: 0.25,
+    driveInertia: 1.0,
+    initialDriveMaxVel: 200.0,
+    brakeForce: 0.8,
+    // Mass & Weight
+    mass: 1500.0,
+    centreOfMassZ: 0.0,
+    // Handling feel
+    steeringLock: 35.0,
+    tractionLoss: 0.8
+};
+
+// Store original values for reset
+let originalHandlingValues = null;
+
+// Visual feedback colors based on values
+let tyreGlowColors = { fr: {r:0,g:255,b:100}, fl: {r:0,g:255,b:100}, rr: {r:0,g:255,b:100}, rl: {r:0,g:255,b:100} };
+let engineGlow = { r: 255, g: 100, b: 0, intensity: 0 };
+let brakeGlow = { r: 255, g: 50, b: 0, intensity: 0 };
+let suspensionOffset = 0;
+let carRotationAngle = 0;
+
+// Currently selected handling parameter for highlighting
+let selectedHandlingParam = "";
 
 // ============================================================================
 // MENU DATA STRUCTURE
@@ -177,7 +238,7 @@ let handlingMods = {
 
 const menuData = {
     main: {
-        title: "REVOLUTION",
+        title: "REVOLUTION v0.1",
         items: [
             { label: "Self Options", action: "submenu", target: "self" },
             { label: "Vehicle Spawner", action: "submenu", target: "vehicles" },
@@ -470,6 +531,7 @@ const menuData = {
             { label: "Repair Vehicle", action: "veh_repair" },
             { label: "Flip Vehicle", action: "veh_flip" },
             { label: "Vehicle Colors", action: "submenu", target: "veh_colors" },
+            { label: "Handling Editor", action: "submenu", target: "handlingEditor" },
             { label: "God Mode", action: "toggle", target: "vehGodMode", state: false },
             { label: "Nitro Boost", action: "veh_nitro" },
             { label: "Drive On Water", action: "toggle", target: "driveOnWater", state: false },
@@ -484,6 +546,200 @@ const menuData = {
             { label: "Toggle Engine", action: "veh_engine" },
             { label: "Pop Tires", action: "veh_poptires" },
             { label: "Fix Tires", action: "veh_fixtires" }
+        ]
+    },
+
+    handlingEditor: {
+        title: "HANDLING EDITOR",
+        items: [
+            { label: "--- Presets ---", action: "none" },
+            { label: "Reset to Default", action: "handling_reset" },
+            { label: "Race Setup", action: "handling_preset", value: "race" },
+            { label: "Drift Setup", action: "handling_preset", value: "drift" },
+            { label: "Off-Road Setup", action: "handling_preset", value: "offroad" },
+            { label: "Low Rider", action: "handling_preset", value: "lowrider" },
+            { label: "--- Traction & Grip ---", action: "none" },
+            { label: "Traction Max", action: "submenu", target: "handling_traction_max" },
+            { label: "Traction Min", action: "submenu", target: "handling_traction_min" },
+            { label: "Traction Bias (F/R)", action: "submenu", target: "handling_traction_bias" },
+            { label: "Traction Loss", action: "submenu", target: "handling_traction_loss" },
+            { label: "--- Suspension ---", action: "none" },
+            { label: "Suspension Force", action: "submenu", target: "handling_susp_force" },
+            { label: "Suspension Height", action: "submenu", target: "handling_susp_height" },
+            { label: "Suspension Damping", action: "submenu", target: "handling_susp_damp" },
+            { label: "--- Engine & Speed ---", action: "none" },
+            { label: "Engine Power", action: "submenu", target: "handling_power" },
+            { label: "Top Speed", action: "submenu", target: "handling_speed" },
+            { label: "Brake Force", action: "submenu", target: "handling_brake" },
+            { label: "--- Weight & Balance ---", action: "none" },
+            { label: "Vehicle Mass", action: "submenu", target: "handling_mass" },
+            { label: "Center of Mass", action: "submenu", target: "handling_com" },
+            { label: "--- Steering ---", action: "none" },
+            { label: "Steering Lock", action: "submenu", target: "handling_steering" }
+        ]
+    },
+
+    handling_traction_max: {
+        title: "TRACTION MAX",
+        items: [
+            { label: "Ice (0.5)", action: "handling_set", param: "tractionCurveMax", value: 0.5 },
+            { label: "Very Low (1.0)", action: "handling_set", param: "tractionCurveMax", value: 1.0 },
+            { label: "Low (1.5)", action: "handling_set", param: "tractionCurveMax", value: 1.5 },
+            { label: "Default (2.0)", action: "handling_set", param: "tractionCurveMax", value: 2.0 },
+            { label: "Medium (2.5)", action: "handling_set", param: "tractionCurveMax", value: 2.5 },
+            { label: "High (3.0)", action: "handling_set", param: "tractionCurveMax", value: 3.0 },
+            { label: "Very High (3.5)", action: "handling_set", param: "tractionCurveMax", value: 3.5 },
+            { label: "Racing Slicks (4.0)", action: "handling_set", param: "tractionCurveMax", value: 4.0 },
+            { label: "Glue (5.0)", action: "handling_set", param: "tractionCurveMax", value: 5.0 }
+        ]
+    },
+
+    handling_traction_min: {
+        title: "TRACTION MIN",
+        items: [
+            { label: "Ice (0.3)", action: "handling_set", param: "tractionCurveMin", value: 0.3 },
+            { label: "Very Low (0.8)", action: "handling_set", param: "tractionCurveMin", value: 0.8 },
+            { label: "Low (1.2)", action: "handling_set", param: "tractionCurveMin", value: 1.2 },
+            { label: "Default (1.8)", action: "handling_set", param: "tractionCurveMin", value: 1.8 },
+            { label: "Medium (2.2)", action: "handling_set", param: "tractionCurveMin", value: 2.2 },
+            { label: "High (2.8)", action: "handling_set", param: "tractionCurveMin", value: 2.8 },
+            { label: "Very High (3.5)", action: "handling_set", param: "tractionCurveMin", value: 3.5 }
+        ]
+    },
+
+    handling_traction_bias: {
+        title: "TRACTION BIAS",
+        items: [
+            { label: "Full Front (0.0)", action: "handling_set", param: "tractionBias", value: 0.0 },
+            { label: "Front Heavy (0.3)", action: "handling_set", param: "tractionBias", value: 0.3 },
+            { label: "Balanced (0.5)", action: "handling_set", param: "tractionBias", value: 0.5 },
+            { label: "Rear Heavy (0.7)", action: "handling_set", param: "tractionBias", value: 0.7 },
+            { label: "Full Rear (1.0)", action: "handling_set", param: "tractionBias", value: 1.0 }
+        ]
+    },
+
+    handling_traction_loss: {
+        title: "TRACTION LOSS",
+        items: [
+            { label: "No Loss (0.0)", action: "handling_set", param: "tractionLoss", value: 0.0 },
+            { label: "Minimal (0.4)", action: "handling_set", param: "tractionLoss", value: 0.4 },
+            { label: "Default (0.8)", action: "handling_set", param: "tractionLoss", value: 0.8 },
+            { label: "Loose (1.2)", action: "handling_set", param: "tractionLoss", value: 1.2 },
+            { label: "Drifty (1.6)", action: "handling_set", param: "tractionLoss", value: 1.6 },
+            { label: "Ice Mode (2.0)", action: "handling_set", param: "tractionLoss", value: 2.0 }
+        ]
+    },
+
+    handling_susp_force: {
+        title: "SUSPENSION FORCE",
+        items: [
+            { label: "Soft (0.5)", action: "handling_set", param: "suspensionForce", value: 0.5 },
+            { label: "Comfort (1.0)", action: "handling_set", param: "suspensionForce", value: 1.0 },
+            { label: "Default (2.0)", action: "handling_set", param: "suspensionForce", value: 2.0 },
+            { label: "Firm (3.0)", action: "handling_set", param: "suspensionForce", value: 3.0 },
+            { label: "Sport (4.0)", action: "handling_set", param: "suspensionForce", value: 4.0 },
+            { label: "Race (5.0)", action: "handling_set", param: "suspensionForce", value: 5.0 },
+            { label: "Rock Solid (8.0)", action: "handling_set", param: "suspensionForce", value: 8.0 }
+        ]
+    },
+
+    handling_susp_height: {
+        title: "SUSPENSION HEIGHT",
+        items: [
+            { label: "Slammed (-0.15)", action: "handling_set", param: "suspensionRaise", value: -0.15 },
+            { label: "Low (-0.10)", action: "handling_set", param: "suspensionRaise", value: -0.10 },
+            { label: "Lowered (-0.05)", action: "handling_set", param: "suspensionRaise", value: -0.05 },
+            { label: "Default (0.0)", action: "handling_set", param: "suspensionRaise", value: 0.0 },
+            { label: "Raised (0.05)", action: "handling_set", param: "suspensionRaise", value: 0.05 },
+            { label: "High (0.10)", action: "handling_set", param: "suspensionRaise", value: 0.10 },
+            { label: "Off-Road (0.15)", action: "handling_set", param: "suspensionRaise", value: 0.15 },
+            { label: "Monster (0.25)", action: "handling_set", param: "suspensionRaise", value: 0.25 }
+        ]
+    },
+
+    handling_susp_damp: {
+        title: "SUSPENSION DAMPING",
+        items: [
+            { label: "Bouncy (0.3)", action: "handling_set", param: "suspensionCompDamp", value: 0.3 },
+            { label: "Soft (0.6)", action: "handling_set", param: "suspensionCompDamp", value: 0.6 },
+            { label: "Default (1.0)", action: "handling_set", param: "suspensionCompDamp", value: 1.0 },
+            { label: "Sport (1.5)", action: "handling_set", param: "suspensionCompDamp", value: 1.5 },
+            { label: "Race (2.0)", action: "handling_set", param: "suspensionCompDamp", value: 2.0 },
+            { label: "Stiff (3.0)", action: "handling_set", param: "suspensionCompDamp", value: 3.0 }
+        ]
+    },
+
+    handling_power: {
+        title: "ENGINE POWER",
+        items: [
+            { label: "Weak (0.10)", action: "handling_set", param: "driveForce", value: 0.10 },
+            { label: "Low (0.18)", action: "handling_set", param: "driveForce", value: 0.18 },
+            { label: "Default (0.25)", action: "handling_set", param: "driveForce", value: 0.25 },
+            { label: "Tuned (0.35)", action: "handling_set", param: "driveForce", value: 0.35 },
+            { label: "Sport (0.45)", action: "handling_set", param: "driveForce", value: 0.45 },
+            { label: "Super (0.60)", action: "handling_set", param: "driveForce", value: 0.60 },
+            { label: "Hyper (0.80)", action: "handling_set", param: "driveForce", value: 0.80 },
+            { label: "Rocket (1.20)", action: "handling_set", param: "driveForce", value: 1.20 }
+        ]
+    },
+
+    handling_speed: {
+        title: "TOP SPEED",
+        items: [
+            { label: "Slow (100)", action: "handling_set", param: "initialDriveMaxVel", value: 100.0 },
+            { label: "City (140)", action: "handling_set", param: "initialDriveMaxVel", value: 140.0 },
+            { label: "Default (200)", action: "handling_set", param: "initialDriveMaxVel", value: 200.0 },
+            { label: "Fast (250)", action: "handling_set", param: "initialDriveMaxVel", value: 250.0 },
+            { label: "Super (300)", action: "handling_set", param: "initialDriveMaxVel", value: 300.0 },
+            { label: "Hyper (400)", action: "handling_set", param: "initialDriveMaxVel", value: 400.0 },
+            { label: "Insane (500)", action: "handling_set", param: "initialDriveMaxVel", value: 500.0 }
+        ]
+    },
+
+    handling_brake: {
+        title: "BRAKE FORCE",
+        items: [
+            { label: "Weak (0.3)", action: "handling_set", param: "brakeForce", value: 0.3 },
+            { label: "Low (0.5)", action: "handling_set", param: "brakeForce", value: 0.5 },
+            { label: "Default (0.8)", action: "handling_set", param: "brakeForce", value: 0.8 },
+            { label: "Strong (1.2)", action: "handling_set", param: "brakeForce", value: 1.2 },
+            { label: "Race (1.6)", action: "handling_set", param: "brakeForce", value: 1.6 },
+            { label: "Ceramic (2.0)", action: "handling_set", param: "brakeForce", value: 2.0 },
+            { label: "Instant Stop (3.0)", action: "handling_set", param: "brakeForce", value: 3.0 }
+        ]
+    },
+
+    handling_mass: {
+        title: "VEHICLE MASS",
+        items: [
+            { label: "Feather (500)", action: "handling_set", param: "mass", value: 500.0 },
+            { label: "Light (1000)", action: "handling_set", param: "mass", value: 1000.0 },
+            { label: "Default (1500)", action: "handling_set", param: "mass", value: 1500.0 },
+            { label: "Heavy (2000)", action: "handling_set", param: "mass", value: 2000.0 },
+            { label: "Truck (3000)", action: "handling_set", param: "mass", value: 3000.0 },
+            { label: "Tank (5000)", action: "handling_set", param: "mass", value: 5000.0 }
+        ]
+    },
+
+    handling_com: {
+        title: "CENTER OF MASS",
+        items: [
+            { label: "Very Low (-0.3)", action: "handling_set", param: "centreOfMassZ", value: -0.3 },
+            { label: "Low (-0.15)", action: "handling_set", param: "centreOfMassZ", value: -0.15 },
+            { label: "Default (0.0)", action: "handling_set", param: "centreOfMassZ", value: 0.0 },
+            { label: "High (0.15)", action: "handling_set", param: "centreOfMassZ", value: 0.15 },
+            { label: "Very High (0.3)", action: "handling_set", param: "centreOfMassZ", value: 0.3 }
+        ]
+    },
+
+    handling_steering: {
+        title: "STEERING LOCK",
+        items: [
+            { label: "Tight (25)", action: "handling_set", param: "steeringLock", value: 25.0 },
+            { label: "Default (35)", action: "handling_set", param: "steeringLock", value: 35.0 },
+            { label: "Loose (45)", action: "handling_set", param: "steeringLock", value: 45.0 },
+            { label: "Wide (55)", action: "handling_set", param: "steeringLock", value: 55.0 },
+            { label: "Extreme (70)", action: "handling_set", param: "steeringLock", value: 70.0 }
         ]
     },
 
@@ -507,33 +763,35 @@ const menuData = {
         title: "VEHICLE COLORS",
         items: [
             { label: "Black", action: "veh_color", value: [0, 0] },
-            { label: "White", action: "veh_color", value: [1, 1] },
-            { label: "Dark Gray", action: "veh_color", value: [2, 2] },
-            { label: "Light Gray", action: "veh_color", value: [3, 3] },
+            { label: "White", action: "veh_color", value: [18, 18] },
+            { label: "Dark Gray", action: "veh_color", value: [4, 4] },
+            { label: "Light Gray", action: "veh_color", value: [8, 8] },
+            { label: "Silver", action: "veh_color", value: [12, 12] },
             { label: "Red", action: "veh_color", value: [27, 27] },
             { label: "Dark Red", action: "veh_color", value: [28, 28] },
-            { label: "Orange", action: "veh_color", value: [38, 38] },
-            { label: "Yellow", action: "veh_color", value: [42, 42] },
-            { label: "Dark Yellow", action: "veh_color", value: [43, 43] },
-            { label: "Green", action: "veh_color", value: [53, 53] },
-            { label: "Dark Green", action: "veh_color", value: [54, 54] },
-            { label: "Blue", action: "veh_color", value: [51, 51] },
-            { label: "Dark Blue", action: "veh_color", value: [52, 52] },
-            { label: "Light Blue", action: "veh_color", value: [55, 55] },
-            { label: "Purple", action: "veh_color", value: [39, 39] },
-            { label: "Pink", action: "veh_color", value: [40, 40] },
-            { label: "Brown", action: "veh_color", value: [41, 41] },
-            { label: "Beige", action: "veh_color", value: [56, 56] },
-            { label: "Bronze", action: "veh_color", value: [57, 57] },
-            { label: "Silver", action: "veh_color", value: [58, 58] },
-            { label: "Gold", action: "veh_color", value: [59, 59] },
-            { label: "Chrome", action: "veh_color", value: [60, 60] },
+            { label: "Candy Red", action: "veh_color", value: [30, 30] },
+            { label: "Orange", action: "veh_color", value: [36, 36] },
+            { label: "Yellow", action: "veh_color", value: [89, 89] },
+            { label: "Bright Yellow", action: "veh_color", value: [91, 91] },
+            { label: "Green", action: "veh_color", value: [50, 50] },
+            { label: "Dark Green", action: "veh_color", value: [52, 52] },
+            { label: "Lime Green", action: "veh_color", value: [55, 55] },
+            { label: "Blue", action: "veh_color", value: [62, 62] },
+            { label: "Dark Blue", action: "veh_color", value: [64, 64] },
+            { label: "Light Blue", action: "veh_color", value: [73, 73] },
+            { label: "Bright Blue", action: "veh_color", value: [82, 82] },
+            { label: "Purple", action: "veh_color", value: [99, 99] },
+            { label: "Pink", action: "veh_color", value: [100, 100] },
+            { label: "Hot Pink", action: "veh_color", value: [101, 101] },
+            { label: "Brown", action: "veh_color", value: [45, 45] },
+            { label: "Beige", action: "veh_color", value: [44, 44] },
+            { label: "Gold", action: "veh_color", value: [37, 37] },
             { label: "--- Two Tone ---", action: "none" },
             { label: "Black/Red", action: "veh_color", value: [0, 27] },
-            { label: "Black/White", action: "veh_color", value: [0, 1] },
+            { label: "Black/White", action: "veh_color", value: [0, 18] },
             { label: "Red/Black", action: "veh_color", value: [27, 0] },
-            { label: "Blue/White", action: "veh_color", value: [51, 1] },
-            { label: "Green/White", action: "veh_color", value: [53, 1] },
+            { label: "Blue/White", action: "veh_color", value: [62, 18] },
+            { label: "Green/White", action: "veh_color", value: [50, 18] },
             { label: "Random", action: "veh_color_random" }
         ]
     },
@@ -579,7 +837,7 @@ const menuData = {
             { label: "Thunderstorm", action: "world_weather", value: 7 },
             { label: "Foggy", action: "world_weather", value: 6 },
             { label: "Snowy", action: "world_weather", value: 8 },
-            { label: "--- Environment ---", action: "none" },
+            { label: "--- Environment ---(WIP)", action: "none" },
             { label: "Clear Area", action: "world_clear_area" },
             { label: "Clear Vehicles", action: "world_clear_vehicles" },
             { label: "Clear Peds", action: "world_clear_peds" },
@@ -587,7 +845,7 @@ const menuData = {
             { label: "Traffic ON", action: "world_traffic", value: true },
             { label: "Traffic OFF", action: "world_traffic", value: false },
             { label: "Set Traffic Density", action: "submenu", target: "world_traffic_density" },
-            { label: "--- Visual Effects ---", action: "none" },
+            { label: "--- Visual Effects ---(WIP)", action: "none" },
             { label: "Rainbow Sky", action: "toggle", target: "rainbowSky", state: false },
             { label: "Sky Colors", action: "submenu", target: "sky_colors" },
             { label: "Timecycle Modifier", action: "submenu", target: "world_timecycles" }
@@ -595,7 +853,7 @@ const menuData = {
     },
 
     sky_colors: {
-        title: "SKY COLORS",
+        title: "SKY COLORS (WIP)",
         items: [
             { label: "Default Sky", action: "sky_color", value: 0 },
             { label: "Red Sky", action: "sky_color", value: 1 },
@@ -612,7 +870,7 @@ const menuData = {
     },
 
     world_traffic_density: {
-        title: "TRAFFIC DENSITY",
+        title: "TRAFFIC DENSITY(WIP)",
         items: [
             { label: "No Traffic", action: "world_traffic_density", value: 0.0 },
             { label: "Very Light", action: "world_traffic_density", value: 0.2 },
@@ -673,18 +931,18 @@ const menuData = {
             { label: "Drunk Mode", action: "toggle", target: "drunkMode", state: false },
             { label: "Spinbot", action: "toggle", target: "spinbot", state: false },
             { label: "Ragdoll", action: "fun_ragdoll" },
-            { label: "--- Chaos Mode ---", action: "none" },
+            { label: "--- Chaos Mode ---(WIP)", action: "none" },
             { label: "Explode Me", action: "fun_explode" },
             { label: "Random Explosion", action: "fun_random_explosion" },
             { label: "Car Rain", action: "fun_car_rain" },
             { label: "Ped Invasion", action: "fun_ped_invasion" },
             { label: "Weapon Shower", action: "fun_weapon_shower" },
-            { label: "--- Spawning ---", action: "none" },
+            { label: "--- Spawning ---(WIP)", action: "none" },
             { label: "Spawn Random Ped", action: "fun_ped" },
             { label: "Spawn Gang", action: "fun_gang" },
             { label: "Spawn Army", action: "fun_army" },
             { label: "Spawn Money Rain", action: "fun_money_rain" },
-            { label: "--- Visual Effects ---", action: "none" },
+            { label: "--- Visual Effects ---(WIP)", action: "none" },
             { label: "Screen Shake", action: "fun_screen_shake" },
             { label: "Flash Screen", action: "fun_flash" },
             { label: "Matrix Mode", action: "toggle", target: "matrixMode", state: false },
@@ -949,6 +1207,27 @@ function selectItem() {
                 // Auto-refresh player list when entering network menu
                 if (item.target === "network") {
                     refreshPlayerList();
+                }
+
+                // Activate handling editor visualization when entering handling menus
+                if (item.target === "handlingEditor" || item.target.startsWith("handling_")) {
+                    handlingEditorActive = true;
+                    // Highlight the relevant parameter in the visualization
+                    if (item.target.includes("traction")) {
+                        selectedHandlingParam = "traction";
+                    } else if (item.target.includes("susp")) {
+                        selectedHandlingParam = "suspension";
+                    } else if (item.target.includes("power") || item.target.includes("speed")) {
+                        selectedHandlingParam = "engine";
+                    } else if (item.target.includes("brake")) {
+                        selectedHandlingParam = "brakes";
+                    } else if (item.target.includes("mass") || item.target.includes("com")) {
+                        selectedHandlingParam = "weight";
+                    } else if (item.target.includes("steering")) {
+                        selectedHandlingParam = "steering";
+                    } else {
+                        selectedHandlingParam = "";
+                    }
                 }
             }
             break;
@@ -1423,6 +1702,40 @@ function selectItem() {
             currentTheme = item.value;
             showNotification("Theme: " + themes[item.value].name);
             break;
+
+        // ============================================================================
+        // HANDLING EDITOR ACTIONS
+        // ============================================================================
+        case "handling_set":
+            if (localPlayer && localPlayer.vehicle) {
+                handlingValues[item.param] = item.value;
+                selectedHandlingParam = item.param;
+                applyHandlingValue(item.param, item.value);
+                showNotification(item.param + ": " + item.value);
+                // Trigger visual feedback
+                updateHandlingVisuals(item.param, item.value);
+            } else {
+                showNotification("Get in a vehicle first!");
+            }
+            break;
+
+        case "handling_reset":
+            if (localPlayer && localPlayer.vehicle) {
+                resetHandlingToDefault();
+                showNotification("Handling reset to default!");
+            } else {
+                showNotification("Get in a vehicle first!");
+            }
+            break;
+
+        case "handling_preset":
+            if (localPlayer && localPlayer.vehicle) {
+                applyHandlingPreset(item.value);
+                showNotification("Applied: " + item.label);
+            } else {
+                showNotification("Get in a vehicle first!");
+            }
+            break;
     }
 }
 
@@ -1541,16 +1854,48 @@ addNetworkHandler("ModMenu:ExecuteSelfOption", function(option) {
     }
 });
 
-// Execute teleport
+// Execute teleport - with multiple fallback methods
 addNetworkHandler("ModMenu:ExecuteTeleport", function(x, y, z) {
-    if (!localPlayer) return;
+    if (!localPlayer) {
+        showNotification("Player not ready!");
+        return;
+    }
+
+    console.log("[ModMenu] Executing teleport to: " + x + ", " + y + ", " + z);
 
     try {
+        // Method 1: Direct position set
         let pos = new Vec3(x, y, z);
+
+        // Check if player is in vehicle
+        if (localPlayer.vehicle) {
+            // Teleport the vehicle instead
+            try {
+                localPlayer.vehicle.position = pos;
+                showNotification("Teleported (in vehicle)!");
+                console.log("[ModMenu] Teleported vehicle successfully");
+                return;
+            } catch(e) {
+                console.log("[ModMenu] Vehicle teleport failed, trying player: " + e);
+            }
+        }
+
+        // Try direct position assignment
         localPlayer.position = pos;
         showNotification("Teleported!");
+        console.log("[ModMenu] Teleported player successfully");
     } catch(e) {
         console.log("[ModMenu] Teleport error: " + e);
+
+        // Method 2: Try using native
+        try {
+            natives.setCharCoordinates(localPlayer, x, y, z);
+            showNotification("Teleported!");
+            console.log("[ModMenu] Teleported using native successfully");
+        } catch(e2) {
+            console.log("[ModMenu] Native teleport also failed: " + e2);
+            showNotification("Teleport failed!");
+        }
     }
 });
 
@@ -1981,9 +2326,11 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
                 clearInterval(loadInterval);
                 console.log("[ModMenu] Skin load timeout");
             }
-        }, 100);
+        }, 50);
+
     } catch(e) {
         console.log("[ModMenu] Skin change error: " + e);
+        showNotification("Skin change failed");
     }
 });
 
@@ -2032,24 +2379,63 @@ addEventHandler("OnProcess", function(event) {
                 localPlayer.gravity = 9.8;
             }
 
-            // Drunk mode
+            // Drunk mode - wobble effect
             if (toggleStates.drunkMode) {
-                natives.setGameSpeed(0.8 + Math.sin(animTime * 2) * 0.2);
-                natives.forceCameraShake(0.1, 0.1, 1.0);
-            } else {
-                natives.setGameSpeed(1.0);
+                try {
+                    natives.setGameCamShake(true, 2);
+                    natives.shakeCam(1, 100);
+                } catch(e) {
+                    try {
+                        natives.setGameCamHeading(Math.sin(animTime * 3) * 5);
+                    } catch(e2) {}
+                }
             }
 
-            // Visual effects
+            // Night Vision - using timecycle modifier as alternative
+            if (toggleStates.nightVision) {
+                try {
+                    // Try native first
+                    natives.setNightvision(true);
+                } catch(e) {
+                    try {
+                        // Alternative: use timecycle for green tint effect
+                        natives.setTimecycleModifier("nightvision");
+                    } catch(e2) {}
+                }
+            }
+
+            // Thermal Vision - using timecycle modifier as alternative
             if (toggleStates.thermalVision) {
-                natives.setDrawInfrared(true);
-                natives.setDrawNightvision(false);
-            } else if (toggleStates.nightVision) {
-                natives.setDrawNightvision(true);
-                natives.setDrawInfrared(false);
-            } else {
-                natives.setDrawInfrared(false);
-                natives.setDrawNightvision(false);
+                try {
+                    // Try native first
+                    natives.setInfaredvision(true);
+                } catch(e) {
+                    try {
+                        // Alternative: use timecycle for thermal effect
+                        natives.setTimecycleModifier("thermal");
+                    } catch(e2) {}
+                }
+            }
+
+            // Clear vision effects when both disabled
+            if (!toggleStates.nightVision && !toggleStates.thermalVision) {
+                try {
+                    natives.setNightvision(false);
+                    natives.setInfaredvision(false);
+                } catch(e) {}
+            }
+
+            // Screen shake effect - apply camera shake
+            if (screenShake > 0.01) {
+                try {
+                    let shakeAmount = screenShake * 50;
+                    natives.shakeCam(1, Math.floor(shakeAmount));
+                } catch(e) {
+                    try {
+                        // Alternative: move camera slightly
+                        natives.setGameCamShake(true, Math.floor(screenShake * 3));
+                    } catch(e2) {}
+                }
             }
         } catch(e) {}
     }
@@ -2454,6 +2840,97 @@ addEventHandler("OnDrawnHUD", function(event) {
     }
 });
 
+// ============================================================================
+// VISUAL EFFECTS OVERLAY - Flash, Matrix, Screen Effects
+// ============================================================================
+addEventHandler("OnDrawnHUD", function(event) {
+    let screenWidth = 1920;
+    let screenHeight = 1080;
+    try {
+        screenWidth = game.width || 1920;
+        screenHeight = game.height || 1080;
+    } catch(e) {}
+
+    // Flash Screen Effect - white overlay that fades out
+    if (flashAlpha > 0.01) {
+        let flashColor = toColour(255, 255, 255, Math.floor(flashAlpha * 255));
+        drawRect(0, 0, screenWidth, screenHeight, flashColor);
+    }
+
+    // Screen Shake Visual Effect - draw offset overlay
+    if (screenShake > 0.01) {
+        // Apply visual shake by drawing slightly offset
+        let shakeX = (Math.random() - 0.5) * screenShake * 20;
+        let shakeY = (Math.random() - 0.5) * screenShake * 20;
+        // Draw subtle edge distortion
+        let edgeColor = toColour(0, 0, 0, Math.floor(screenShake * 50));
+        drawRect(shakeX, shakeY, 10, screenHeight, edgeColor);
+        drawRect(screenWidth - 10 + shakeX, shakeY, 10, screenHeight, edgeColor);
+    }
+
+    // Matrix Mode - Digital rain effect
+    if (toggleStates.matrixMode) {
+        // Draw matrix-style falling characters
+        let matrixColor = toColour(0, 255, 65, 150);
+        let matrixBgColor = toColour(0, 30, 10, 100);
+
+        // Draw dark green overlay
+        drawRect(0, 0, screenWidth, screenHeight, matrixBgColor);
+
+        // Draw vertical lines simulating matrix rain
+        for (let col = 0; col < 40; col++) {
+            let x = col * 48;
+            let offset = (matrixEffect * 50 + col * 73) % screenHeight;
+
+            // Draw fading trail
+            for (let i = 0; i < 15; i++) {
+                let y = (offset + i * 30) % screenHeight;
+                let alpha = Math.max(0, 150 - i * 10);
+                let charColor = toColour(0, 255, 65, alpha);
+                // Draw small rectangles as "characters"
+                drawRect(x, y, 8, 12, charColor);
+            }
+        }
+
+        // Add scanline effect
+        for (let y = 0; y < screenHeight; y += 4) {
+            let scanlineColor = toColour(0, 0, 0, 30);
+            drawRect(0, y, screenWidth, 2, scanlineColor);
+        }
+    }
+
+    // Night Vision Overlay - green tint effect if native doesn't work
+    if (toggleStates.nightVision) {
+        let nvColor = toColour(0, 80, 0, 60);
+        drawRect(0, 0, screenWidth, screenHeight, nvColor);
+        // Add grain effect
+        for (let i = 0; i < 50; i++) {
+            let grainX = Math.random() * screenWidth;
+            let grainY = Math.random() * screenHeight;
+            let grainColor = toColour(100, 255, 100, Math.floor(Math.random() * 30));
+            drawRect(grainX, grainY, 2, 2, grainColor);
+        }
+    }
+
+    // Thermal Vision Overlay - color bands if native doesn't work
+    if (toggleStates.thermalVision) {
+        let thermalColor = toColour(100, 50, 150, 40);
+        drawRect(0, 0, screenWidth, screenHeight, thermalColor);
+        // Add heat shimmer effect
+        for (let i = 0; i < 30; i++) {
+            let heatX = Math.random() * screenWidth;
+            let heatY = Math.random() * screenHeight;
+            let heatW = 20 + Math.random() * 40;
+            let heatH = 10 + Math.random() * 20;
+            let r = 200 + Math.floor(Math.random() * 55);
+            let g = 100 + Math.floor(Math.random() * 100);
+            let b = Math.floor(Math.random() * 50);
+            let heatColor = toColour(r, g, b, 20);
+            drawRect(heatX, heatY, heatW, heatH, heatColor);
+        }
+    }
+});
+
 // Draw rectangle using graphics API
 function drawRect(x, y, w, h, colour) {
     try {
@@ -2501,7 +2978,11 @@ let lastSuperRun = false;
 let lastNoRagdoll = false;
 let lastVehGodMode = false;
 let lastDriftMode = false;
+let lastInvisible = false;
 let processCounter = 0;
+
+// Spinbot speed control (lower = slower)
+let spinbotSpeed = 2;
 
 addEventHandler("OnProcess", function(event) {
     if (!localPlayer) return;
@@ -2542,21 +3023,35 @@ addEventHandler("OnProcess", function(event) {
         lastSuperRun = toggleStates.superRun;
     }
 
-    // No Ragdoll - prevent ragdoll
+    // No Ragdoll - prevent ragdoll using multiple methods
     if (toggleStates.noRagdoll !== lastNoRagdoll) {
         try {
-            natives.setPedCanRagdoll(localPlayer, !toggleStates.noRagdoll);
+            // Use GTA IV specific natives
+            natives.setCharCanBeKnockedOffBike(localPlayer, !toggleStates.noRagdoll);
+            natives.setCharWillFlyThroughWindscreen(localPlayer, !toggleStates.noRagdoll);
         } catch(e) {}
         lastNoRagdoll = toggleStates.noRagdoll;
     }
     // Keep preventing ragdoll every frame
     if (toggleStates.noRagdoll) {
         try {
-            natives.setPedCanRagdoll(localPlayer, false);
-            // Cancel any active ragdoll
-            if (natives.isPedRagdoll(localPlayer)) {
-                natives.switchPedToAnimated(localPlayer, true);
-            }
+            // Multiple approaches for GTA IV ragdoll prevention
+            natives.setCharCanBeKnockedOffBike(localPlayer, false);
+            natives.setCharWillFlyThroughWindscreen(localPlayer, false);
+            // Unlock ragdoll to reset it, then prevent
+            natives.unlockRagdoll(localPlayer, true);
+            // Make character not fall from hits
+            natives.setCharNeverTargetted(localPlayer, false);
+            // If currently in ragdoll, recover
+            try {
+                if (natives.isPedRagdoll(localPlayer)) {
+                    natives.switchPedToAnimated(localPlayer, true);
+                }
+            } catch(e2) {}
+            // Alternative: task to stand up
+            try {
+                natives.taskSetCharDecisionMaker(localPlayer, 0);
+            } catch(e3) {}
         } catch(e) {}
     }
 
@@ -2697,6 +3192,52 @@ addEventHandler("OnProcess", function(event) {
                     veh.velocity = new Vec3(vel.x + slideX, vel.y + slideY, vel.z);
                 }
             } catch(e) {}
+        }
+
+        // ===== HANDLING EDITOR EFFECTS =====
+        // Apply acceleration boost when driveForce is modified
+        if (handlingMods.acceleration > 1.0) {
+            try {
+                let vel = veh.velocity;
+                let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+                // Only boost when accelerating (moving forward)
+                if (speed > 1 && speed < 50) {
+                    let heading = veh.heading || 0;
+                    let boostFactor = (handlingMods.acceleration - 1.0) * 0.05;
+                    let boostX = Math.sin(heading) * -boostFactor * speed;
+                    let boostY = Math.cos(heading) * boostFactor * speed;
+                    veh.velocity = new Vec3(vel.x + boostX, vel.y + boostY, vel.z);
+                }
+            } catch(e) {}
+        }
+
+        // Apply top speed limiting/boosting
+        if (handlingMods.topSpeed !== 1.0) {
+            try {
+                let vel = veh.velocity;
+                let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+                let maxSpeed = 35 * handlingMods.topSpeed; // Base max ~35 m/s (~126 km/h)
+
+                // If going too fast for the setting, slow down
+                if (speed > maxSpeed && handlingMods.topSpeed < 1.0) {
+                    let factor = maxSpeed / speed;
+                    veh.velocity = new Vec3(vel.x * factor, vel.y * factor, vel.z);
+                }
+                // If speed boost is enabled and accelerating, add forward push
+                else if (handlingMods.topSpeed > 1.0 && speed > 20 && speed < maxSpeed) {
+                    let heading = veh.heading || 0;
+                    let pushFactor = (handlingMods.topSpeed - 1.0) * 0.02;
+                    let pushX = Math.sin(heading) * -pushFactor * speed;
+                    let pushY = Math.cos(heading) * pushFactor * speed;
+                    veh.velocity = new Vec3(vel.x + pushX, vel.y + pushY, vel.z);
+                }
+            } catch(e) {}
+        }
+
+        // Apply enhanced braking
+        if (handlingMods.braking > 1.0) {
+            // Braking effect is passive - applied when vehicle is slowing down
+            // This would need input detection to work properly
         }
 
         // Fly mode - WASD controls altitude
@@ -2902,6 +3443,521 @@ addEventHandler("OnPedWeaponShoot", function(event, ped, weapon) {
 // ============================================================================
 // INITIALIZATION
 // ============================================================================
+
+// ============================================================================
+// HANDLING EDITOR FUNCTIONS
+// ============================================================================
+
+// Apply a single handling value to the current vehicle
+// Uses verified GTA IV natives and GTA Connected OOP properties
+function applyHandlingValue(param, value) {
+    if (!localPlayer || !localPlayer.vehicle) return;
+
+    let veh = localPlayer.vehicle;
+
+    try {
+        switch(param) {
+            case "tractionCurveMax":
+                // SET_CAR_TRACTION - Verified GTA IV native
+                // Multiplies the vehicle's traction
+                try {
+                    natives.setCarTraction(veh, value);
+                } catch(e) {
+                    console.log("[Handling] setCarTraction failed: " + e);
+                }
+                break;
+
+            case "tractionCurveMin":
+                // Apply combined with max for overall grip feel
+                try {
+                    let combinedTraction = (handlingValues.tractionCurveMax + value) / 2;
+                    natives.setCarTraction(veh, combinedTraction);
+                } catch(e) {}
+                break;
+
+            case "tractionBias":
+                // Adjust traction based on front/rear distribution
+                // Lower values = more rear grip, higher = more front
+                try {
+                    let adjustedTraction = handlingValues.tractionCurveMax * (0.5 + (value - 0.5) * 0.5);
+                    natives.setCarTraction(veh, adjustedTraction);
+                } catch(e) {}
+                break;
+
+            case "tractionLoss":
+                // Higher values = easier to lose traction
+                // Apply reduced traction based on loss value
+                try {
+                    let lossTraction = handlingValues.tractionCurveMax / (1 + (value - 0.8));
+                    natives.setCarTraction(veh, Math.max(0.3, lossTraction));
+                } catch(e) {}
+                break;
+
+            case "suspensionForce":
+                // Visual feedback - suspension stiffness affects bounce animation
+                suspensionOffset = (value - 2.0) * 0.02; // Stiffer = less bounce
+                break;
+
+            case "suspensionRaise":
+                // Visual suspension height offset
+                suspensionOffset = value;
+                break;
+
+            case "suspensionCompDamp":
+                // Affects bounce feel - stored for visual animation
+                break;
+
+            case "driveForce":
+                // Engine power - affects acceleration multiplier
+                handlingMods.acceleration = value / 0.25;
+                // For actual speed boost, we'll apply this in the process loop
+                break;
+
+            case "initialDriveMaxVel":
+                // Top speed - store multiplier for speed limiting
+                handlingMods.topSpeed = value / 200.0;
+                break;
+
+            case "brakeForce":
+                // Brake strength multiplier
+                handlingMods.braking = value / 0.8;
+                break;
+
+            case "mass":
+                // SET_CAR_MASS or use OOP property
+                try {
+                    // Try native first
+                    natives.setCarMass(veh, value);
+                } catch(e1) {
+                    // Fallback to OOP property if available
+                    try {
+                        veh.mass = value;
+                    } catch(e2) {
+                        console.log("[Handling] mass set failed: " + e2);
+                    }
+                }
+                break;
+
+            case "centreOfMassZ":
+                // Try OOP property for center of mass
+                try {
+                    if (veh.centerOfMass) {
+                        let com = veh.centerOfMass;
+                        veh.centerOfMass = new Vec3(com.x, com.y, value);
+                    }
+                } catch(e) {}
+                break;
+
+            case "steeringLock":
+                // Steering angle - visual/stored only
+                // GTA IV doesn't have a runtime native for this
+                break;
+        }
+    } catch(e) {
+        console.log("[HandlingEditor] Error applying " + param + ": " + e);
+    }
+}
+
+// Reset handling to default values
+function resetHandlingToDefault() {
+    handlingValues = {
+        tractionCurveMax: 2.0,
+        tractionCurveMin: 1.8,
+        tractionBias: 0.5,
+        suspensionForce: 2.0,
+        suspensionCompDamp: 1.0,
+        suspensionReboundDamp: 1.2,
+        suspensionUpperLimit: 0.12,
+        suspensionLowerLimit: -0.10,
+        suspensionRaise: 0.0,
+        driveForce: 0.25,
+        driveInertia: 1.0,
+        initialDriveMaxVel: 200.0,
+        brakeForce: 0.8,
+        mass: 1500.0,
+        centreOfMassZ: 0.0,
+        steeringLock: 35.0,
+        tractionLoss: 0.8
+    };
+
+    // Reset visual feedback
+    tyreGlowColors = { fr: {r:0,g:255,b:100}, fl: {r:0,g:255,b:100}, rr: {r:0,g:255,b:100}, rl: {r:0,g:255,b:100} };
+    engineGlow.intensity = 0;
+    brakeGlow.intensity = 0;
+    suspensionOffset = 0;
+    selectedHandlingParam = "";
+
+    // Apply defaults to vehicle
+    if (localPlayer && localPlayer.vehicle) {
+        let veh = localPlayer.vehicle;
+        // Reset traction
+        try {
+            natives.setCarTraction(veh, 2.0);
+        } catch(e) {
+            console.log("[Handling] Reset traction failed: " + e);
+        }
+        // Reset mass
+        try {
+            natives.setCarMass(veh, 1500.0);
+        } catch(e1) {
+            try {
+                veh.mass = 1500.0;
+            } catch(e2) {}
+        }
+        // Repair vehicle to reset any damage-based handling issues
+        try {
+            natives.fixCar(veh);
+        } catch(e) {}
+    }
+
+    // Reset handling mods (independent from drift mode toggle)
+    handlingMods = {
+        grip: 1.0,
+        acceleration: 1.0,
+        topSpeed: 1.0,
+        braking: 1.0
+    };
+
+    console.log("[Handling] Reset to defaults");
+}
+
+// Apply handling presets
+function applyHandlingPreset(preset) {
+    switch(preset) {
+        case "race":
+            handlingValues.tractionCurveMax = 3.5;
+            handlingValues.tractionCurveMin = 3.0;
+            handlingValues.suspensionForce = 4.0;
+            handlingValues.suspensionCompDamp = 2.0;
+            handlingValues.suspensionRaise = -0.05;
+            handlingValues.driveForce = 0.50;
+            handlingValues.initialDriveMaxVel = 300.0;
+            handlingValues.brakeForce = 1.5;
+            handlingValues.mass = 1200.0;
+            break;
+        case "drift":
+            handlingValues.tractionCurveMax = 1.5;
+            handlingValues.tractionCurveMin = 1.0;
+            handlingValues.tractionLoss = 1.8;
+            handlingValues.tractionBias = 0.7;
+            handlingValues.suspensionForce = 3.0;
+            handlingValues.driveForce = 0.40;
+            handlingValues.brakeForce = 1.0;
+            // Low traction values create drift feeling without needing drift mode toggle
+            break;
+        case "offroad":
+            handlingValues.tractionCurveMax = 2.5;
+            handlingValues.suspensionForce = 1.5;
+            handlingValues.suspensionCompDamp = 0.6;
+            handlingValues.suspensionRaise = 0.12;
+            handlingValues.driveForce = 0.35;
+            handlingValues.mass = 2000.0;
+            break;
+        case "lowrider":
+            handlingValues.suspensionForce = 0.8;
+            handlingValues.suspensionCompDamp = 0.4;
+            handlingValues.suspensionRaise = -0.12;
+            handlingValues.driveForce = 0.20;
+            handlingValues.initialDriveMaxVel = 150.0;
+            break;
+    }
+
+    // Apply all values
+    for (let param in handlingValues) {
+        applyHandlingValue(param, handlingValues[param]);
+    }
+
+    // Update visuals
+    updateAllHandlingVisuals();
+}
+
+// Update visual feedback based on parameter
+function updateHandlingVisuals(param, value) {
+    switch(param) {
+        case "tractionCurveMax":
+        case "tractionCurveMin":
+        case "tractionLoss":
+            // Tyre color: Red = low grip, Green = high grip
+            let gripFactor = Math.min(1, Math.max(0, (value - 0.5) / 4.0));
+            let r = Math.floor(255 * (1 - gripFactor));
+            let g = Math.floor(255 * gripFactor);
+            tyreGlowColors.fr = tyreGlowColors.fl = tyreGlowColors.rr = tyreGlowColors.rl = {r: r, g: g, b: 50};
+            break;
+        case "tractionBias":
+            // Front vs rear tyre colors
+            let frontGrip = 1 - value;
+            let rearGrip = value;
+            tyreGlowColors.fr = tyreGlowColors.fl = {r: Math.floor(255 * (1 - frontGrip)), g: Math.floor(255 * frontGrip), b: 50};
+            tyreGlowColors.rr = tyreGlowColors.rl = {r: Math.floor(255 * (1 - rearGrip)), g: Math.floor(255 * rearGrip), b: 50};
+            break;
+        case "driveForce":
+            // Engine glow intensity based on power
+            engineGlow.intensity = Math.min(1, value / 0.5);
+            engineGlow.r = 255;
+            engineGlow.g = Math.floor(100 + 100 * (1 - engineGlow.intensity));
+            engineGlow.b = 0;
+            break;
+        case "brakeForce":
+            // Brake glow
+            brakeGlow.intensity = Math.min(1, value / 2.0);
+            break;
+        case "suspensionRaise":
+            suspensionOffset = value;
+            break;
+        case "mass":
+            // Heavier = darker shadow/glow underneath
+            break;
+    }
+}
+
+// Update all visuals based on current handling values
+function updateAllHandlingVisuals() {
+    updateHandlingVisuals("tractionCurveMax", handlingValues.tractionCurveMax);
+    updateHandlingVisuals("driveForce", handlingValues.driveForce);
+    updateHandlingVisuals("brakeForce", handlingValues.brakeForce);
+    updateHandlingVisuals("suspensionRaise", handlingValues.suspensionRaise);
+}
+
+// Check if we're in a handling editor submenu
+function isInHandlingEditor() {
+    return currentMenu === "handlingEditor" ||
+           currentMenu.startsWith("handling_");
+}
+
+// ============================================================================
+// HANDLING EDITOR VISUALIZATION - Clean & Informative
+// ============================================================================
+
+// Render the handling editor visualization
+addEventHandler("OnDrawnHUD", function(event) {
+    // Only render when in handling editor menus and menu is open
+    if (!menuOpen || !isInHandlingEditor()) {
+        handlingEditorAnim = Math.max(0, handlingEditorAnim - 0.15);
+        if (handlingEditorAnim <= 0) return;
+    } else {
+        handlingEditorAnim = Math.min(1, handlingEditorAnim + 0.12);
+    }
+
+    let theme = getTheme();
+    let alpha = Math.floor(255 * handlingEditorAnim);
+
+    // Panel position (left side of screen)
+    let panelX = 40;
+    let panelY = 120;
+    let panelW = 380;
+    let panelH = 520;
+
+    // Slide in animation
+    let slideOffset = (1 - handlingEditorAnim) * -150;
+    panelX += slideOffset;
+
+    // ===== PANEL BACKGROUND =====
+    let bgColor = toColour(15, 15, 20, Math.floor(235 * handlingEditorAnim));
+    drawRect(panelX, panelY, panelW, panelH, bgColor);
+
+    // Border
+    let borderColor = toColour(theme.primary.r, theme.primary.g, theme.primary.b, Math.floor(alpha * 0.8));
+    drawRect(panelX, panelY, panelW, 2, borderColor);
+    drawRect(panelX, panelY + panelH - 2, panelW, 2, borderColor);
+    drawRect(panelX, panelY, 2, panelH, borderColor);
+    drawRect(panelX + panelW - 2, panelY, 2, panelH, borderColor);
+
+    // ===== HEADER =====
+    let headerBg = toColour(25, 25, 35, alpha);
+    drawRect(panelX + 2, panelY + 2, panelW - 4, 35, headerBg);
+
+    let titleColor = toColour(255, 255, 255, alpha);
+    drawText("HANDLING TUNER", panelX + 12, panelY + 10, titleColor, 16);
+
+    // Vehicle status
+    let statusText = "NO VEHICLE";
+    let statusColor = toColour(255, 80, 80, alpha);
+    if (localPlayer && localPlayer.vehicle) {
+        statusText = "ACTIVE";
+        statusColor = toColour(80, 255, 80, alpha);
+    }
+    drawText(statusText, panelX + panelW - 70, panelY + 12, statusColor, 11);
+
+    // ===== TOP-DOWN CAR DIAGRAM =====
+    let carCenterX = panelX + panelW / 2;
+    let carCenterY = panelY + 130;
+    let carW = 70;
+    let carH = 120;
+    let carX = carCenterX - carW / 2;
+    let carY = carCenterY - carH / 2;
+
+    // Suspension height visual offset (subtle)
+    let suspOffset = suspensionOffset * 30;
+    carY += suspOffset;
+
+    // Car body outline
+    let bodyOutline = toColour(60, 60, 70, alpha);
+    drawRect(carX - 1, carY - 1, carW + 2, carH + 2, bodyOutline);
+
+    // Car body
+    let bodyColor = toColour(50, 50, 60, alpha);
+    drawRect(carX, carY, carW, carH, bodyColor);
+
+    // Windshield
+    let glassColor = toColour(80, 100, 120, alpha);
+    drawRect(carX + 10, carY + 25, carW - 20, 25, glassColor);
+    drawRect(carX + 12, carY + carH - 35, carW - 24, 18, glassColor);
+
+    // ===== WHEELS WITH GRIP INDICATOR =====
+    let wheelW = 18;
+    let wheelH = 30;
+    let wheels = [
+        { x: carX - wheelW + 3, y: carY + 12, color: tyreGlowColors.fl, label: "FL" },
+        { x: carX + carW - 3, y: carY + 12, color: tyreGlowColors.fr, label: "FR" },
+        { x: carX - wheelW + 3, y: carY + carH - 12 - wheelH, color: tyreGlowColors.rl, label: "RL" },
+        { x: carX + carW - 3, y: carY + carH - 12 - wheelH, color: tyreGlowColors.rr, label: "RR" }
+    ];
+
+    for (let i = 0; i < wheels.length; i++) {
+        let w = wheels[i];
+
+        // Wheel background
+        let wheelBg = toColour(25, 25, 30, alpha);
+        drawRect(w.x, w.y, wheelW, wheelH, wheelBg);
+
+        // Grip indicator bar on wheel (colored based on traction)
+        let gripBarH = Math.floor(wheelH * 0.8);
+        let gripColor = toColour(w.color.r, w.color.g, w.color.b, alpha);
+        drawRect(w.x + 2, w.y + (wheelH - gripBarH) / 2, 4, gripBarH, gripColor);
+
+        // Wheel outline
+        let wheelOutline = toColour(80, 80, 90, alpha);
+        drawRect(w.x, w.y, wheelW, 1, wheelOutline);
+        drawRect(w.x, w.y + wheelH - 1, wheelW, 1, wheelOutline);
+    }
+
+    // ===== TRACTION BIAS ARROWS =====
+    let biasY = carCenterY;
+    let frontBias = 1 - handlingValues.tractionBias;
+    let rearBias = handlingValues.tractionBias;
+
+    // Front bias indicator (above car)
+    let frontArrowColor = toColour(100, 200, 100, Math.floor(alpha * frontBias));
+    drawRect(carCenterX - 15, carY - 15, 30, 3, frontArrowColor);
+    drawText(Math.floor(frontBias * 100) + "%", carCenterX - 12, carY - 28, frontArrowColor, 9);
+
+    // Rear bias indicator (below car)
+    let rearArrowColor = toColour(100, 200, 100, Math.floor(alpha * rearBias));
+    drawRect(carCenterX - 15, carY + carH + 12, 30, 3, rearArrowColor);
+    drawText(Math.floor(rearBias * 100) + "%", carCenterX - 12, carY + carH + 18, rearArrowColor, 9);
+
+    // Center of mass indicator
+    let comY = carCenterY + (handlingValues.centreOfMassZ * 50);
+    let comColor = toColour(255, 200, 0, alpha);
+    drawRect(carCenterX - 4, comY - 4, 8, 8, comColor);
+
+    // ===== DATA TABLE =====
+    let tableX = panelX + 15;
+    let tableY = panelY + 210;
+    let labelCol = toColour(160, 160, 170, alpha);
+    let valueCol = toColour(255, 255, 255, alpha);
+    let rowH = 22;
+
+    // Section: Traction
+    let sectionColor = toColour(theme.accent.r, theme.accent.g, theme.accent.b, alpha);
+    drawText("TRACTION", tableX, tableY, sectionColor, 11);
+    tableY += 18;
+
+    drawText("Grip Level:", tableX, tableY, labelCol, 10);
+    drawText(handlingValues.tractionCurveMax.toFixed(2), tableX + 140, tableY, valueCol, 10);
+    let gripDesc = handlingValues.tractionCurveMax < 1.5 ? "Slippery" : handlingValues.tractionCurveMax < 2.5 ? "Normal" : handlingValues.tractionCurveMax < 3.5 ? "High" : "Maximum";
+    drawText(gripDesc, tableX + 200, tableY, toColour(tyreGlowColors.fr.r, tyreGlowColors.fr.g, tyreGlowColors.fr.b, alpha), 10);
+    tableY += rowH;
+
+    drawText("Traction Loss:", tableX, tableY, labelCol, 10);
+    drawText(handlingValues.tractionLoss.toFixed(2), tableX + 140, tableY, valueCol, 10);
+    let lossDesc = handlingValues.tractionLoss < 0.5 ? "Stable" : handlingValues.tractionLoss < 1.0 ? "Normal" : "Drifty";
+    drawText(lossDesc, tableX + 200, tableY, labelCol, 10);
+    tableY += rowH;
+
+    drawText("Bias (F/R):", tableX, tableY, labelCol, 10);
+    drawText(Math.floor(frontBias * 100) + "/" + Math.floor(rearBias * 100), tableX + 140, tableY, valueCol, 10);
+    tableY += rowH + 8;
+
+    // Section: Engine
+    drawText("ENGINE", tableX, tableY, sectionColor, 11);
+    tableY += 18;
+
+    drawText("Power:", tableX, tableY, labelCol, 10);
+    drawText(handlingValues.driveForce.toFixed(2), tableX + 140, tableY, valueCol, 10);
+    let powerPct = Math.floor((handlingValues.driveForce / 1.2) * 100);
+    let powerColor = powerPct > 100 ? toColour(255, 150, 0, alpha) : valueCol;
+    drawText(powerPct + "%", tableX + 200, tableY, powerColor, 10);
+    tableY += rowH;
+
+    drawText("Top Speed:", tableX, tableY, labelCol, 10);
+    drawText(handlingValues.initialDriveMaxVel.toFixed(0) + " km/h", tableX + 140, tableY, valueCol, 10);
+    tableY += rowH;
+
+    drawText("Brake Force:", tableX, tableY, labelCol, 10);
+    drawText(handlingValues.brakeForce.toFixed(2), tableX + 140, tableY, valueCol, 10);
+    let brakePct = Math.floor((handlingValues.brakeForce / 3.0) * 100);
+    drawText(brakePct + "%", tableX + 200, tableY, valueCol, 10);
+    tableY += rowH + 8;
+
+    // Section: Suspension
+    drawText("SUSPENSION", tableX, tableY, sectionColor, 11);
+    tableY += 18;
+
+    drawText("Height:", tableX, tableY, labelCol, 10);
+    let heightDesc = handlingValues.suspensionRaise < -0.08 ? "Slammed" : handlingValues.suspensionRaise < -0.02 ? "Low" : handlingValues.suspensionRaise < 0.02 ? "Stock" : handlingValues.suspensionRaise < 0.08 ? "Raised" : "Lifted";
+    drawText(heightDesc, tableX + 140, tableY, valueCol, 10);
+    drawText((handlingValues.suspensionRaise >= 0 ? "+" : "") + handlingValues.suspensionRaise.toFixed(2), tableX + 200, tableY, labelCol, 10);
+    tableY += rowH;
+
+    drawText("Stiffness:", tableX, tableY, labelCol, 10);
+    let stiffDesc = handlingValues.suspensionForce < 1.5 ? "Soft" : handlingValues.suspensionForce < 3.0 ? "Normal" : handlingValues.suspensionForce < 5.0 ? "Firm" : "Race";
+    drawText(stiffDesc, tableX + 140, tableY, valueCol, 10);
+    drawText(handlingValues.suspensionForce.toFixed(1), tableX + 200, tableY, labelCol, 10);
+    tableY += rowH + 8;
+
+    // Section: Weight
+    drawText("WEIGHT", tableX, tableY, sectionColor, 11);
+    tableY += 18;
+
+    drawText("Mass:", tableX, tableY, labelCol, 10);
+    drawText(handlingValues.mass.toFixed(0) + " kg", tableX + 140, tableY, valueCol, 10);
+    let massDesc = handlingValues.mass < 1000 ? "Light" : handlingValues.mass < 2000 ? "Normal" : handlingValues.mass < 3500 ? "Heavy" : "Tank";
+    drawText(massDesc, tableX + 200, tableY, labelCol, 10);
+    tableY += rowH;
+
+    drawText("CoM Height:", tableX, tableY, labelCol, 10);
+    let comDesc = handlingValues.centreOfMassZ < -0.1 ? "Low" : handlingValues.centreOfMassZ < 0.1 ? "Center" : "High";
+    drawText(comDesc, tableX + 140, tableY, valueCol, 10);
+    tableY += rowH + 8;
+
+    // ===== LIVE VEHICLE DATA =====
+    if (localPlayer && localPlayer.vehicle) {
+        let veh = localPlayer.vehicle;
+        drawText("LIVE DATA", tableX, tableY, sectionColor, 11);
+        tableY += 18;
+
+        try {
+            let vel = veh.velocity;
+            let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y) * 3.6; // m/s to km/h
+            drawText("Speed:", tableX, tableY, labelCol, 10);
+            drawText(speed.toFixed(0) + " km/h", tableX + 140, tableY, toColour(0, 200, 255, alpha), 10);
+            tableY += rowH;
+        } catch(e) {}
+
+        try {
+            let health = veh.health;
+            drawText("Health:", tableX, tableY, labelCol, 10);
+            let healthColor = health > 700 ? toColour(0, 255, 0, alpha) : health > 300 ? toColour(255, 200, 0, alpha) : toColour(255, 50, 50, alpha);
+            drawText(health.toFixed(0), tableX + 140, tableY, healthColor, 10);
+        } catch(e) {}
+    }
+
+    // ===== FOOTER =====
+    let footerY = panelY + panelH - 22;
+    let footerColor = toColour(100, 100, 110, alpha);
+    drawText("Changes apply in real-time", tableX, footerY, footerColor, 9);
+});
 
 addEventHandler("OnResourceStart", function(event, resource) {
     console.log("[ModMenu] Client loaded - Press F5 to open menu");
