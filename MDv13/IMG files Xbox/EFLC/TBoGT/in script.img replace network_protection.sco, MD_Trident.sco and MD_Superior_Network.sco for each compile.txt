@@ -1,1 +1,0 @@
-in script.img replace network_protection.sco, MD_Trident.sco and MD_Superior_Network.sco for each compile
