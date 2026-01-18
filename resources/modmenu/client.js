@@ -1,7 +1,8 @@
 
 // ============================================================================
-// REVOLUTION MOD MENU - Client Side
+// MD REVOLUTION MOD MENU - Client Side (Trident Style)
 // Interactive GUI menu for all players
+// Steel Blue / Gold / Orange color scheme with flash effects
 // Press F5 to open/close menu, Arrow keys to navigate, Enter to select
 // ============================================================================
 
@@ -26,20 +27,34 @@ let screenShake = 0;
 let flashAlpha = 0;
 let currentDescription = "";
 
+// Trident-style header flash effect
+let headerFlashTimer = 0;
+let headerFlashActive = false;
+let headerFlashInterval = 3.0; // Flash every 3 seconds
+let headerFlashDuration = 0.15; // Flash lasts 0.15 seconds
+
 // ============================================================================
 // THEME SYSTEM
 // ============================================================================
-let currentTheme = "gray"; // Default theme
+let currentTheme = "trident"; // Default theme - Trident style
 
+// Trident-style color scheme
 const themes = {
-    black: { primary: { r: 80, g: 80, b: 80 }, accent: { r: 150, g: 150, b: 150 }, name: "Black" },
-    red: { primary: { r: 200, g: 30, b: 30 }, accent: { r: 255, g: 80, b: 80 }, name: "Red" },
-    blue: { primary: { r: 30, g: 80, b: 200 }, accent: { r: 80, g: 150, b: 255 }, name: "Blue" },
-    green: { primary: { r: 30, g: 160, b: 60 }, accent: { r: 80, g: 220, b: 100 }, name: "Green" },
-    purple: { primary: { r: 120, g: 40, b: 180 }, accent: { r: 180, g: 100, b: 255 }, name: "Purple" },
-    pink: { primary: { r: 200, g: 60, b: 120 }, accent: { r: 255, g: 120, b: 180 }, name: "Pink" },
-    gold: { primary: { r: 180, g: 140, b: 30 }, accent: { r: 255, g: 200, b: 80 }, name: "Gold" },
-    gray: { primary: { r: 100, g: 100, b: 110 }, accent: { r: 160, g: 160, b: 170 }, name: "Gray" }
+    // Primary Trident theme - Steel Blue with Gold/Orange accents
+    trident: {
+        primary: { r: 70, g: 130, b: 180 },      // Steel Blue
+        accent: { r: 255, g: 200, b: 50 },        // Gold
+        highlight: { r: 255, g: 140, b: 0 },      // Orange
+        name: "Trident"
+    },
+    black: { primary: { r: 80, g: 80, b: 80 }, accent: { r: 150, g: 150, b: 150 }, highlight: { r: 200, g: 200, b: 200 }, name: "Black" },
+    red: { primary: { r: 200, g: 30, b: 30 }, accent: { r: 255, g: 80, b: 80 }, highlight: { r: 255, g: 120, b: 80 }, name: "Red" },
+    blue: { primary: { r: 30, g: 80, b: 200 }, accent: { r: 80, g: 150, b: 255 }, highlight: { r: 100, g: 200, b: 255 }, name: "Blue" },
+    green: { primary: { r: 30, g: 160, b: 60 }, accent: { r: 80, g: 220, b: 100 }, highlight: { r: 120, g: 255, b: 120 }, name: "Green" },
+    purple: { primary: { r: 120, g: 40, b: 180 }, accent: { r: 180, g: 100, b: 255 }, highlight: { r: 220, g: 150, b: 255 }, name: "Purple" },
+    pink: { primary: { r: 200, g: 60, b: 120 }, accent: { r: 255, g: 120, b: 180 }, highlight: { r: 255, g: 180, b: 200 }, name: "Pink" },
+    gold: { primary: { r: 180, g: 140, b: 30 }, accent: { r: 255, g: 200, b: 80 }, highlight: { r: 255, g: 220, b: 100 }, name: "Gold" },
+    gray: { primary: { r: 100, g: 100, b: 110 }, accent: { r: 160, g: 160, b: 170 }, highlight: { r: 200, g: 200, b: 210 }, name: "Gray" }
 };
 
 function getTheme() {
@@ -238,7 +253,7 @@ let selectedHandlingParam = "";
 
 const menuData = {
     main: {
-        title: "REVOLUTION v0.1",
+        title: "MD REVOLUTION",
         items: [
             { label: "Self Options", action: "submenu", target: "self" },
             { label: "Vehicle Spawner", action: "submenu", target: "vehicles" },
@@ -256,6 +271,7 @@ const menuData = {
     themes: {
         title: "MOD MENU THEME",
         items: [
+            { label: "Trident (Default)", action: "theme", value: "trident" },
             { label: "Black", action: "theme", value: "black" },
             { label: "Red", action: "theme", value: "red" },
             { label: "Blue", action: "theme", value: "blue" },
@@ -2335,7 +2351,8 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
 });
 
 // ============================================================================
-// RENDERING - REVOLUTION MOD MENU (Red & Black Eye-Melting Theme)
+// RENDERING - MD REVOLUTION MOD MENU (Trident Style)
+// Steel Blue primary, Gold/Orange accents, Flash effects
 // ============================================================================
 
 // Smooth animation update with original effects
@@ -2346,7 +2363,17 @@ addEventHandler("OnProcess", function(event) {
     selectedPulse += 0.06;
     colorShift += 0.01;
     particleTime += 0.05;
-    
+
+    // Trident-style header flash timer
+    headerFlashTimer += 0.02;
+    if (headerFlashTimer >= headerFlashInterval) {
+        headerFlashTimer = 0;
+        headerFlashActive = true;
+    }
+    if (headerFlashActive && headerFlashTimer >= headerFlashDuration) {
+        headerFlashActive = false;
+    }
+
     // Enhanced visual effects
     glowIntensity = Math.sin(animTime * 3) * 0.5 + 0.5;
     
@@ -2473,48 +2500,56 @@ addEventHandler("OnDrawnHUD", function(event) {
     let baseX = menu.x + slideOffset;
     let baseY = menu.y;
 
-    // ===== SMOOTH PULSING OUTER GLOW (THEMED) =====
+    // ===== TRIDENT-STYLE OUTER GLOW =====
     let theme = getTheme();
-    let glowPulse = Math.sin(animTime * 2) * 0.3 + 0.7;
-    let glowSize = 10 + Math.sin(animTime * 1.5) * 4;
+    let highlight = theme.highlight || theme.accent;
+    let glowPulse = Math.sin(animTime * 2) * 0.25 + 0.75;
+    let glowSize = 8 + Math.sin(animTime * 1.5) * 3;
 
-    // Theme-colored glow with smooth pulse
-    let glowIntensityMult = 0.8 + Math.sin(animTime * 2) * 0.2;
+    // Steel Blue outer glow with subtle Gold tint
+    let glowIntensityMult = 0.7 + Math.sin(animTime * 2) * 0.15;
     for (let g = 4; g >= 1; g--) {
-        let gAlpha = Math.floor((40 / g) * glowPulse * menuOpenAnim);
+        let gAlpha = Math.floor((35 / g) * glowPulse * menuOpenAnim);
+        // Mix Steel Blue with subtle Gold
         let gCol = toColour(
-            Math.floor(theme.primary.r * glowIntensityMult),
-            Math.floor(theme.primary.g * glowIntensityMult),
-            Math.floor(theme.primary.b * glowIntensityMult),
+            Math.floor((theme.primary.r * 0.8 + highlight.r * 0.2) * glowIntensityMult),
+            Math.floor((theme.primary.g * 0.8 + highlight.g * 0.15) * glowIntensityMult),
+            Math.floor((theme.primary.b * 0.9 + highlight.b * 0.1) * glowIntensityMult),
             gAlpha
         );
         drawRect(baseX - glowSize * g, baseY - glowSize * g,
                  menu.width + glowSize * g * 2, totalHeight + glowSize * g * 2 + 10, gCol);
     }
 
-    // ===== MAIN BACKGROUND - Deep Black =====
-    let bgColor = toColour(8, 8, 12, Math.floor(245 * menuOpenAnim));
+    // ===== MAIN BACKGROUND - Dark with Steel Blue tint =====
+    let bgColor = toColour(10, 12, 18, Math.floor(248 * menuOpenAnim));
     drawRect(baseX, baseY, menu.width, totalHeight + 10, bgColor);
 
-    // ===== SMOOTH ANIMATED BORDER (THEMED) =====
-    let borderPulse = Math.sin(animTime * 3) * 0.2 + 0.8;
+    // ===== TRIDENT-STYLE BORDER - Steel Blue =====
+    let borderPulse = Math.sin(animTime * 3) * 0.15 + 0.85;
     let borderColor = toColour(
-        Math.floor(theme.primary.r * borderPulse),
-        Math.floor(theme.primary.g * borderPulse),
+        Math.floor(theme.primary.r * borderPulse * 0.8),
+        Math.floor(theme.primary.g * borderPulse * 0.8),
         Math.floor(theme.primary.b * borderPulse),
         Math.floor(220 * menuOpenAnim)
     );
 
     // Smooth border thickness
-    let borderW = 3 + Math.sin(animTime * 3) * 0.8;
+    let borderW = 3 + Math.sin(animTime * 3) * 0.5;
     drawRect(baseX, baseY, menu.width, borderW, borderColor); // Top
     drawRect(baseX, baseY + totalHeight + 10 - borderW, menu.width, borderW, borderColor); // Bottom
     drawRect(baseX, baseY, borderW, totalHeight + 10, borderColor); // Left
     drawRect(baseX + menu.width - borderW, baseY, borderW, totalHeight + 10, borderColor); // Right
 
-    // Corner accents - smooth brighter theme color
-    let cornerSize = 15 + Math.sin(animTime * 2) * 4;
-    let cornerColor = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(200 * menuOpenAnim));
+    // Corner accents - Gold/Orange (Trident signature)
+    let cornerSize = 14 + Math.sin(animTime * 2) * 3;
+    let cornerPulse = Math.sin(animTime * 2.5) * 0.2 + 0.8;
+    let cornerColor = toColour(
+        Math.floor(highlight.r * cornerPulse),
+        Math.floor(highlight.g * cornerPulse),
+        Math.floor(highlight.b * 0.5),
+        Math.floor(220 * menuOpenAnim)
+    );
     drawRect(baseX, baseY, cornerSize, 3, cornerColor);
     drawRect(baseX, baseY, 3, cornerSize, cornerColor);
     drawRect(baseX + menu.width - cornerSize, baseY, cornerSize, 3, cornerColor);
@@ -2524,54 +2559,81 @@ addEventHandler("OnDrawnHUD", function(event) {
     drawRect(baseX + menu.width - cornerSize, baseY + totalHeight + 7, cornerSize, 3, cornerColor);
     drawRect(baseX + menu.width - 3, baseY + totalHeight + 10 - cornerSize, 3, cornerSize, cornerColor);
 
-    // ===== HEADER - Smooth Black to Theme Gradient =====
-    let headerMult = 0.7 + Math.sin(animTime * 2) * 0.15;
+    // ===== HEADER - Trident-style gradient =====
+    let headerMult = 0.8 + Math.sin(animTime * 2) * 0.1;
+
+    // Flash effect - bright white flash overlay
+    let flashMult = headerFlashActive ? 2.5 : 1.0;
+
     let headerLeft = toColour(
-        Math.floor(theme.primary.r * headerMult),
-        Math.floor(theme.primary.g * headerMult * 0.3),
-        Math.floor(theme.primary.b * headerMult * 0.3),
+        Math.min(255, Math.floor(theme.primary.r * headerMult * flashMult)),
+        Math.min(255, Math.floor(theme.primary.g * headerMult * flashMult)),
+        Math.min(255, Math.floor(theme.primary.b * headerMult * flashMult)),
         animAlpha
     );
     let headerRight = toColour(
-        Math.floor(theme.primary.r * 0.3),
-        Math.floor(theme.primary.g * 0.1),
-        Math.floor(theme.primary.b * 0.1),
+        Math.floor(theme.primary.r * 0.2),
+        Math.floor(theme.primary.g * 0.2),
+        Math.floor(theme.primary.b * 0.3),
         animAlpha
     );
     drawGradientRect(baseX + 4, baseY + 4, menu.width - 8, menu.headerHeight - 4, headerLeft, headerRight);
 
-    // Header smooth glow line
+    // Flash overlay when active
+    if (headerFlashActive) {
+        let flashOverlay = toColour(255, 255, 255, Math.floor(180 * menuOpenAnim));
+        drawRect(baseX + 4, baseY + 4, menu.width - 8, menu.headerHeight - 4, flashOverlay);
+    }
+
+    // Header accent line (Gold/Orange)
     let lineGlow = Math.sin(animTime * 4) * 0.3 + 0.7;
-    let headerLineColor = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(150 * lineGlow * menuOpenAnim));
+    let highlight = theme.highlight || theme.accent;
+    let headerLineColor = toColour(highlight.r, highlight.g, highlight.b, Math.floor(200 * lineGlow * menuOpenAnim));
     drawRect(baseX + 4, baseY + menu.headerHeight - 2, menu.width - 8, 2, headerLineColor);
 
-    // ===== ANIMATED TITLE =====
+    // ===== ANIMATED TITLE WITH MD PREFIX =====
     let titleY = baseY + 10;
+
+    // MD Prefix - Gold/Orange color with glow
+    let mdGlowPulse = Math.sin(titlePulse * 1.5) * 0.3 + 0.7;
+    let mdGlowColor = toColour(highlight.r, highlight.g, highlight.b, Math.floor(60 * mdGlowPulse * menuOpenAnim));
+    drawText("MD", baseX + 12, titleY + 2, mdGlowColor, 24);
+
+    // MD shadow
+    let shadowColor = toColour(0, 0, 0, Math.floor(200 * menuOpenAnim));
+    drawText("MD", baseX + 11, titleY + 2, shadowColor, 24);
+
+    // Main MD prefix - Orange/Gold
+    let mdColor = toColour(
+        Math.min(255, Math.floor(highlight.r * (headerFlashActive ? 1.5 : 1.0))),
+        Math.min(255, Math.floor(highlight.g * (headerFlashActive ? 1.5 : 1.0))),
+        Math.floor(highlight.b * 0.8),
+        animAlpha
+    );
+    drawText("MD", baseX + 10, titleY, mdColor, 24);
 
     // Title glow effect (themed)
     let titleGlowPulse = Math.sin(titlePulse) * 0.5 + 0.5;
-    let titleGlowColor = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(100 * titleGlowPulse * menuOpenAnim));
-    drawText("REVOLUTION", baseX + 14, titleY + 2, titleGlowColor, 24);
-    drawText("REVOLUTION", baseX + 8, titleY + 2, titleGlowColor, 24);
+    let titleGlowColor = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(80 * titleGlowPulse * menuOpenAnim));
+    drawText("REVOLUTION", baseX + 54, titleY + 2, titleGlowColor, 24);
 
     // Title shadow
-    let shadowColor = toColour(0, 0, 0, Math.floor(200 * menuOpenAnim));
-    drawText("REVOLUTION", baseX + 12, titleY + 3, shadowColor, 24);
+    drawText("REVOLUTION", baseX + 52, titleY + 2, shadowColor, 24);
 
-    // Main title - pulsing theme to white
-    let titlePulseVal = Math.sin(titlePulse * 2) * 0.3 + 0.7;
+    // Main title - Steel Blue to white pulse
+    let titlePulseVal = Math.sin(titlePulse * 2) * 0.25 + 0.75;
     let titleColor = toColour(
-        Math.floor(255 * titlePulseVal + theme.accent.r * (1 - titlePulseVal)),
-        Math.floor(255 * titlePulseVal + theme.accent.g * (1 - titlePulseVal)),
-        Math.floor(255 * titlePulseVal + theme.accent.b * (1 - titlePulseVal)),
+        Math.min(255, Math.floor(255 * titlePulseVal + theme.primary.r * (1 - titlePulseVal) * (headerFlashActive ? 1.5 : 1.0))),
+        Math.min(255, Math.floor(255 * titlePulseVal + theme.primary.g * (1 - titlePulseVal) * (headerFlashActive ? 1.5 : 1.0))),
+        Math.min(255, Math.floor(255 * titlePulseVal + theme.primary.b * (1 - titlePulseVal) * (headerFlashActive ? 1.5 : 1.0))),
         animAlpha
     );
-    drawText("REVOLUTION", baseX + 10, titleY, titleColor, 24);
+    drawText("REVOLUTION", baseX + 50, titleY, titleColor, 24);
 
-    // Subtitle with flicker
-    let betaFlicker = Math.sin(animTime * 8) > 0.3 ? 1 : 0.7;
-    let betaColor = toColour(180, 180, 180, Math.floor(180 * betaFlicker * menuOpenAnim));
-    drawText("ModMenu (Beta)", baseX + 12, titleY + 30, betaColor, 11);
+    // Subtitle - version info
+    let betaFlicker = Math.sin(animTime * 6) > 0.2 ? 1 : 0.8;
+    let betaColor = toColour(180, 190, 200, Math.floor(180 * betaFlicker * menuOpenAnim));
+    drawText("Trident Style v1.0", baseX + 12, titleY + 30, betaColor, 11);
 
     // Smooth animated line under title (themed)
     let lineWidth = 100 + Math.sin(animTime * 3) * 30;
@@ -2602,69 +2664,73 @@ addEventHandler("OnDrawnHUD", function(event) {
         }
 
         if (isSelected) {
-            // ===== SELECTED ITEM - Pulsing Theme Color =====
-            let selMult = 0.6 + selectGlow * 0.35;
+            // ===== SELECTED ITEM - Trident-style Steel Blue with Gold accent =====
+            let selMult = 0.7 + selectGlow * 0.3;
             let selColor = toColour(
                 Math.floor(theme.primary.r * selMult),
-                Math.floor(theme.primary.g * selMult * 0.3),
-                Math.floor(theme.primary.b * selMult * 0.3),
-                Math.floor(230 * menuOpenAnim)
+                Math.floor(theme.primary.g * selMult),
+                Math.floor(theme.primary.b * selMult),
+                Math.floor(235 * menuOpenAnim)
             );
 
-            // Outer glow
-            let selGlowColor = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(50 * menuOpenAnim));
-            drawRect(baseX + 2, itemY - 3, menu.width - 4, menu.itemHeight + 6, selGlowColor);
+            // Outer glow - Gold/Orange
+            let selGlowColor = toColour(highlight.r, highlight.g, highlight.b, Math.floor(40 * menuOpenAnim));
+            drawRect(baseX + 2, itemY - 2, menu.width - 4, menu.itemHeight + 4, selGlowColor);
 
-            // Main selection background
+            // Main selection background - gradient feel
             drawRect(baseX + 6 + selectOffset, itemY, menu.width - 12, menu.itemHeight - 2, selColor);
 
-            // Left indicator bar - smooth bright theme pulsing
+            // Left indicator bar - Gold/Orange pulsing (Trident-style)
             let barPulse = Math.sin(selectedPulse * 1.5) * 0.2 + 0.8;
             let barColor = toColour(
-                Math.floor(theme.accent.r * barPulse),
-                Math.floor(theme.accent.g * barPulse),
-                Math.floor(theme.accent.b * barPulse),
+                Math.floor(highlight.r * barPulse),
+                Math.floor(highlight.g * barPulse),
+                Math.floor(highlight.b * 0.5),
                 animAlpha
             );
-            drawRect(baseX + 6, itemY, 5, menu.itemHeight - 2, barColor);
+            drawRect(baseX + 6, itemY, 4, menu.itemHeight - 2, barColor);
 
-            // Right edge highlight
-            let rightColor = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(100 * menuOpenAnim));
+            // Right edge highlight - subtle Gold
+            let rightColor = toColour(highlight.r, highlight.g, highlight.b, Math.floor(80 * menuOpenAnim));
             drawRect(baseX + menu.width - 8, itemY, 2, menu.itemHeight - 2, rightColor);
 
+            // Bottom selection line - Orange glow
+            let bottomLineColor = toColour(highlight.r, highlight.g, highlight.b, Math.floor(120 * selectGlow * menuOpenAnim));
+            drawRect(baseX + 10, itemY + menu.itemHeight - 3, menu.width - 20, 1, bottomLineColor);
+
         } else if (item.action === "none") {
-            // Separator (themed)
+            // Separator (Trident-style)
             let sepColor = toColour(
-                Math.floor(theme.primary.r * 0.2),
-                Math.floor(theme.primary.g * 0.1),
-                Math.floor(theme.primary.b * 0.1),
+                Math.floor(theme.primary.r * 0.15),
+                Math.floor(theme.primary.g * 0.15),
+                Math.floor(theme.primary.b * 0.2),
                 Math.floor(180 * menuOpenAnim)
             );
             drawRect(baseX + 6, itemY, menu.width - 12, menu.itemHeight - 2, sepColor);
-            // Separator line
+            // Separator line - Gold accent
             let sepLineColor = toColour(
-                Math.floor(theme.primary.r * 0.5),
-                Math.floor(theme.primary.g * 0.2),
-                Math.floor(theme.primary.b * 0.2),
+                Math.floor(highlight.r * 0.4),
+                Math.floor(highlight.g * 0.3),
+                Math.floor(highlight.b * 0.2),
                 Math.floor(150 * menuOpenAnim)
             );
             drawRect(baseX + 20, itemY + menu.itemHeight/2 - 1, menu.width - 40, 1, sepLineColor);
         } else {
-            // Normal item - dark with subtle theme tint
-            let normTint = 0.1 + (i % 2) * 0.02;
+            // Normal item - dark with subtle Steel Blue tint
+            let normTint = 0.12 + (i % 2) * 0.03;
             let normColor = toColour(
-                Math.floor(theme.primary.r * normTint + 15),
-                Math.floor(theme.primary.g * normTint * 0.5 + 10),
-                Math.floor(theme.primary.b * normTint * 0.5 + 12),
+                Math.floor(theme.primary.r * normTint + 12),
+                Math.floor(theme.primary.g * normTint + 12),
+                Math.floor(theme.primary.b * normTint + 18),
                 Math.floor(200 * menuOpenAnim)
             );
             drawRect(baseX + 6, itemY, menu.width - 12, menu.itemHeight - 2, normColor);
 
-            // Subtle left border on hover area (themed)
+            // Subtle left border - Steel Blue hint
             let leftBorderColor = toColour(
-                Math.floor(theme.primary.r * 0.4),
-                Math.floor(theme.primary.g * 0.1),
-                Math.floor(theme.primary.b * 0.1),
+                Math.floor(theme.primary.r * 0.3),
+                Math.floor(theme.primary.g * 0.3),
+                Math.floor(theme.primary.b * 0.4),
                 Math.floor(100 * menuOpenAnim)
             );
             drawRect(baseX + 6, itemY, 2, menu.itemHeight - 2, leftBorderColor);
@@ -2731,28 +2797,45 @@ addEventHandler("OnDrawnHUD", function(event) {
         }
     }
 
-    // ===== FOOTER (THEMED) =====
+    // ===== FOOTER / HELPER TEXT (Trident-style) =====
     let footerY = yPos + visibleCount * menu.itemHeight;
     let footerColor = toColour(
-        Math.floor(theme.primary.r * 0.1),
-        Math.floor(theme.primary.g * 0.05),
-        Math.floor(theme.primary.b * 0.05 + 8),
-        Math.floor(230 * menuOpenAnim)
+        Math.floor(theme.primary.r * 0.15),
+        Math.floor(theme.primary.g * 0.15),
+        Math.floor(theme.primary.b * 0.2 + 10),
+        Math.floor(235 * menuOpenAnim)
     );
     drawRect(baseX + 4, footerY, menu.width - 8, menu.footerHeight, footerColor);
 
-    // Footer top line (themed)
+    // Footer top line (Gold/Orange accent)
     let footerLineColor = toColour(
-        Math.floor(theme.primary.r * 0.6),
-        Math.floor(theme.primary.g * 0.2),
-        Math.floor(theme.primary.b * 0.25),
-        Math.floor(180 * menuOpenAnim)
+        Math.floor(highlight.r * 0.7),
+        Math.floor(highlight.g * 0.5),
+        Math.floor(highlight.b * 0.3),
+        Math.floor(200 * menuOpenAnim)
     );
     drawRect(baseX + 4, footerY, menu.width - 8, 2, footerLineColor);
 
-    // Footer text
-    let footerTextColor = toColour(180, 170, 170, Math.floor(200 * menuOpenAnim));
-    drawText("UP/DOWN  |  ENTER  |  BACK", baseX + 25, footerY + 10, footerTextColor, 11);
+    // Helper text - navigation instructions (Trident-style)
+    let helperPulse = Math.sin(animTime * 2) * 0.15 + 0.85;
+    let helperKeyColor = toColour(
+        Math.floor(highlight.r * helperPulse),
+        Math.floor(highlight.g * helperPulse),
+        Math.floor(highlight.b * 0.6),
+        Math.floor(220 * menuOpenAnim)
+    );
+    let helperTextColor = toColour(200, 200, 210, Math.floor(180 * menuOpenAnim));
+
+    // Draw helper text with highlighted keys
+    drawText("[", baseX + 15, footerY + 10, helperTextColor, 11);
+    drawText("UP", baseX + 22, footerY + 10, helperKeyColor, 11);
+    drawText("/", baseX + 42, footerY + 10, helperTextColor, 11);
+    drawText("DOWN", baseX + 50, footerY + 10, helperKeyColor, 11);
+    drawText("] Navigate  [", baseX + 82, footerY + 10, helperTextColor, 11);
+    drawText("ENTER", baseX + 162, footerY + 10, helperKeyColor, 11);
+    drawText("] Select  [", baseX + 200, footerY + 10, helperTextColor, 11);
+    drawText("BACK", baseX + 268, footerY + 10, helperKeyColor, 11);
+    drawText("]", baseX + 300, footerY + 10, helperTextColor, 11);
 
     // ===== SCROLL BAR (THEMED) =====
     if (items.length > menu.maxVisibleItems) {
@@ -2778,6 +2861,42 @@ addEventHandler("OnDrawnHUD", function(event) {
             Math.floor(220 * menuOpenAnim)
         );
         drawRect(baseX + menu.width - 12, scrollBarY, 6, scrollBarH, scrollBarColor);
+
+        // ===== SCROLL INDICATORS (Trident-style arrows) =====
+        let arrowPulse = Math.sin(animTime * 4) * 0.3 + 0.7;
+
+        // Up arrow indicator - show when not at top
+        if (scrollOffset > 0) {
+            let upArrowY = baseY + menu.headerHeight + 2;
+            let upArrowColor = toColour(
+                Math.floor(highlight.r * arrowPulse),
+                Math.floor(highlight.g * arrowPulse),
+                Math.floor(highlight.b * 0.5),
+                Math.floor(220 * menuOpenAnim)
+            );
+            // Arrow pointing up (triangle effect using text)
+            drawText("^", baseX + menu.width / 2 - 5, upArrowY, upArrowColor, 16);
+            // Additional visual - animated bounce
+            let bounceOffset = Math.sin(animTime * 6) * 2;
+            drawText("^", baseX + menu.width / 2 - 5, upArrowY - 4 + bounceOffset, toColour(highlight.r, highlight.g, highlight.b, Math.floor(100 * menuOpenAnim)), 12);
+        }
+
+        // Down arrow indicator - show when not at bottom
+        let maxScroll = items.length - visibleCount;
+        if (scrollOffset < maxScroll) {
+            let downArrowY = footerY - 18;
+            let downArrowColor = toColour(
+                Math.floor(highlight.r * arrowPulse),
+                Math.floor(highlight.g * arrowPulse),
+                Math.floor(highlight.b * 0.5),
+                Math.floor(220 * menuOpenAnim)
+            );
+            // Arrow pointing down (v shape)
+            drawText("v", baseX + menu.width / 2 - 5, downArrowY, downArrowColor, 16);
+            // Additional visual - animated bounce
+            let bounceOffset = Math.sin(animTime * 6) * 2;
+            drawText("v", baseX + menu.width / 2 - 5, downArrowY + 4 + bounceOffset, toColour(highlight.r, highlight.g, highlight.b, Math.floor(100 * menuOpenAnim)), 12);
+        }
     }
 
     // ===== INFO BAR (THEMED) =====
