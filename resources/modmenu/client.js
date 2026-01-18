@@ -2454,9 +2454,6 @@ addEventHandler("OnProcess", function(event) {
     if (dropdown_y > 0.96) dropdown_y -= 0.01;
     else dropdown_y = 0.95;
 
-    // Enhanced visual effects
-    glowIntensity = Math.sin(animTime * 3) * 0.5 + 0.5;
-    
     // Screen shake decay
     if (screenShake > 0) {
         screenShake -= 0.1;
