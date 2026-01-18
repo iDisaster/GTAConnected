@@ -2587,7 +2587,6 @@ addEventHandler("OnDrawnHUD", function(event) {
 
     // Header accent line (Gold/Orange)
     let lineGlow = Math.sin(animTime * 4) * 0.3 + 0.7;
-    let highlight = theme.highlight || theme.accent;
     let headerLineColor = toColour(highlight.r, highlight.g, highlight.b, Math.floor(200 * lineGlow * menuOpenAnim));
     drawRect(baseX + 4, baseY + menu.headerHeight - 2, menu.width - 8, 2, headerLineColor);
 
