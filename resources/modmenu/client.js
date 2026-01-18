@@ -1,7 +1,7 @@
 
 // ============================================================================
-// MD REVOLUTION MOD MENU - Client Side (Trident Style)
-// Interactive GUI menu for all players
+// MD REVOLUTION MOD MENU - Client Side (MDB Trident Style)
+// MADE BY - DEVILSDESIGN & IIV_NATHAN_VII & SHOCKixiXixiWAVE (Original Template)
 // Steel Blue / Gold / Orange color scheme with flash effects
 // Press F5 to open/close menu, Arrow keys to navigate, Enter to select
 // ============================================================================
@@ -13,25 +13,76 @@ let selectedIndex = 0;
 let menuStack = [];
 let scrollOffset = 0;
 
-// Enhanced animation state
+// ============================================================================
+// MDB TRIDENT COLOR DEFINITIONS (Exact from MDB_Template.c)
+// ============================================================================
+const MDB = {
+    // Primary Colors
+    Gold: { r: 164, g: 134, b: 35 },
+    Steelblue: { r: 70, g: 130, b: 180 },
+    DevilsRed: { r: 153, g: 0, b: 0 },
+    Chocolate: { r: 210, g: 105, b: 30 },
+
+    // Header Colors
+    Header: { r: 177, g: 19, b: 26 },
+    SubHeader: { r: 58, g: 95, b: 205 },
+
+    // Line Colors (White separator)
+    Line: { r: 255, g: 255, b: 255 },
+
+    // Item Colors
+    Item: { r: 180, g: 180, b: 180 },
+    ItemHighlight: { r: 255, g: 143, b: 0 },
+    ScrollItem: { r: 255, g: 255, b: 255 },
+    SubMenu: { r: 139, g: 134, b: 130 },
+
+    // Bool/Toggle Colors
+    Bool: { r: 255, g: 128, b: 0 },
+
+    // JumpOver (Section headers)
+    JumpOver: { r: 58, g: 95, b: 205 },
+
+    // Stats Colors
+    StatsItem: { r: 255, g: 255, b: 255 },
+    StatsValue: { r: 255, g: 143, b: 0 },
+    StatsYes: { r: 204, g: 0, b: 0 },      // Red for "Yes/Active"
+    StatsNo: { r: 0, g: 204, b: 0 },       // Green for "No/Inactive"
+
+    // Alert Colors
+    Alert: { r: 255, g: 0, b: 0 },
+    Ghost: { r: 0, g: 102, b: 204 },
+    Holy: { r: 127, g: 0, b: 255 },
+
+    // Misc
+    Orange: { r: 255, g: 69, b: 0 },
+    MicTalk: { r: 255, g: 140, b: 0 },
+    HasMic: { r: 255, g: 255, b: 255 }
+};
+
+// ============================================================================
+// MDB ANIMATION STATE
+// ============================================================================
 let animTime = 0;
 let smoothScrollY = 0;
 let targetScrollY = 0;
 let titlePulse = 0;
 let menuOpenAnim = 0;
 let selectedPulse = 0;
-let glowIntensity = 0;
 let colorShift = 0;
 let particleTime = 0;
 let screenShake = 0;
 let flashAlpha = 0;
 let currentDescription = "";
 
-// Trident-style header flash effect
-let headerFlashTimer = 0;
-let headerFlashActive = false;
-let headerFlashInterval = 3.0; // Flash every 3 seconds
-let headerFlashDuration = 0.15; // Flash lasts 0.15 seconds
+// MDB Flashing/Glowing Effects (from MDB_Template.c)
+let FlashingGhost = 200;        // Ranges 150-255, used for header text flash
+let FlashingGhostIncrement = true;
+let Glowing = 100;              // Ranges 0-190, used for scrollbar glow
+let GlowingIncrement = true;
+let Rotating360 = 0;            // For spinning icons
+let Fading_100 = 100;           // Fade in effect
+let Fading_150 = 150;           // Fade in effect
+let dropdown_y = 1.2;           // Dropdown animation
 
 // ============================================================================
 // THEME SYSTEM
@@ -40,11 +91,11 @@ let currentTheme = "trident"; // Default theme - Trident style
 
 // Trident-style color scheme
 const themes = {
-    // Primary Trident theme - Steel Blue with Gold/Orange accents
+    // Primary Trident theme - Steel Blue with Gold/Orange accents (MDB Style)
     trident: {
-        primary: { r: 70, g: 130, b: 180 },      // Steel Blue
-        accent: { r: 255, g: 200, b: 50 },        // Gold
-        highlight: { r: 255, g: 140, b: 0 },      // Orange
+        primary: { r: 70, g: 130, b: 180 },      // Steelblue
+        accent: { r: 164, g: 134, b: 35 },        // Gold (exact MDB)
+        highlight: { r: 255, g: 143, b: 0 },      // Item Highlight (exact MDB)
         name: "Trident"
     },
     black: { primary: { r: 80, g: 80, b: 80 }, accent: { r: 150, g: 150, b: 150 }, highlight: { r: 200, g: 200, b: 200 }, name: "Black" },
@@ -58,7 +109,7 @@ const themes = {
 };
 
 function getTheme() {
-    return themes[currentTheme] || themes.red;
+    return themes[currentTheme] || themes.trident;
 }
 
 // Info bar configuration
@@ -2355,24 +2406,53 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
 // Steel Blue primary, Gold/Orange accents, Flash effects
 // ============================================================================
 
-// Smooth animation update with original effects
+// MDB Animation Effects Update (from MDB_Template.c Menu_Effects)
 addEventHandler("OnProcess", function(event) {
-    // Update animation time - SMOOTHED
+    // Update animation time
     animTime += 0.02;
     titlePulse += 0.04;
     selectedPulse += 0.06;
     colorShift += 0.01;
     particleTime += 0.05;
 
-    // Trident-style header flash timer
-    headerFlashTimer += 0.02;
-    if (headerFlashTimer >= headerFlashInterval) {
-        headerFlashTimer = 0;
-        headerFlashActive = true;
+    // ===== MDB FlashingGhost Effect (150-255 range) =====
+    // Used for header text pulsing
+    if (FlashingGhost >= 255) FlashingGhostIncrement = false;
+    else if (FlashingGhost < 150) FlashingGhostIncrement = true;
+    if (FlashingGhostIncrement) {
+        if (FlashingGhost > 240) {
+            FlashingGhost += (255 - FlashingGhost);
+            FlashingGhostIncrement = false;
+        } else {
+            FlashingGhost += 2;
+        }
+    } else {
+        FlashingGhost -= 2;
     }
-    if (headerFlashActive && headerFlashTimer >= headerFlashDuration) {
-        headerFlashActive = false;
+
+    // ===== MDB Glowing Effect (0-190 range) =====
+    // Used for scrollbar glow
+    if (Glowing >= 190) GlowingIncrement = false;
+    if (Glowing <= 0) GlowingIncrement = true;
+    if (GlowingIncrement) {
+        if (Glowing > 185) Glowing++;
+        else Glowing += 2;
+    } else {
+        if (Glowing < 10) Glowing--;
+        else Glowing -= 2;
     }
+
+    // ===== MDB Rotating Icon Effect =====
+    if (Rotating360 >= 360) Rotating360 = 0;
+    else Rotating360 += 5;
+
+    // ===== MDB Fading Effects =====
+    if (Fading_100 < 255) Fading_100 += 5;
+    if (Fading_150 < 255) Fading_150 += 5;
+
+    // ===== MDB Dropdown Animation =====
+    if (dropdown_y > 0.96) dropdown_y -= 0.01;
+    else dropdown_y = 0.95;
 
     // Enhanced visual effects
     glowIntensity = Math.sin(animTime * 3) * 0.5 + 0.5;
@@ -2500,152 +2580,46 @@ addEventHandler("OnDrawnHUD", function(event) {
     let baseX = menu.x + slideOffset;
     let baseY = menu.y;
 
-    // ===== TRIDENT-STYLE OUTER GLOW =====
-    let theme = getTheme();
-    let highlight = theme.highlight || theme.accent;
-    let glowPulse = Math.sin(animTime * 2) * 0.25 + 0.75;
-    let glowSize = 8 + Math.sin(animTime * 1.5) * 3;
+    // ===== MDB WINDOW BACKGROUND - Steelblue (70,130,180) alpha 180 =====
+    // Matches: DRAW_SPRITE(MAP_LOBBY, ..., 70,130,180, 180)
+    let windowBgColor = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(180 * menuOpenAnim));
+    drawRect(baseX, baseY, menu.width, totalHeight + 10, windowBgColor);
 
-    // Steel Blue outer glow with subtle Gold tint
-    let glowIntensityMult = 0.7 + Math.sin(animTime * 2) * 0.15;
-    for (let g = 4; g >= 1; g--) {
-        let gAlpha = Math.floor((35 / g) * glowPulse * menuOpenAnim);
-        // Mix Steel Blue with subtle Gold
-        let gCol = toColour(
-            Math.floor((theme.primary.r * 0.8 + highlight.r * 0.2) * glowIntensityMult),
-            Math.floor((theme.primary.g * 0.8 + highlight.g * 0.15) * glowIntensityMult),
-            Math.floor((theme.primary.b * 0.9 + highlight.b * 0.1) * glowIntensityMult),
-            gAlpha
-        );
-        drawRect(baseX - glowSize * g, baseY - glowSize * g,
-                 menu.width + glowSize * g * 2, totalHeight + glowSize * g * 2 + 10, gCol);
-    }
+    // ===== MDB HEADER SECTION =====
+    let headerY = baseY + 5;
 
-    // ===== MAIN BACKGROUND - Dark with Steel Blue tint =====
-    let bgColor = toColour(10, 12, 18, Math.floor(248 * menuOpenAnim));
-    drawRect(baseX, baseY, menu.width, totalHeight + 10, bgColor);
+    // "MD" Prefix - Steelblue, large text (Version_Txt_Size equivalent)
+    // Shadow first
+    let shadowColor = toColour(0, 0, 0, Math.floor(255 * menuOpenAnim));
+    drawText("MD", baseX + 11, headerY + 1, shadowColor, 28);
+    // Main "MD" in Steelblue
+    let mdColor = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, animAlpha);
+    drawText("MD", baseX + 10, headerY, mdColor, 28);
 
-    // ===== TRIDENT-STYLE BORDER - Steel Blue =====
-    let borderPulse = Math.sin(animTime * 3) * 0.15 + 0.85;
-    let borderColor = toColour(
-        Math.floor(theme.primary.r * borderPulse * 0.8),
-        Math.floor(theme.primary.g * borderPulse * 0.8),
-        Math.floor(theme.primary.b * borderPulse),
-        Math.floor(220 * menuOpenAnim)
-    );
+    // Menu Header Text - Gold with FlashingGhost alpha (Extend_Txt_Size equivalent)
+    // Shadow
+    drawText("REVOLUTION", baseX + 56, headerY + 6, shadowColor, 20);
+    // Main header in Gold with FlashingGhost effect
+    let headerGoldColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(FlashingGhost * menuOpenAnim));
+    drawText("REVOLUTION", baseX + 55, headerY + 5, headerGoldColor, 20);
 
-    // Smooth border thickness
-    let borderW = 3 + Math.sin(animTime * 3) * 0.5;
-    drawRect(baseX, baseY, menu.width, borderW, borderColor); // Top
-    drawRect(baseX, baseY + totalHeight + 10 - borderW, menu.width, borderW, borderColor); // Bottom
-    drawRect(baseX, baseY, borderW, totalHeight + 10, borderColor); // Left
-    drawRect(baseX + menu.width - borderW, baseY, borderW, totalHeight + 10, borderColor); // Right
+    // Version text - Steelblue (right side)
+    let versionColor = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, animAlpha);
+    drawText("TRIDENT", baseX + menu.width - 70, headerY + 22, versionColor, 12);
 
-    // Corner accents - Gold/Orange (Trident signature)
-    let cornerSize = 14 + Math.sin(animTime * 2) * 3;
-    let cornerPulse = Math.sin(animTime * 2.5) * 0.2 + 0.8;
-    let cornerColor = toColour(
-        Math.floor(highlight.r * cornerPulse),
-        Math.floor(highlight.g * cornerPulse),
-        Math.floor(highlight.b * 0.5),
-        Math.floor(220 * menuOpenAnim)
-    );
-    drawRect(baseX, baseY, cornerSize, 3, cornerColor);
-    drawRect(baseX, baseY, 3, cornerSize, cornerColor);
-    drawRect(baseX + menu.width - cornerSize, baseY, cornerSize, 3, cornerColor);
-    drawRect(baseX + menu.width - 3, baseY, 3, cornerSize, cornerColor);
-    drawRect(baseX, baseY + totalHeight + 7, cornerSize, 3, cornerColor);
-    drawRect(baseX, baseY + totalHeight + 10 - cornerSize, 3, cornerSize, cornerColor);
-    drawRect(baseX + menu.width - cornerSize, baseY + totalHeight + 7, cornerSize, 3, cornerColor);
-    drawRect(baseX + menu.width - 3, baseY + totalHeight + 10 - cornerSize, 3, cornerSize, cornerColor);
+    // Sub Header - centered, SubHeader color (58,95,205)
+    let subHeaderColor = toColour(MDB.SubHeader.r, MDB.SubHeader.g, MDB.SubHeader.b, animAlpha);
+    let subHeaderText = currentMenu === "main" ? "MAJOR DISTRIBUTION" : title;
+    // Calculate center position
+    let subHeaderX = baseX + (menu.width / 2) - (subHeaderText.length * 3);
+    drawText(subHeaderText, subHeaderX, headerY + 38, subHeaderColor, 12);
 
-    // ===== HEADER - Trident-style gradient =====
-    let headerMult = 0.8 + Math.sin(animTime * 2) * 0.1;
+    // ===== MDB WHITE LINE SEPARATOR =====
+    // DRAW_RECT(..., Line_r=255, Line_g=255, Line_b=255, 255)
+    let lineColor = toColour(MDB.Line.r, MDB.Line.g, MDB.Line.b, animAlpha);
+    drawRect(baseX + 10, baseY + menu.headerHeight - 5, menu.width - 20, 2, lineColor);
 
-    // Flash effect - bright white flash overlay
-    let flashMult = headerFlashActive ? 2.5 : 1.0;
-
-    let headerLeft = toColour(
-        Math.min(255, Math.floor(theme.primary.r * headerMult * flashMult)),
-        Math.min(255, Math.floor(theme.primary.g * headerMult * flashMult)),
-        Math.min(255, Math.floor(theme.primary.b * headerMult * flashMult)),
-        animAlpha
-    );
-    let headerRight = toColour(
-        Math.floor(theme.primary.r * 0.2),
-        Math.floor(theme.primary.g * 0.2),
-        Math.floor(theme.primary.b * 0.3),
-        animAlpha
-    );
-    drawGradientRect(baseX + 4, baseY + 4, menu.width - 8, menu.headerHeight - 4, headerLeft, headerRight);
-
-    // Flash overlay when active
-    if (headerFlashActive) {
-        let flashOverlay = toColour(255, 255, 255, Math.floor(180 * menuOpenAnim));
-        drawRect(baseX + 4, baseY + 4, menu.width - 8, menu.headerHeight - 4, flashOverlay);
-    }
-
-    // Header accent line (Gold/Orange)
-    let lineGlow = Math.sin(animTime * 4) * 0.3 + 0.7;
-    let headerLineColor = toColour(highlight.r, highlight.g, highlight.b, Math.floor(200 * lineGlow * menuOpenAnim));
-    drawRect(baseX + 4, baseY + menu.headerHeight - 2, menu.width - 8, 2, headerLineColor);
-
-    // ===== ANIMATED TITLE WITH MD PREFIX =====
-    let titleY = baseY + 10;
-
-    // MD Prefix - Gold/Orange color with glow
-    let mdGlowPulse = Math.sin(titlePulse * 1.5) * 0.3 + 0.7;
-    let mdGlowColor = toColour(highlight.r, highlight.g, highlight.b, Math.floor(60 * mdGlowPulse * menuOpenAnim));
-    drawText("MD", baseX + 12, titleY + 2, mdGlowColor, 24);
-
-    // MD shadow
-    let shadowColor = toColour(0, 0, 0, Math.floor(200 * menuOpenAnim));
-    drawText("MD", baseX + 11, titleY + 2, shadowColor, 24);
-
-    // Main MD prefix - Orange/Gold
-    let mdColor = toColour(
-        Math.min(255, Math.floor(highlight.r * (headerFlashActive ? 1.5 : 1.0))),
-        Math.min(255, Math.floor(highlight.g * (headerFlashActive ? 1.5 : 1.0))),
-        Math.floor(highlight.b * 0.8),
-        animAlpha
-    );
-    drawText("MD", baseX + 10, titleY, mdColor, 24);
-
-    // Title glow effect (themed)
-    let titleGlowPulse = Math.sin(titlePulse) * 0.5 + 0.5;
-    let titleGlowColor = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(80 * titleGlowPulse * menuOpenAnim));
-    drawText("REVOLUTION", baseX + 54, titleY + 2, titleGlowColor, 24);
-
-    // Title shadow
-    drawText("REVOLUTION", baseX + 52, titleY + 2, shadowColor, 24);
-
-    // Main title - Steel Blue to white pulse
-    let titlePulseVal = Math.sin(titlePulse * 2) * 0.25 + 0.75;
-    let titleColor = toColour(
-        Math.min(255, Math.floor(255 * titlePulseVal + theme.primary.r * (1 - titlePulseVal) * (headerFlashActive ? 1.5 : 1.0))),
-        Math.min(255, Math.floor(255 * titlePulseVal + theme.primary.g * (1 - titlePulseVal) * (headerFlashActive ? 1.5 : 1.0))),
-        Math.min(255, Math.floor(255 * titlePulseVal + theme.primary.b * (1 - titlePulseVal) * (headerFlashActive ? 1.5 : 1.0))),
-        animAlpha
-    );
-    drawText("REVOLUTION", baseX + 50, titleY, titleColor, 24);
-
-    // Subtitle - version info
-    let betaFlicker = Math.sin(animTime * 6) > 0.2 ? 1 : 0.8;
-    let betaColor = toColour(180, 190, 200, Math.floor(180 * betaFlicker * menuOpenAnim));
-    drawText("Trident Style v1.0", baseX + 12, titleY + 30, betaColor, 11);
-
-    // Smooth animated line under title (themed)
-    let lineWidth = 100 + Math.sin(animTime * 3) * 30;
-    let linePulseMult = Math.sin(animTime * 4) * 0.2 + 0.8;
-    let underlineColor = toColour(
-        Math.floor(theme.primary.r * linePulseMult),
-        Math.floor(theme.primary.g * linePulseMult),
-        Math.floor(theme.primary.b * linePulseMult),
-        Math.floor(220 * menuOpenAnim)
-    );
-    drawRect(baseX + (menu.width - lineWidth) / 2, baseY + menu.headerHeight - 6, lineWidth, 2, underlineColor);
-
-    // ===== MENU ITEMS =====
+    // ===== MDB MENU ITEMS =====
     let yPos = baseY + menu.headerHeight;
     targetScrollY = scrollOffset * menu.itemHeight;
 
@@ -2654,307 +2628,116 @@ addEventHandler("OnDrawnHUD", function(event) {
         let isSelected = (i === selectedIndex);
         let itemY = yPos + (i - scrollOffset) * menu.itemHeight;
 
-        // Selection animation - smoother
-        let selectOffset = 0;
-        let selectGlow = 0;
         if (isSelected) {
-            selectOffset = Math.sin(selectedPulse) * 2;
-            selectGlow = Math.sin(selectedPulse * 1.5) * 0.3 + 0.7;
-        }
-
-        if (isSelected) {
-            // ===== SELECTED ITEM - Trident-style Steel Blue with Gold accent =====
-            let selMult = 0.7 + selectGlow * 0.3;
-            let selColor = toColour(
-                Math.floor(theme.primary.r * selMult),
-                Math.floor(theme.primary.g * selMult),
-                Math.floor(theme.primary.b * selMult),
-                Math.floor(235 * menuOpenAnim)
-            );
-
-            // Outer glow - Gold/Orange
-            let selGlowColor = toColour(highlight.r, highlight.g, highlight.b, Math.floor(40 * menuOpenAnim));
-            drawRect(baseX + 2, itemY - 2, menu.width - 4, menu.itemHeight + 4, selGlowColor);
-
-            // Main selection background - gradient feel
-            drawRect(baseX + 6 + selectOffset, itemY, menu.width - 12, menu.itemHeight - 2, selColor);
-
-            // Left indicator bar - Gold/Orange pulsing (Trident-style)
-            let barPulse = Math.sin(selectedPulse * 1.5) * 0.2 + 0.8;
-            let barColor = toColour(
-                Math.floor(highlight.r * barPulse),
-                Math.floor(highlight.g * barPulse),
-                Math.floor(highlight.b * 0.5),
-                animAlpha
-            );
-            drawRect(baseX + 6, itemY, 4, menu.itemHeight - 2, barColor);
-
-            // Right edge highlight - subtle Gold
-            let rightColor = toColour(highlight.r, highlight.g, highlight.b, Math.floor(80 * menuOpenAnim));
-            drawRect(baseX + menu.width - 8, itemY, 2, menu.itemHeight - 2, rightColor);
-
-            // Bottom selection line - Orange glow
-            let bottomLineColor = toColour(highlight.r, highlight.g, highlight.b, Math.floor(120 * selectGlow * menuOpenAnim));
-            drawRect(baseX + 10, itemY + menu.itemHeight - 3, menu.width - 20, 1, bottomLineColor);
+            // ===== MDB SELECTED ITEM - Scrollbar with Glowing effect =====
+            // DRAW_RECT(..., Glowing, Glowing, 200, 150)
+            let scrollbarColor = toColour(Glowing, Glowing, 200, Math.floor(150 * menuOpenAnim));
+            drawRect(baseX + 6, itemY, menu.width - 12, menu.itemHeight - 2, scrollbarColor);
 
         } else if (item.action === "none") {
-            // Separator (Trident-style)
-            let sepColor = toColour(
-                Math.floor(theme.primary.r * 0.15),
-                Math.floor(theme.primary.g * 0.15),
-                Math.floor(theme.primary.b * 0.2),
-                Math.floor(180 * menuOpenAnim)
-            );
-            drawRect(baseX + 6, itemY, menu.width - 12, menu.itemHeight - 2, sepColor);
-            // Separator line - Gold accent
-            let sepLineColor = toColour(
-                Math.floor(highlight.r * 0.4),
-                Math.floor(highlight.g * 0.3),
-                Math.floor(highlight.b * 0.2),
-                Math.floor(150 * menuOpenAnim)
-            );
-            drawRect(baseX + 20, itemY + menu.itemHeight/2 - 1, menu.width - 40, 1, sepLineColor);
-        } else {
-            // Normal item - dark with subtle Steel Blue tint
-            let normTint = 0.12 + (i % 2) * 0.03;
-            let normColor = toColour(
-                Math.floor(theme.primary.r * normTint + 12),
-                Math.floor(theme.primary.g * normTint + 12),
-                Math.floor(theme.primary.b * normTint + 18),
-                Math.floor(200 * menuOpenAnim)
-            );
-            drawRect(baseX + 6, itemY, menu.width - 12, menu.itemHeight - 2, normColor);
-
-            // Subtle left border - Steel Blue hint
-            let leftBorderColor = toColour(
-                Math.floor(theme.primary.r * 0.3),
-                Math.floor(theme.primary.g * 0.3),
-                Math.floor(theme.primary.b * 0.4),
-                Math.floor(100 * menuOpenAnim)
-            );
-            drawRect(baseX + 6, itemY, 2, menu.itemHeight - 2, leftBorderColor);
+            // ===== MDB Separator/JumpOver =====
+            // No background, just different text color
         }
+        // Normal items have no background in MDB style (transparent over Steelblue window)
 
-        // Item text
-        let textX = baseX + 22 + (isSelected ? selectOffset + 6 : 0);
-        let textBright = isSelected ? 255 : 200;
-        let textColor = toColour(textBright, textBright, textBright, animAlpha);
+        // ===== MDB ITEM TEXT =====
+        let textX = baseX + 22;
 
         if (item.action === "none") {
-            let sepTextColor = toColour(
-                Math.floor(theme.accent.r * 0.6),
-                Math.floor(theme.accent.g * 0.5),
-                Math.floor(theme.accent.b * 0.5),
-                Math.floor(200 * menuOpenAnim)
-            );
-            drawText(item.label, baseX + 20, itemY + 12, sepTextColor, 11);
+            // ===== MDB JumpOver/Separator Text - JumpOver color (58,95,205) =====
+            let jumpOverColor = toColour(MDB.JumpOver.r, MDB.JumpOver.g, MDB.JumpOver.b, animAlpha);
+            drawText(item.label, baseX + 20, itemY + 12, jumpOverColor, 12);
+        } else if (item.action === "toggle" && toggleStates[item.target]) {
+            // ===== MDB Toggle ON - ItemHighlight color (255,143,0) with FlashingGhost =====
+            let highlightColor = toColour(MDB.ItemHighlight.r, MDB.ItemHighlight.g, MDB.ItemHighlight.b, animAlpha);
+            drawText(item.label, textX, itemY + 12, highlightColor, 14);
+        } else if (isSelected) {
+            // ===== MDB Selected Item Text - ScrollItem white (255,255,255) =====
+            let selectedTextColor = toColour(MDB.ScrollItem.r, MDB.ScrollItem.g, MDB.ScrollItem.b, animAlpha);
+            drawText(item.label, textX, itemY + 12, selectedTextColor, 14);
         } else {
-            drawText(item.label, textX, itemY + 12, textColor, 14);
+            // ===== MDB Normal Item Text - Item gray (180,180,180) =====
+            let normalTextColor = toColour(MDB.Item.r, MDB.Item.g, MDB.Item.b, animAlpha);
+            drawText(item.label, textX, itemY + 12, normalTextColor, 14);
         }
 
-        // ===== TOGGLE INDICATORS =====
+        // ===== MDB TOGGLE INDICATORS - Bool color (255,128,0) arrow =====
         if (item.action === "toggle") {
             let isOn = toggleStates[item.target];
-            let stateText = isOn ? "ON" : "OFF";
-            let stateX = baseX + menu.width - 60;
+            // Draw arrow indicator like MDB (arrowLeftRight sprite equivalent)
+            let arrowColor = toColour(MDB.Bool.r, MDB.Bool.g, MDB.Bool.b, Math.floor(Fading_100 * menuOpenAnim));
+            drawText(">", baseX + 12, itemY + 12, arrowColor, 12);
 
+            // Status text on right side
+            let stateX = baseX + menu.width - 50;
             if (isOn) {
-                // GREEN ON - Smooth Pulsing
-                let greenPulse = Math.sin(animTime * 3) * 40 + 215;
-                let onBgColor = toColour(30, Math.floor(greenPulse * 0.4), 30, animAlpha);
-                let onTextColor = toColour(80, Math.floor(greenPulse), 80, animAlpha);
-                drawRect(stateX - 8, itemY + 8, 52, 24, onBgColor);
-                // Green border
-                let onBorderColor = toColour(50, Math.floor(greenPulse), 50, animAlpha);
-                drawRect(stateX - 8, itemY + 8, 52, 2, onBorderColor);
-                drawRect(stateX - 8, itemY + 30, 52, 2, onBorderColor);
-                drawText(stateText, stateX + 5, itemY + 12, onTextColor, 13);
+                // MDB ON state - ItemHighlight with FlashingGhost
+                let onColor = toColour(MDB.ItemHighlight.r, MDB.ItemHighlight.g, MDB.ItemHighlight.b, Math.floor(FlashingGhost * menuOpenAnim));
+                drawText("ON", stateX, itemY + 12, onColor, 12);
             } else {
-                // RED OFF
-                let offBgColor = toColour(80, 25, 30, animAlpha);
-                let offTextColor = toColour(255, 90, 90, animAlpha);
-                drawRect(stateX - 8, itemY + 8, 52, 24, offBgColor);
-                // Red border
-                let offBorderColor = toColour(150, 40, 50, animAlpha);
-                drawRect(stateX - 8, itemY + 8, 52, 2, offBorderColor);
-                drawRect(stateX - 8, itemY + 30, 52, 2, offBorderColor);
-                drawText(stateText, stateX + 2, itemY + 12, offTextColor, 13);
+                // MDB OFF state - gray
+                let offColor = toColour(MDB.Item.r, MDB.Item.g, MDB.Item.b, animAlpha);
+                drawText("OFF", stateX, itemY + 12, offColor, 12);
             }
         }
 
-        // Submenu arrow - smoother (themed)
+        // ===== MDB Submenu Arrow =====
         if (item.action === "submenu") {
-            let arrowX = baseX + menu.width - 32 + (isSelected ? Math.sin(animTime * 5) * 3 : 0);
-            let arrowBright = isSelected ? 1.0 : 0.6;
-            let arrowColor = toColour(
-                Math.floor(theme.accent.r * arrowBright),
-                Math.floor(theme.accent.g * arrowBright),
-                Math.floor(theme.accent.b * arrowBright),
-                animAlpha
-            );
-            drawText(">>", arrowX, itemY + 12, arrowColor, 14);
+            let arrowX = baseX + menu.width - 25;
+            // MDB uses spinning blip icon, we'll use animated arrow
+            let arrowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, animAlpha);
+            drawText(">", arrowX, itemY + 12, arrowColor, 14);
         }
     }
 
-    // ===== FOOTER / HELPER TEXT (Trident-style) =====
+    // ===== MDB HELPER TEXT (Bottom of screen style) =====
+    // In MDB this appears at bottom of screen, we'll put in footer area
     let footerY = yPos + visibleCount * menu.itemHeight;
-    let footerColor = toColour(
-        Math.floor(theme.primary.r * 0.15),
-        Math.floor(theme.primary.g * 0.15),
-        Math.floor(theme.primary.b * 0.2 + 10),
-        Math.floor(235 * menuOpenAnim)
-    );
-    drawRect(baseX + 4, footerY, menu.width - 8, menu.footerHeight, footerColor);
 
-    // Footer top line (Gold/Orange accent)
-    let footerLineColor = toColour(
-        Math.floor(highlight.r * 0.7),
-        Math.floor(highlight.g * 0.5),
-        Math.floor(highlight.b * 0.3),
-        Math.floor(200 * menuOpenAnim)
-    );
-    drawRect(baseX + 4, footerY, menu.width - 8, 2, footerLineColor);
+    // Simple footer with MDB style helper text
+    let helperColor = toColour(MDB.Orange.r, MDB.Orange.g, MDB.Orange.b, animAlpha);
+    let helperTextColor = toColour(MDB.StatsItem.r, MDB.StatsItem.g, MDB.StatsItem.b, Math.floor(200 * menuOpenAnim));
 
-    // Helper text - navigation instructions (Trident-style)
-    let helperPulse = Math.sin(animTime * 2) * 0.15 + 0.85;
-    let helperKeyColor = toColour(
-        Math.floor(highlight.r * helperPulse),
-        Math.floor(highlight.g * helperPulse),
-        Math.floor(highlight.b * 0.6),
-        Math.floor(220 * menuOpenAnim)
-    );
-    let helperTextColor = toColour(200, 200, 210, Math.floor(180 * menuOpenAnim));
+    drawText("[UP/DOWN] Navigate  [ENTER] Select  [BACKSPACE] Back", baseX + 15, footerY + 10, helperTextColor, 10);
 
-    // Draw helper text with highlighted keys
-    drawText("[", baseX + 15, footerY + 10, helperTextColor, 11);
-    drawText("UP", baseX + 22, footerY + 10, helperKeyColor, 11);
-    drawText("/", baseX + 42, footerY + 10, helperTextColor, 11);
-    drawText("DOWN", baseX + 50, footerY + 10, helperKeyColor, 11);
-    drawText("] Navigate  [", baseX + 82, footerY + 10, helperTextColor, 11);
-    drawText("ENTER", baseX + 162, footerY + 10, helperKeyColor, 11);
-    drawText("] Select  [", baseX + 200, footerY + 10, helperTextColor, 11);
-    drawText("BACK", baseX + 268, footerY + 10, helperKeyColor, 11);
-    drawText("]", baseX + 300, footerY + 10, helperTextColor, 11);
-
-    // ===== SCROLL BAR (THEMED) =====
+    // ===== MDB SCROLL INDICATORS =====
     if (items.length > menu.maxVisibleItems) {
-        let scrollTrackColor = toColour(
-            Math.floor(theme.primary.r * 0.2),
-            Math.floor(theme.primary.g * 0.08),
-            Math.floor(theme.primary.b * 0.1),
-            Math.floor(150 * menuOpenAnim)
-        );
-        let scrollTrackY = baseY + menu.headerHeight + 5;
-        let scrollTrackH = visibleCount * menu.itemHeight - 10;
-        drawRect(baseX + menu.width - 12, scrollTrackY, 6, scrollTrackH, scrollTrackColor);
-
-        let scrollPct = scrollOffset / Math.max(1, items.length - visibleCount);
-        let scrollBarH = Math.max(30, scrollTrackH * (visibleCount / items.length));
-        let scrollBarY = scrollTrackY + scrollPct * (scrollTrackH - scrollBarH);
-
-        let scrollPulse = Math.sin(animTime * 2) * 0.15 + 0.85;
-        let scrollBarColor = toColour(
-            Math.floor(theme.primary.r * scrollPulse),
-            Math.floor(theme.primary.g * scrollPulse * 0.3),
-            Math.floor(theme.primary.b * scrollPulse * 0.35),
-            Math.floor(220 * menuOpenAnim)
-        );
-        drawRect(baseX + menu.width - 12, scrollBarY, 6, scrollBarH, scrollBarColor);
-
-        // ===== SCROLL INDICATORS (Trident-style arrows) =====
-        let arrowPulse = Math.sin(animTime * 4) * 0.3 + 0.7;
-
-        // Up arrow indicator - show when not at top
+        // Up arrow - Gold color, show when not at top
         if (scrollOffset > 0) {
             let upArrowY = baseY + menu.headerHeight + 2;
-            let upArrowColor = toColour(
-                Math.floor(highlight.r * arrowPulse),
-                Math.floor(highlight.g * arrowPulse),
-                Math.floor(highlight.b * 0.5),
-                Math.floor(220 * menuOpenAnim)
-            );
-            // Arrow pointing up (triangle effect using text)
-            drawText("^", baseX + menu.width / 2 - 5, upArrowY, upArrowColor, 16);
-            // Additional visual - animated bounce
-            let bounceOffset = Math.sin(animTime * 6) * 2;
-            drawText("^", baseX + menu.width / 2 - 5, upArrowY - 4 + bounceOffset, toColour(highlight.r, highlight.g, highlight.b, Math.floor(100 * menuOpenAnim)), 12);
+            let upArrowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(FlashingGhost * menuOpenAnim));
+            drawText("^", baseX + menu.width / 2 - 5, upArrowY, upArrowColor, 14);
         }
 
-        // Down arrow indicator - show when not at bottom
+        // Down arrow - Gold color, show when not at bottom
         let maxScroll = items.length - visibleCount;
         if (scrollOffset < maxScroll) {
-            let downArrowY = footerY - 18;
-            let downArrowColor = toColour(
-                Math.floor(highlight.r * arrowPulse),
-                Math.floor(highlight.g * arrowPulse),
-                Math.floor(highlight.b * 0.5),
-                Math.floor(220 * menuOpenAnim)
-            );
-            // Arrow pointing down (v shape)
-            drawText("v", baseX + menu.width / 2 - 5, downArrowY, downArrowColor, 16);
-            // Additional visual - animated bounce
-            let bounceOffset = Math.sin(animTime * 6) * 2;
-            drawText("v", baseX + menu.width / 2 - 5, downArrowY + 4 + bounceOffset, toColour(highlight.r, highlight.g, highlight.b, Math.floor(100 * menuOpenAnim)), 12);
+            let downArrowY = footerY - 16;
+            let downArrowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(FlashingGhost * menuOpenAnim));
+            drawText("v", baseX + menu.width / 2 - 5, downArrowY, downArrowColor, 14);
         }
     }
 
-    // ===== INFO BAR (THEMED) =====
+    // ===== MDB INFO BAR =====
     if (currentDescription && currentDescription.length > 0) {
         let infoY = baseY + totalHeight + 15;
         let infoBarHeight = infoBar.height;
 
-        // Background with glow effect
-        let infoGlowPulse = Math.sin(animTime * 2) * 0.3 + 0.7;
-        let infoBgColor = toColour(
-            Math.floor(theme.primary.r * 0.1),
-            Math.floor(theme.primary.g * 0.05),
-            Math.floor(theme.primary.b * 0.07 + 10),
-            Math.floor(220 * menuOpenAnim)
-        );
+        // Background - Steelblue like window
+        let infoBgColor = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(160 * menuOpenAnim));
         drawRect(baseX, infoY, menu.width, infoBarHeight, infoBgColor);
 
-        // Animated themed border (matching menu style)
-        let infoBorderPulse = Math.sin(animTime * 3) * 0.2 + 0.8;
-        let infoBorderColor = toColour(
-            Math.floor(theme.primary.r * infoBorderPulse),
-            Math.floor(theme.primary.g * infoBorderPulse * 0.2),
-            Math.floor(theme.primary.b * infoBorderPulse * 0.25),
-            Math.floor(200 * menuOpenAnim)
-        );
-        drawRect(baseX, infoY, menu.width, 3, infoBorderColor); // Top
-        drawRect(baseX, infoY + infoBarHeight - 3, menu.width, 3, infoBorderColor); // Bottom
-        drawRect(baseX, infoY, 3, infoBarHeight, infoBorderColor); // Left
-        drawRect(baseX + menu.width - 3, infoY, 3, infoBarHeight, infoBorderColor); // Right
+        // White line at top
+        let infoLineColor = toColour(MDB.Line.r, MDB.Line.g, MDB.Line.b, animAlpha);
+        drawRect(baseX + 10, infoY + 2, menu.width - 20, 2, infoLineColor);
 
-        // Corner accents (themed)
-        let infoCornerSize = 12 + Math.sin(animTime * 2) * 3;
-        let infoCornerColor = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(180 * menuOpenAnim));
-        drawRect(baseX, infoY, infoCornerSize, 3, infoCornerColor);
-        drawRect(baseX, infoY, 3, infoCornerSize, infoCornerColor);
-        drawRect(baseX + menu.width - infoCornerSize, infoY, infoCornerSize, 3, infoCornerColor);
-        drawRect(baseX + menu.width - 3, infoY, 3, infoCornerSize, infoCornerColor);
-        drawRect(baseX, infoY + infoBarHeight - 3, infoCornerSize, 3, infoCornerColor);
-        drawRect(baseX, infoY + infoBarHeight - infoCornerSize, 3, infoCornerSize, infoCornerColor);
-        drawRect(baseX + menu.width - infoCornerSize, infoY + infoBarHeight - 3, infoCornerSize, 3, infoCornerColor);
-        drawRect(baseX + menu.width - 3, infoY + infoBarHeight - infoCornerSize, 3, infoCornerSize, infoCornerColor);
+        // "INFO" label in Gold
+        let infoLabelColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, animAlpha);
+        drawText("INFO", baseX + 12, infoY + 6, infoLabelColor, 10);
 
-        // Description text with glow effect
-        let textGlow = Math.sin(animTime * 4) * 0.4 + 0.6;
-        let glowColor = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(30 * textGlow * menuOpenAnim));
-        drawText(currentDescription, baseX + 14, infoY + 18, glowColor, 14);
-
-        // Main description text
-        let textColor = toColour(255, 255, 255, Math.floor(255 * menuOpenAnim));
-        drawText(currentDescription, baseX + 12, infoY + 18, textColor, 12);
-
-        // "INFO" label (themed)
-        let labelColor = toColour(
-            Math.floor(theme.accent.r * 0.8),
-            Math.floor(theme.accent.g * 0.5),
-            Math.floor(theme.accent.b * 0.5),
-            Math.floor(200 * menuOpenAnim)
-        );
-        drawText("INFO", baseX + 12, infoY + 2, labelColor, 10);
+        // Description text - white
+        let descColor = toColour(MDB.StatsItem.r, MDB.StatsItem.g, MDB.StatsItem.b, animAlpha);
+        drawText(currentDescription, baseX + 12, infoY + 20, descColor, 11);
     }
 });
 
