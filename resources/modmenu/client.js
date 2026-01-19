@@ -97,6 +97,25 @@ let bannerShimmer = 0;          // Banner shimmer effect
 let footerPulse = 0;            // Footer pulse animation
 let itemHoverScale = [];        // Per-item hover scale
 
+// Eye-Melting Premium Effects
+let rainbowHue = 0;             // Rainbow color cycling (0-360)
+let neonPulse = 0;              // Neon glow intensity pulse
+let wavePhase = 0;              // Wave animation phase
+let elasticScroll = 0;          // Elastic scroll bounce
+let elasticVelocity = 0;        // Scroll velocity for elastic
+let glitchTimer = 0;            // Glitch effect timer
+let selectionGlow = 0;          // Selection glow intensity
+let headerBreathAlpha = 0;      // Header breathing effect
+let scanlineOffset = 0;         // Scanline animation offset
+let chromaticAberration = 0;    // RGB split effect
+let smoothSelectedIndex = 0;    // Smooth selection animation
+let itemAnimOffsets = [];       // Per-item animation offsets
+let menuScale = 1.0;            // Menu scale animation
+let logoGlowIntensity = 0;      // Logo glow
+let borderRainbow = 0;          // Rainbow border cycle
+let particleSpawnTimer = 0;     // Particle spawn timing
+let activeParticles = [];       // Active floating particles
+
 // ============================================================================
 // THEME SYSTEM
 // ============================================================================
@@ -246,15 +265,15 @@ let matrixEffect = 0;
 let menuFont = null;
 let titleFont = null;
 
-// Menu dimensions in pixels - positioned on right side
+// Menu dimensions in pixels - positioned center-right for premium look
 const menu = {
-    x: 1050,
-    y: 100,
-    width: 340,
-    headerHeight: 60,
-    itemHeight: 42,
-    footerHeight: 35,
-    maxVisibleItems: 11
+    x: 480,
+    y: 80,
+    width: 420,
+    headerHeight: 85,
+    itemHeight: 48,
+    footerHeight: 45,
+    maxVisibleItems: 12
 };
 
 // Player list cache
@@ -2494,6 +2513,77 @@ addEventHandler("OnProcess", function(event) {
     // Stats update timer
     statsUpdateTime += 0.02;
 
+    // ===== Eye-Melting Premium Effects =====
+    // Rainbow hue cycling (smooth 360 degree rotation)
+    rainbowHue = (rainbowHue + 0.8) % 360;
+
+    // Neon pulse (smooth sine wave)
+    neonPulse = (neonPulse + 0.06) % (Math.PI * 2);
+
+    // Wave phase for animated borders
+    wavePhase = (wavePhase + 0.04) % (Math.PI * 2);
+
+    // Selection glow breathing
+    selectionGlow = (selectionGlow + 0.1) % (Math.PI * 2);
+
+    // Header breathing effect
+    headerBreathAlpha = (headerBreathAlpha + 0.03) % (Math.PI * 2);
+
+    // Scanline animation
+    scanlineOffset = (scanlineOffset + 2) % 20;
+
+    // Chromatic aberration pulse
+    chromaticAberration = Math.sin(animTime * 2) * 2;
+
+    // Smooth selection interpolation
+    smoothSelectedIndex += (selectedIndex - smoothSelectedIndex) * 0.2;
+
+    // Logo glow intensity
+    logoGlowIntensity = 0.5 + Math.sin(animTime * 2) * 0.3;
+
+    // Border rainbow cycle
+    borderRainbow = (borderRainbow + 1.5) % 360;
+
+    // Menu scale animation (subtle breathing)
+    if (menuOpen) {
+        menuScale += (1.0 - menuScale) * 0.1;
+    }
+
+    // Elastic scroll physics
+    if (Math.abs(elasticVelocity) > 0.01) {
+        elasticScroll += elasticVelocity;
+        elasticVelocity *= 0.85; // Damping
+        // Bounce back
+        if (elasticScroll > 10) elasticVelocity -= (elasticScroll - 10) * 0.1;
+        if (elasticScroll < -10) elasticVelocity -= (elasticScroll + 10) * 0.1;
+    } else {
+        elasticScroll *= 0.9;
+    }
+
+    // Particle system update
+    particleSpawnTimer += 0.1;
+    if (menuOpen && particleSpawnTimer > 1 && activeParticles.length < 15) {
+        particleSpawnTimer = 0;
+        activeParticles.push({
+            x: menu.x + Math.random() * menu.width,
+            y: menu.y + menu.headerHeight + Math.random() * 300,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: -0.5 - Math.random() * 0.5,
+            life: 1.0,
+            size: 2 + Math.random() * 3,
+            hue: Math.random() * 60 + 30 // Gold-ish hues
+        });
+    }
+    // Update particles
+    for (let i = activeParticles.length - 1; i >= 0; i--) {
+        let p = activeParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.015;
+        p.size *= 0.995;
+        if (p.life <= 0) activeParticles.splice(i, 1);
+    }
+
     // Screen shake decay
     if (screenShake > 0) {
         screenShake -= 0.1;
@@ -2599,7 +2689,9 @@ addEventHandler("OnProcess", function(event) {
     }
 });
 
-// Enhanced eye-melting menu rendering (optimized)
+// ============================================================================
+// PREMIUM EYE-MELTING MENU RENDERING - Trident Special Edition
+// ============================================================================
 addEventHandler("OnDrawnHUD", function(event) {
     if (menuOpenAnim <= 0) return;
 
@@ -2612,113 +2704,178 @@ addEventHandler("OnDrawnHUD", function(event) {
 
     let animAlpha = Math.floor(255 * menuOpenAnim);
 
-    // Calculate animated position (smooth slide in from right)
-    let slideOffset = (1 - menuOpenAnim) * 120;
-    let baseX = menu.x + slideOffset;
-    let baseY = menu.y;
+    // Calculate animated position with elastic bounce
+    let slideOffset = (1 - menuOpenAnim) * 150;
+    let bounceOffset = Math.sin(menuOpenAnim * Math.PI) * 8 * (1 - menuOpenAnim);
+    let baseX = menu.x + slideOffset + bounceOffset + elasticScroll * 0.3;
+    let baseY = menu.y + elasticScroll * 0.5;
 
-    // ===== ENHANCED OUTER GLOW/SHADOW =====
-    let glowIntensity = 0.3 + borderGlow * 0.2;
-    let outerGlowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(40 * glowIntensity * menuOpenAnim));
-    drawRect(baseX - 8, baseY - 8, menu.width + 16, totalHeight + 26, outerGlowColor);
-    let shadowBg = toColour(0, 0, 0, Math.floor(120 * menuOpenAnim));
-    drawRect(baseX - 4, baseY - 4, menu.width + 8, totalHeight + 18, shadowBg);
+    // Helper function for rainbow color
+    function getRainbowColor(offset, alpha) {
+        let hue = (rainbowHue + offset) % 360;
+        let r = Math.floor(Math.sin(hue * Math.PI / 180) * 127 + 128);
+        let g = Math.floor(Math.sin((hue + 120) * Math.PI / 180) * 127 + 128);
+        let b = Math.floor(Math.sin((hue + 240) * Math.PI / 180) * 127 + 128);
+        return toColour(r, g, b, alpha);
+    }
 
-    // ===== MDB WINDOW BACKGROUND - Enhanced gradient-style =====
-    let windowBgColor = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(190 * menuOpenAnim));
-    drawRect(baseX, baseY, menu.width, totalHeight + 10, windowBgColor);
+    // ===== PREMIUM OUTER NEON GLOW =====
+    let neonIntensity = 0.4 + Math.sin(neonPulse) * 0.3;
+    // Multiple glow layers for neon effect
+    for (let i = 3; i >= 0; i--) {
+        let glowSize = 6 + i * 4;
+        let glowAlpha = Math.floor((25 - i * 5) * neonIntensity * menuOpenAnim);
+        let glowCol = getRainbowColor(i * 30, glowAlpha);
+        drawRect(baseX - glowSize, baseY - glowSize, menu.width + glowSize * 2, totalHeight + 10 + glowSize * 2, glowCol);
+    }
 
-    // Inner darker panel for depth
-    let innerBgColor = toColour(30, 50, 70, Math.floor(100 * menuOpenAnim));
-    drawRect(baseX + 3, baseY + 3, menu.width - 6, totalHeight + 4, innerBgColor);
+    // Dark shadow base
+    let shadowBg = toColour(0, 0, 0, Math.floor(200 * menuOpenAnim));
+    drawRect(baseX - 3, baseY - 3, menu.width + 6, totalHeight + 16, shadowBg);
 
-    // ===== ANIMATED BORDER =====
-    let borderAlpha = Math.floor((180 + borderGlow * 75) * menuOpenAnim);
-    let borderColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, borderAlpha);
-    // Top border
-    drawRect(baseX, baseY, menu.width, 2, borderColor);
-    // Bottom border
-    drawRect(baseX, baseY + totalHeight + 8, menu.width, 2, borderColor);
+    // ===== MAIN WINDOW BACKGROUND - Premium gradient =====
+    // Base layer - dark blue
+    let baseBg = toColour(15, 25, 45, Math.floor(240 * menuOpenAnim));
+    drawRect(baseX, baseY, menu.width, totalHeight + 10, baseBg);
+
+    // Gradient overlay from top
+    let gradTop = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(120 * menuOpenAnim));
+    drawRect(baseX, baseY, menu.width, 100, gradTop);
+
+    // Inner panel with depth
+    let innerBg = toColour(20, 35, 60, Math.floor(180 * menuOpenAnim));
+    drawRect(baseX + 4, baseY + 4, menu.width - 8, totalHeight + 2, innerBg);
+
+    // Scanline effect overlay
+    for (let sy = 0; sy < totalHeight + 10; sy += 4) {
+        let scanAlpha = Math.floor(15 * menuOpenAnim);
+        let scanCol = toColour(0, 0, 0, scanAlpha);
+        drawRect(baseX, baseY + sy + ((scanlineOffset + sy) % 4), menu.width, 1, scanCol);
+    }
+
+    // ===== ANIMATED RAINBOW BORDER =====
+    let borderThickness = 3;
+    // Top border - rainbow wave
+    for (let bx = 0; bx < menu.width; bx += 8) {
+        let waveOffset = Math.sin(wavePhase + bx * 0.02) * 2;
+        let borderCol = getRainbowColor(bx * 0.5, Math.floor((200 + Math.sin(neonPulse + bx * 0.1) * 55) * menuOpenAnim));
+        drawRect(baseX + bx, baseY + waveOffset, 8, borderThickness, borderCol);
+    }
+    // Bottom border - rainbow wave
+    for (let bx = 0; bx < menu.width; bx += 8) {
+        let waveOffset = Math.sin(wavePhase + bx * 0.02 + Math.PI) * 2;
+        let borderCol = getRainbowColor(bx * 0.5 + 180, Math.floor((200 + Math.sin(neonPulse + bx * 0.1) * 55) * menuOpenAnim));
+        drawRect(baseX + bx, baseY + totalHeight + 7 + waveOffset, 8, borderThickness, borderCol);
+    }
     // Left border
-    drawRect(baseX, baseY, 2, totalHeight + 10, borderColor);
+    for (let by = 0; by < totalHeight + 10; by += 8) {
+        let waveOffset = Math.sin(wavePhase + by * 0.02) * 2;
+        let borderCol = getRainbowColor(by * 0.5 + 90, Math.floor((200 + Math.sin(neonPulse + by * 0.1) * 55) * menuOpenAnim));
+        drawRect(baseX + waveOffset, baseY + by, borderThickness, 8, borderCol);
+    }
     // Right border
-    drawRect(baseX + menu.width - 2, baseY, 2, totalHeight + 10, borderColor);
+    for (let by = 0; by < totalHeight + 10; by += 8) {
+        let waveOffset = Math.sin(wavePhase + by * 0.02 + Math.PI) * 2;
+        let borderCol = getRainbowColor(by * 0.5 + 270, Math.floor((200 + Math.sin(neonPulse + by * 0.1) * 55) * menuOpenAnim));
+        drawRect(baseX + menu.width - borderThickness + waveOffset, baseY + by, borderThickness, 8, borderCol);
+    }
 
-    // ===== DECORATIVE CORNER ELEMENTS =====
-    let cornerSize = 12;
-    let cornerAlpha = Math.floor((200 + Math.sin(cornerPulse) * 55) * menuOpenAnim);
-    let cornerColor = toColour(255, 200, 100, cornerAlpha);
-    // Top-left corner
-    drawRect(baseX, baseY, cornerSize, 3, cornerColor);
-    drawRect(baseX, baseY, 3, cornerSize, cornerColor);
-    // Top-right corner
-    drawRect(baseX + menu.width - cornerSize, baseY, cornerSize, 3, cornerColor);
-    drawRect(baseX + menu.width - 3, baseY, 3, cornerSize, cornerColor);
-    // Bottom-left corner
-    drawRect(baseX, baseY + totalHeight + 7, cornerSize, 3, cornerColor);
-    drawRect(baseX, baseY + totalHeight + 10 - cornerSize, 3, cornerSize, cornerColor);
-    // Bottom-right corner
-    drawRect(baseX + menu.width - cornerSize, baseY + totalHeight + 7, cornerSize, 3, cornerColor);
-    drawRect(baseX + menu.width - 3, baseY + totalHeight + 10 - cornerSize, 3, cornerSize, cornerColor);
+    // ===== PREMIUM CORNER DECORATIONS =====
+    let cornerSize = 20;
+    let cornerGlow = Math.floor((255 + Math.sin(cornerPulse * 2) * 0) * menuOpenAnim);
+    let cornerCol = getRainbowColor(0, cornerGlow);
+    // Top-left corner bracket
+    drawRect(baseX - 2, baseY - 2, cornerSize + 4, 4, cornerCol);
+    drawRect(baseX - 2, baseY - 2, 4, cornerSize + 4, cornerCol);
+    // Top-right corner bracket
+    drawRect(baseX + menu.width - cornerSize - 2, baseY - 2, cornerSize + 4, 4, getRainbowColor(90, cornerGlow));
+    drawRect(baseX + menu.width - 2, baseY - 2, 4, cornerSize + 4, getRainbowColor(90, cornerGlow));
+    // Bottom-left corner bracket
+    drawRect(baseX - 2, baseY + totalHeight + 6, cornerSize + 4, 4, getRainbowColor(180, cornerGlow));
+    drawRect(baseX - 2, baseY + totalHeight + 10 - cornerSize, 4, cornerSize + 4, getRainbowColor(180, cornerGlow));
+    // Bottom-right corner bracket
+    drawRect(baseX + menu.width - cornerSize - 2, baseY + totalHeight + 6, cornerSize + 4, 4, getRainbowColor(270, cornerGlow));
+    drawRect(baseX + menu.width - 2, baseY + totalHeight + 10 - cornerSize, 4, cornerSize + 4, getRainbowColor(270, cornerGlow));
 
-    // ===== ENHANCED HEADER BANNER =====
-    let headerY = baseY + 5;
-    // Header background gradient
-    let headerBg1 = toColour(40, 60, 90, Math.floor(220 * menuOpenAnim));
-    let headerBg2 = toColour(60, 90, 130, Math.floor(220 * menuOpenAnim));
-    drawRect(baseX + 4, headerY - 2, menu.width - 8, 55, headerBg1);
-    // Header shimmer effect
-    let shimmerX = baseX + 4 + ((Math.sin(bannerShimmer) + 1) * 0.5) * (menu.width - 80);
-    let shimmerColor = toColour(255, 255, 255, Math.floor(30 * menuOpenAnim));
-    drawRect(shimmerX, headerY - 2, 60, 55, shimmerColor);
+    // ===== PREMIUM HEADER =====
+    let headerY = baseY + 8;
+    let headerH = menu.headerHeight - 16;
 
-    // "MD" Prefix - Enhanced with glow
-    let shadowColor = toColour(0, 0, 0, Math.floor(255 * menuOpenAnim));
-    drawText("MD", baseX + 13, headerY + 3, shadowColor, 28);
-    drawText("MD", baseX + 11, headerY + 1, shadowColor, 28);
-    // Main "MD" in bright Steelblue
-    let mdGlowColor = toColour(100, 160, 220, Math.floor(FlashingGhost * menuOpenAnim));
-    let mdColor = toColour(MDB.Steelblue.r + 30, MDB.Steelblue.g + 30, MDB.Steelblue.b + 30, animAlpha);
-    drawText("MD", baseX + 10, headerY, mdGlowColor, 28);
-    drawText("MD", baseX + 10, headerY, mdColor, 28);
+    // Header background with gradient layers
+    let headerBg1 = toColour(MDB.DevilsRed.r, MDB.DevilsRed.g, MDB.DevilsRed.b, Math.floor(200 * menuOpenAnim));
+    drawRect(baseX + 6, headerY, menu.width - 12, headerH, headerBg1);
 
-    // "REVOLUTION" - Enhanced with glow effect
-    drawText("REVOLUTION", baseX + 58, headerY + 8, shadowColor, 20);
-    drawText("REVOLUTION", baseX + 56, headerY + 6, shadowColor, 20);
-    // Main header in Gold with enhanced FlashingGhost effect
-    let headerGlowColor = toColour(255, 200, 100, Math.floor(FlashingGhost * 0.7 * menuOpenAnim));
-    let headerGoldColor = toColour(MDB.Gold.r + 40, MDB.Gold.g + 40, MDB.Gold.b, Math.floor(FlashingGhost * menuOpenAnim));
-    drawText("REVOLUTION", baseX + 55, headerY + 5, headerGlowColor, 20);
-    drawText("REVOLUTION", baseX + 55, headerY + 5, headerGoldColor, 20);
+    // Header gradient overlay
+    let headerGrad = toColour(100, 20, 30, Math.floor((100 + Math.sin(headerBreathAlpha) * 40) * menuOpenAnim));
+    drawRect(baseX + 6, headerY, menu.width - 12, headerH / 2, headerGrad);
 
-    // Version badge - Enhanced with box
-    let badgeX = baseX + menu.width - 78;
-    let badgeY = headerY + 18;
-    let badgeBg = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(200 * menuOpenAnim));
-    drawRect(badgeX - 4, badgeY - 2, 70, 18, badgeBg);
-    let versionColor = toColour(255, 255, 255, animAlpha);
-    drawText("TRIDENT", badgeX, badgeY + 2, versionColor, 11);
+    // Header shimmer sweep
+    let shimmerPos = ((Math.sin(bannerShimmer) + 1) * 0.5) * (menu.width - 40);
+    let shimmerCol = toColour(255, 255, 255, Math.floor(50 * menuOpenAnim));
+    drawRect(baseX + 6 + shimmerPos, headerY, 40, headerH, shimmerCol);
 
-    // Sub Header - Enhanced with underline effect
-    let subHeaderColor = toColour(MDB.SubHeader.r + 40, MDB.SubHeader.g + 40, MDB.SubHeader.b + 40, animAlpha);
-    let subHeaderText = currentMenu === "main" ? "MAJOR DISTRIBUTION" : title;
-    let subHeaderX = baseX + (menu.width / 2) - (subHeaderText.length * 3.5);
-    drawText(subHeaderText, subHeaderX + 1, headerY + 40, shadowColor, 12);
-    drawText(subHeaderText, subHeaderX, headerY + 39, subHeaderColor, 12);
+    // Header inner border
+    let headerBorder = getRainbowColor(0, Math.floor(180 * menuOpenAnim));
+    drawRect(baseX + 6, headerY, menu.width - 12, 2, headerBorder);
+    drawRect(baseX + 6, headerY + headerH - 2, menu.width - 12, 2, headerBorder);
 
-    // ===== ENHANCED WHITE LINE SEPARATOR =====
-    // Gradient-style separator
-    let lineColorL = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(200 * menuOpenAnim));
-    let lineColorC = toColour(MDB.Line.r, MDB.Line.g, MDB.Line.b, animAlpha);
-    let lineColorR = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(200 * menuOpenAnim));
-    drawRect(baseX + 10, baseY + menu.headerHeight - 5, 30, 2, lineColorL);
-    drawRect(baseX + 40, baseY + menu.headerHeight - 5, menu.width - 80, 2, lineColorC);
-    drawRect(baseX + menu.width - 40, baseY + menu.headerHeight - 5, 30, 2, lineColorR);
-    // Add glow line under
-    let glowLineColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(60 * borderGlow * menuOpenAnim));
-    drawRect(baseX + 10, baseY + menu.headerHeight - 3, menu.width - 20, 3, glowLineColor);
+    // Logo text with multiple glow layers
+    let shadowColor = toColour(0, 0, 0, animAlpha);
+    let logoX = baseX + 18;
+    let logoY = headerY + 12;
 
-    // ===== MDB MENU ITEMS =====
+    // "MD" with chromatic aberration effect
+    let chromaOffset = chromaticAberration;
+    drawText("MD", logoX + 2 + chromaOffset, logoY + 2, toColour(255, 0, 0, Math.floor(80 * menuOpenAnim)), 32);
+    drawText("MD", logoX + 2 - chromaOffset, logoY + 2, toColour(0, 0, 255, Math.floor(80 * menuOpenAnim)), 32);
+    drawText("MD", logoX + 2, logoY + 2, shadowColor, 32);
+    // Main MD text with glow
+    let mdGlow = toColour(150, 200, 255, Math.floor(FlashingGhost * 0.8 * menuOpenAnim));
+    drawText("MD", logoX, logoY, mdGlow, 32);
+    let mdMain = toColour(200, 230, 255, animAlpha);
+    drawText("MD", logoX, logoY, mdMain, 32);
+
+    // "REVOLUTION" with glow
+    let revX = logoX + 75;
+    let revY = headerY + 18;
+    // Glow layers
+    drawText("REVOLUTION", revX + 2, revY + 2, shadowColor, 22);
+    let revGlow = toColour(255, 220, 150, Math.floor(FlashingGhost * 0.6 * menuOpenAnim));
+    drawText("REVOLUTION", revX, revY, revGlow, 22);
+    let revMain = toColour(MDB.Gold.r + 50, MDB.Gold.g + 50, MDB.Gold.b + 20, Math.floor(FlashingGhost * menuOpenAnim));
+    drawText("REVOLUTION", revX, revY, revMain, 22);
+
+    // Version badge with neon effect
+    let badgeX = baseX + menu.width - 95;
+    let badgeY = headerY + 8;
+    let badgeBg = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(220 * menuOpenAnim));
+    drawRect(badgeX - 2, badgeY - 2, 82, 22, getRainbowColor(180, Math.floor(150 * menuOpenAnim)));
+    drawRect(badgeX, badgeY, 78, 18, badgeBg);
+    drawText("TRIDENT v2.0", badgeX + 6, badgeY + 3, toColour(255, 255, 255, animAlpha), 11);
+
+    // Submenu title (below main header)
+    let subTitleY = headerY + headerH - 22;
+    let subText = currentMenu === "main" ? "SPECIAL EDITION" : title;
+    let subTextX = baseX + (menu.width / 2) - (subText.length * 4);
+    drawText(subText, subTextX + 1, subTitleY + 1, shadowColor, 13);
+    let subCol = toColour(MDB.SubHeader.r + 60, MDB.SubHeader.g + 60, MDB.SubHeader.b + 60, animAlpha);
+    drawText(subText, subTextX, subTitleY, subCol, 13);
+
+    // ===== SEPARATOR LINE WITH ANIMATION =====
+    let sepY = baseY + menu.headerHeight - 2;
+    // Animated gradient line
+    for (let lx = 0; lx < menu.width - 20; lx += 4) {
+        let lineAlpha = Math.floor((180 + Math.sin(wavePhase + lx * 0.05) * 75) * menuOpenAnim);
+        let lineCol = lx < 40 || lx > menu.width - 60 ?
+            getRainbowColor(lx * 0.8, lineAlpha) :
+            toColour(255, 255, 255, lineAlpha);
+        drawRect(baseX + 10 + lx, sepY, 4, 2, lineCol);
+    }
+    // Glow under line
+    let glowLine = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(40 * borderGlow * menuOpenAnim));
+    drawRect(baseX + 10, sepY + 2, menu.width - 20, 4, glowLine);
+
+    // ===== PREMIUM MENU ITEMS =====
     let yPos = baseY + menu.headerHeight;
     targetScrollY = scrollOffset * menu.itemHeight;
 
@@ -2726,188 +2883,282 @@ addEventHandler("OnDrawnHUD", function(event) {
         let item = items[i];
         let isSelected = (i === selectedIndex);
         let itemY = yPos + (i - scrollOffset) * menu.itemHeight;
+        let itemIndex = i - scrollOffset;
+
+        // Smooth selection animation
+        let selectionAnim = isSelected ? Math.sin(selectionGlow) * 0.5 + 0.5 : 0;
+        let itemSlide = isSelected ? Math.sin(selectionGlow * 2) * 3 : 0;
 
         if (isSelected) {
-            // ===== ENHANCED SELECTED ITEM - Multi-layer glow effect =====
-            // Outer glow
-            let outerGlowAlpha = Math.floor((80 + Math.sin(scrollbarPulse) * 40) * menuOpenAnim);
-            let outerGlowCol = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, outerGlowAlpha);
-            drawRect(baseX + 4, itemY - 2, menu.width - 8, menu.itemHeight + 2, outerGlowCol);
+            // ===== PREMIUM SELECTED ITEM - Multi-layer neon glow =====
+            // Outer neon glow (rainbow)
+            let outerGlowAlpha = Math.floor((60 + Math.sin(selectionGlow) * 40) * menuOpenAnim);
+            drawRect(baseX + 2, itemY - 4, menu.width - 4, menu.itemHeight + 6, getRainbowColor(0, outerGlowAlpha));
 
-            // Main selection background with enhanced Glowing effect
-            let scrollbarAlpha = Math.floor((160 + Math.sin(scrollbarPulse) * 30) * menuOpenAnim);
-            let scrollbarColor = toColour(Glowing, Glowing + 30, 220, scrollbarAlpha);
-            drawRect(baseX + 6, itemY, menu.width - 12, menu.itemHeight - 2, scrollbarColor);
+            // Middle glow layer
+            let midGlowAlpha = Math.floor((100 + Math.sin(selectionGlow) * 50) * menuOpenAnim);
+            let midGlowCol = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, midGlowAlpha);
+            drawRect(baseX + 4, itemY - 2, menu.width - 8, menu.itemHeight + 2, midGlowCol);
 
-            // Inner highlight line (top)
-            let highlightLineColor = toColour(255, 255, 255, Math.floor(100 * menuOpenAnim));
-            drawRect(baseX + 8, itemY + 1, menu.width - 16, 1, highlightLineColor);
+            // Main selection background with animated gradient
+            let selBgAlpha = Math.floor((180 + Math.sin(selectionGlow) * 40) * menuOpenAnim);
+            let selBgCol = toColour(Glowing + 30, Glowing + 50, 240, selBgAlpha);
+            drawRect(baseX + 6, itemY, menu.width - 12, menu.itemHeight - 4, selBgCol);
 
-            // Left accent bar
-            let accentColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, animAlpha);
-            drawRect(baseX + 6, itemY + 2, 3, menu.itemHeight - 6, accentColor);
+            // Inner highlight shimmer
+            let shimmerX = baseX + 6 + ((Math.sin(bannerShimmer * 2) + 1) * 0.5) * (menu.width - 80);
+            let shimmerHighlight = toColour(255, 255, 255, Math.floor(60 * menuOpenAnim));
+            drawRect(shimmerX, itemY + 2, 60, menu.itemHeight - 8, shimmerHighlight);
+
+            // Top highlight line (glass effect)
+            let topLine = toColour(255, 255, 255, Math.floor((120 + selectionAnim * 80) * menuOpenAnim));
+            drawRect(baseX + 8, itemY + 2, menu.width - 16, 2, topLine);
+
+            // Left accent bar with rainbow
+            let accentCol = getRainbowColor(animTime * 50, animAlpha);
+            drawRect(baseX + 6, itemY + 4, 4, menu.itemHeight - 10, accentCol);
+
+            // Right accent bar
+            drawRect(baseX + menu.width - 10, itemY + 4, 4, menu.itemHeight - 10, accentCol);
 
         } else if (item.action === "none") {
-            // ===== MDB Separator/JumpOver - Enhanced with subtle line =====
-            let sepLineColor = toColour(MDB.JumpOver.r, MDB.JumpOver.g, MDB.JumpOver.b, Math.floor(80 * menuOpenAnim));
-            drawRect(baseX + 20, itemY + menu.itemHeight - 4, menu.width - 40, 1, sepLineColor);
+            // ===== Section Separator with gradient =====
+            let sepGrad1 = getRainbowColor(itemIndex * 20, Math.floor(60 * menuOpenAnim));
+            let sepGrad2 = toColour(MDB.JumpOver.r, MDB.JumpOver.g, MDB.JumpOver.b, Math.floor(120 * menuOpenAnim));
+            drawRect(baseX + 20, itemY + menu.itemHeight - 6, 30, 2, sepGrad1);
+            drawRect(baseX + 50, itemY + menu.itemHeight - 6, menu.width - 100, 2, sepGrad2);
+            drawRect(baseX + menu.width - 50, itemY + menu.itemHeight - 6, 30, 2, sepGrad1);
+        } else {
+            // Subtle hover indicator for non-selected items
+            let hoverAlpha = Math.floor(20 * menuOpenAnim);
+            let hoverCol = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, hoverAlpha);
+            drawRect(baseX + 8, itemY + 2, menu.width - 16, menu.itemHeight - 6, hoverCol);
         }
-        // Normal items have no background in MDB style (transparent over Steelblue window)
 
-        // ===== MDB ITEM TEXT =====
-        let textX = baseX + 22;
+        // ===== ITEM TEXT WITH EFFECTS =====
+        let textX = baseX + 28 + itemSlide;
+        let textY = itemY + 14;
+        let textSize = 15;
 
         if (item.action === "none") {
-            // ===== MDB JumpOver/Separator Text - JumpOver color (58,95,205) =====
-            let jumpOverColor = toColour(MDB.JumpOver.r, MDB.JumpOver.g, MDB.JumpOver.b, animAlpha);
-            drawText(item.label, baseX + 20, itemY + 12, jumpOverColor, 12);
+            // Section header with glow
+            let secShadow = toColour(0, 0, 0, animAlpha);
+            let secCol = toColour(MDB.JumpOver.r + 40, MDB.JumpOver.g + 40, MDB.JumpOver.b + 40, animAlpha);
+            drawText(item.label, baseX + 21, textY + 1, secShadow, 13);
+            drawText(item.label, baseX + 20, textY, secCol, 13);
+
         } else if (item.action === "toggle" && toggleStates[item.target]) {
-            // ===== MDB Toggle ON - ItemHighlight color (255,143,0) with FlashingGhost =====
-            let highlightColor = toColour(MDB.ItemHighlight.r, MDB.ItemHighlight.g, MDB.ItemHighlight.b, animAlpha);
-            drawText(item.label, textX, itemY + 12, highlightColor, 14);
+            // Toggle ON - with pulsing glow
+            let glowAlpha = Math.floor((FlashingGhost * 0.6) * menuOpenAnim);
+            let toggleGlow = toColour(255, 200, 100, glowAlpha);
+            let toggleMain = toColour(MDB.ItemHighlight.r, MDB.ItemHighlight.g, MDB.ItemHighlight.b, animAlpha);
+            drawText(item.label, textX + 1, textY + 1, toColour(0, 0, 0, animAlpha), textSize);
+            drawText(item.label, textX, textY, toggleGlow, textSize);
+            drawText(item.label, textX, textY, toggleMain, textSize);
+
         } else if (isSelected) {
-            // ===== MDB Selected Item Text - ScrollItem white (255,255,255) =====
-            let selectedTextColor = toColour(MDB.ScrollItem.r, MDB.ScrollItem.g, MDB.ScrollItem.b, animAlpha);
-            drawText(item.label, textX, itemY + 12, selectedTextColor, 14);
+            // Selected item with glow effect
+            let selShadow = toColour(0, 0, 0, animAlpha);
+            let selGlow = toColour(255, 255, 200, Math.floor((150 + selectionAnim * 100) * menuOpenAnim));
+            let selMain = toColour(255, 255, 255, animAlpha);
+            drawText(item.label, textX + 2, textY + 2, selShadow, textSize);
+            drawText(item.label, textX, textY, selGlow, textSize);
+            drawText(item.label, textX, textY, selMain, textSize);
+
         } else {
-            // ===== MDB Normal Item Text - Item gray (180,180,180) =====
-            let normalTextColor = toColour(MDB.Item.r, MDB.Item.g, MDB.Item.b, animAlpha);
-            drawText(item.label, textX, itemY + 12, normalTextColor, 14);
+            // Normal item
+            let normShadow = toColour(0, 0, 0, Math.floor(150 * menuOpenAnim));
+            let normCol = toColour(MDB.Item.r + 20, MDB.Item.g + 20, MDB.Item.b + 20, animAlpha);
+            drawText(item.label, textX + 1, textY + 1, normShadow, textSize);
+            drawText(item.label, textX, textY, normCol, textSize);
         }
 
-        // ===== MDB TOGGLE INDICATORS - Bool color (255,128,0) arrow =====
+        // ===== TOGGLE STATUS INDICATOR =====
         if (item.action === "toggle") {
             let isOn = toggleStates[item.target];
-            // Draw arrow indicator like MDB (arrowLeftRight sprite equivalent)
-            let arrowColor = toColour(MDB.Bool.r, MDB.Bool.g, MDB.Bool.b, Math.floor(Fading_100 * menuOpenAnim));
-            drawText(">", baseX + 12, itemY + 12, arrowColor, 12);
+            let stateX = baseX + menu.width - 65;
 
-            // Status text on right side
-            let stateX = baseX + menu.width - 50;
+            // Toggle indicator box
+            let boxW = 50;
+            let boxH = 22;
+            let boxY = itemY + (menu.itemHeight - boxH) / 2 - 2;
+
             if (isOn) {
-                // MDB ON state - ItemHighlight with FlashingGhost
-                let onColor = toColour(MDB.ItemHighlight.r, MDB.ItemHighlight.g, MDB.ItemHighlight.b, Math.floor(FlashingGhost * menuOpenAnim));
-                drawText("ON", stateX, itemY + 12, onColor, 12);
+                // ON state - neon green/gold glow
+                let onGlow = toColour(255, 200, 0, Math.floor((80 + Math.sin(selectionGlow) * 40) * menuOpenAnim));
+                drawRect(stateX - 4, boxY - 2, boxW + 8, boxH + 4, onGlow);
+                let onBg = toColour(50, 150, 50, Math.floor(220 * menuOpenAnim));
+                drawRect(stateX, boxY, boxW, boxH, onBg);
+                let onText = toColour(255, 255, 255, animAlpha);
+                drawText("ON", stateX + 14, boxY + 5, onText, 12);
             } else {
-                // MDB OFF state - gray
-                let offColor = toColour(MDB.Item.r, MDB.Item.g, MDB.Item.b, animAlpha);
-                drawText("OFF", stateX, itemY + 12, offColor, 12);
+                // OFF state - muted
+                let offBg = toColour(80, 80, 90, Math.floor(180 * menuOpenAnim));
+                drawRect(stateX, boxY, boxW, boxH, offBg);
+                let offText = toColour(150, 150, 160, animAlpha);
+                drawText("OFF", stateX + 12, boxY + 5, offText, 12);
             }
+
+            // Arrow indicator
+            let arrowCol = isOn ? getRainbowColor(0, animAlpha) : toColour(MDB.Bool.r, MDB.Bool.g, MDB.Bool.b, Math.floor(180 * menuOpenAnim));
+            drawText(">", baseX + 14, textY, arrowCol, 14);
         }
 
-        // ===== MDB Submenu Arrow =====
+        // ===== SUBMENU ARROW =====
         if (item.action === "submenu") {
-            let arrowX = baseX + menu.width - 25;
-            // MDB uses spinning blip icon, we'll use animated arrow
-            let arrowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, animAlpha);
-            drawText(">", arrowX, itemY + 12, arrowColor, 14);
+            let arrowX = baseX + menu.width - 30;
+            // Animated arrow with glow
+            let arrowGlow = isSelected ? getRainbowColor(animTime * 100, Math.floor(180 * menuOpenAnim)) : toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(150 * menuOpenAnim));
+            let arrowMain = toColour(MDB.Gold.r + 30, MDB.Gold.g + 30, MDB.Gold.b, animAlpha);
+
+            // Double arrow for premium look
+            drawText(">>", arrowX + 1, textY + 1, toColour(0, 0, 0, animAlpha), 14);
+            drawText(">>", arrowX, textY, arrowGlow, 14);
+            drawText(">>", arrowX, textY, arrowMain, 14);
         }
     }
 
-    // ===== ENHANCED FOOTER =====
+    // ===== PREMIUM FOOTER =====
     let footerY = yPos + visibleCount * menu.itemHeight;
 
-    // Footer background with gradient effect
-    let footerBgColor = toColour(30, 50, 70, Math.floor(180 * menuOpenAnim));
-    drawRect(baseX + 4, footerY + 2, menu.width - 8, menu.footerHeight - 4, footerBgColor);
+    // Footer background with gradient
+    let footerBg = toColour(20, 30, 50, Math.floor(220 * menuOpenAnim));
+    drawRect(baseX + 6, footerY + 4, menu.width - 12, menu.footerHeight - 8, footerBg);
 
-    // Footer top line
-    let footerLineColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor((150 + Math.sin(footerPulse) * 50) * menuOpenAnim));
-    drawRect(baseX + 10, footerY + 2, menu.width - 20, 1, footerLineColor);
-
-    // Navigation hints with icons
-    let helperTextColor = toColour(MDB.StatsItem.r, MDB.StatsItem.g, MDB.StatsItem.b, Math.floor(220 * menuOpenAnim));
-    let helperAccentColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(220 * menuOpenAnim));
-
-    // Draw key hints
-    drawText("[", baseX + 12, footerY + 12, helperAccentColor, 10);
-    drawText("UP/DOWN", baseX + 18, footerY + 12, helperTextColor, 10);
-    drawText("]", baseX + 68, footerY + 12, helperAccentColor, 10);
-    drawText("Navigate", baseX + 76, footerY + 12, helperTextColor, 9);
-
-    drawText("[", baseX + 130, footerY + 12, helperAccentColor, 10);
-    drawText("ENTER", baseX + 136, footerY + 12, helperTextColor, 10);
-    drawText("]", baseX + 172, footerY + 12, helperAccentColor, 10);
-    drawText("Select", baseX + 180, footerY + 12, helperTextColor, 9);
-
-    drawText("[", baseX + 225, footerY + 12, helperAccentColor, 10);
-    drawText("BACK", baseX + 231, footerY + 12, helperTextColor, 10);
-    drawText("]", baseX + 260, footerY + 12, helperAccentColor, 10);
-    drawText("Return", baseX + 268, footerY + 12, helperTextColor, 9);
-
-    // ===== ENHANCED SCROLLBAR (RIGHT SIDE) =====
-    if (items.length > menu.maxVisibleItems) {
-        let scrollbarX = baseX + menu.width - 10;
-        let scrollbarY = baseY + menu.headerHeight + 5;
-        let scrollbarH = visibleCount * menu.itemHeight - 10;
-        let maxScroll = items.length - visibleCount;
-        let scrollProgress = scrollOffset / maxScroll;
-        let thumbH = Math.max(30, scrollbarH * (visibleCount / items.length));
-        let thumbY = scrollbarY + scrollProgress * (scrollbarH - thumbH);
-
-        // Scrollbar track
-        let trackColor = toColour(40, 40, 50, Math.floor(150 * menuOpenAnim));
-        drawRect(scrollbarX, scrollbarY, 5, scrollbarH, trackColor);
-
-        // Scrollbar thumb with glow
-        let thumbGlowAlpha = Math.floor((60 + Math.sin(scrollbarPulse) * 30) * menuOpenAnim);
-        let thumbGlowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, thumbGlowAlpha);
-        drawRect(scrollbarX - 1, thumbY - 1, 7, thumbH + 2, thumbGlowColor);
-
-        let thumbColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(220 * menuOpenAnim));
-        drawRect(scrollbarX, thumbY, 5, thumbH, thumbColor);
-
-        // Up arrow - Gold color, show when not at top
-        if (scrollOffset > 0) {
-            let upArrowY = baseY + menu.headerHeight + 2;
-            let upArrowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(FlashingGhost * menuOpenAnim));
-            drawText("^", baseX + menu.width / 2 - 5, upArrowY, upArrowColor, 14);
-        }
-
-        // Down arrow - Gold color, show when not at bottom
-        if (scrollOffset < maxScroll) {
-            let downArrowY = footerY - 16;
-            let downArrowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(FlashingGhost * menuOpenAnim));
-            drawText("v", baseX + menu.width / 2 - 5, downArrowY, downArrowColor, 14);
-        }
-
-        // Page indicator
-        let pageText = (scrollOffset + 1) + "/" + (maxScroll + 1);
-        let pageColor = toColour(150, 150, 160, Math.floor(180 * menuOpenAnim));
-        drawText(pageText, baseX + menu.width - 45, footerY + 12, pageColor, 9);
+    // Footer top line with rainbow animation
+    for (let fx = 0; fx < menu.width - 20; fx += 6) {
+        let fLineAlpha = Math.floor((150 + Math.sin(footerPulse + fx * 0.03) * 80) * menuOpenAnim);
+        let fLineCol = getRainbowColor(fx * 0.5 + 180, fLineAlpha);
+        drawRect(baseX + 10 + fx, footerY + 4, 6, 2, fLineCol);
     }
 
-    // ===== ENHANCED INFO BAR =====
+    // Navigation hints with premium styling
+    let hintY = footerY + 16;
+    let hintSpacing = 130;
+
+    // Helper function for key hints
+    function drawKeyHint(x, key, label) {
+        // Key box
+        let keyBg = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(200 * menuOpenAnim));
+        let keyBorder = getRainbowColor(x * 0.5, Math.floor(150 * menuOpenAnim));
+        drawRect(x - 2, hintY - 4, key.length * 8 + 12, 20, keyBorder);
+        drawRect(x, hintY - 2, key.length * 8 + 8, 16, keyBg);
+        let keyCol = toColour(255, 255, 255, animAlpha);
+        drawText(key, x + 4, hintY, keyCol, 10);
+        // Label
+        let labelCol = toColour(180, 180, 190, animAlpha);
+        drawText(label, x + key.length * 8 + 14, hintY, labelCol, 10);
+    }
+
+    drawKeyHint(baseX + 15, "UP/DOWN", "Navigate");
+    drawKeyHint(baseX + 150, "ENTER", "Select");
+    drawKeyHint(baseX + 270, "BACK", "Return");
+
+    // ===== PREMIUM SCROLLBAR =====
+    if (items.length > menu.maxVisibleItems) {
+        let scrollbarX = baseX + menu.width - 14;
+        let scrollbarY = baseY + menu.headerHeight + 8;
+        let scrollbarH = visibleCount * menu.itemHeight - 16;
+        let maxScroll = items.length - visibleCount;
+        let scrollProgress = scrollOffset / maxScroll;
+        let thumbH = Math.max(40, scrollbarH * (visibleCount / items.length));
+        let thumbY = scrollbarY + scrollProgress * (scrollbarH - thumbH);
+
+        // Scrollbar track with glow
+        let trackGlow = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(60 * menuOpenAnim));
+        drawRect(scrollbarX - 2, scrollbarY - 2, 12, scrollbarH + 4, trackGlow);
+        let trackBg = toColour(30, 40, 60, Math.floor(200 * menuOpenAnim));
+        drawRect(scrollbarX, scrollbarY, 8, scrollbarH, trackBg);
+
+        // Scrollbar thumb with rainbow glow
+        let thumbGlowAlpha = Math.floor((80 + Math.sin(scrollbarPulse) * 50) * menuOpenAnim);
+        drawRect(scrollbarX - 2, thumbY - 2, 12, thumbH + 4, getRainbowColor(0, thumbGlowAlpha));
+
+        // Thumb gradient
+        for (let ty = 0; ty < thumbH; ty += 3) {
+            let tCol = getRainbowColor(ty * 2 + animTime * 30, Math.floor((200 + Math.sin(neonPulse + ty * 0.1) * 55) * menuOpenAnim));
+            drawRect(scrollbarX, thumbY + ty, 8, 3, tCol);
+        }
+
+        // Thumb highlight
+        let thumbHighlight = toColour(255, 255, 255, Math.floor(60 * menuOpenAnim));
+        drawRect(scrollbarX + 1, thumbY + 2, 2, thumbH - 4, thumbHighlight);
+
+        // Up/Down indicators with animation
+        if (scrollOffset > 0) {
+            let upY = baseY + menu.headerHeight + 2;
+            let upCol = getRainbowColor(animTime * 50, Math.floor(FlashingGhost * menuOpenAnim));
+            drawText("^", baseX + menu.width / 2 - 5, upY, upCol, 16);
+        }
+        if (scrollOffset < maxScroll) {
+            let downY = footerY - 18;
+            let downCol = getRainbowColor(animTime * 50 + 180, Math.floor(FlashingGhost * menuOpenAnim));
+            drawText("v", baseX + menu.width / 2 - 5, downY, downCol, 16);
+        }
+
+        // Page indicator with premium styling
+        let pageText = (scrollOffset + 1) + " / " + (maxScroll + 1);
+        let pageBg = toColour(40, 50, 70, Math.floor(180 * menuOpenAnim));
+        drawRect(baseX + menu.width - 60, footerY + 12, 50, 18, pageBg);
+        let pageCol = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, animAlpha);
+        drawText(pageText, baseX + menu.width - 52, footerY + 14, pageCol, 10);
+    }
+
+    // ===== FLOATING PARTICLES =====
+    for (let p = 0; p < activeParticles.length; p++) {
+        let particle = activeParticles[p];
+        let pAlpha = Math.floor(particle.life * 150 * menuOpenAnim);
+        let pCol = toColour(
+            Math.floor(200 + Math.sin(particle.hue * 0.1) * 55),
+            Math.floor(150 + Math.cos(particle.hue * 0.1) * 55),
+            50, pAlpha
+        );
+        drawRect(particle.x, particle.y, particle.size, particle.size, pCol);
+    }
+
+    // ===== PREMIUM INFO BAR =====
     if (currentDescription && currentDescription.length > 0) {
-        let infoY = baseY + totalHeight + 15;
-        let infoBarHeight = infoBar.height + 5;
+        let infoY = baseY + totalHeight + 18;
+        let infoBarHeight = infoBar.height + 10;
+
+        // Neon outer glow
+        for (let ig = 2; ig >= 0; ig--) {
+            let igAlpha = Math.floor((20 - ig * 5) * menuOpenAnim);
+            drawRect(baseX - 4 - ig * 2, infoY - 4 - ig * 2, menu.width + 8 + ig * 4, infoBarHeight + 8 + ig * 4, getRainbowColor(180, igAlpha));
+        }
 
         // Shadow
-        let infoShadow = toColour(0, 0, 0, Math.floor(100 * menuOpenAnim));
+        let infoShadow = toColour(0, 0, 0, Math.floor(150 * menuOpenAnim));
         drawRect(baseX - 2, infoY - 2, menu.width + 4, infoBarHeight + 4, infoShadow);
 
-        // Background - Enhanced with gradient look
-        let infoBgColor = toColour(MDB.Steelblue.r - 20, MDB.Steelblue.g - 20, MDB.Steelblue.b - 20, Math.floor(200 * menuOpenAnim));
-        drawRect(baseX, infoY, menu.width, infoBarHeight, infoBgColor);
+        // Background
+        let infoBg = toColour(15, 25, 40, Math.floor(230 * menuOpenAnim));
+        drawRect(baseX, infoY, menu.width, infoBarHeight, infoBg);
 
-        // Border
-        let infoBorderColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(180 * menuOpenAnim));
-        drawRect(baseX, infoY, menu.width, 2, infoBorderColor);
-        drawRect(baseX, infoY + infoBarHeight - 2, menu.width, 2, infoBorderColor);
-        drawRect(baseX, infoY, 2, infoBarHeight, infoBorderColor);
-        drawRect(baseX + menu.width - 2, infoY, 2, infoBarHeight, infoBorderColor);
+        // Rainbow border
+        for (let ibx = 0; ibx < menu.width; ibx += 6) {
+            let ibCol = getRainbowColor(ibx * 0.8, Math.floor((180 + Math.sin(wavePhase + ibx * 0.05) * 75) * menuOpenAnim));
+            drawRect(baseX + ibx, infoY, 6, 2, ibCol);
+            drawRect(baseX + ibx, infoY + infoBarHeight - 2, 6, 2, ibCol);
+        }
+        drawRect(baseX, infoY, 2, infoBarHeight, getRainbowColor(90, animAlpha));
+        drawRect(baseX + menu.width - 2, infoY, 2, infoBarHeight, getRainbowColor(270, animAlpha));
 
-        // "INFO" label box
-        let infoLabelBg = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(200 * menuOpenAnim));
-        drawRect(baseX + 8, infoY + 6, 40, 16, infoLabelBg);
-        let infoLabelColor = toColour(0, 0, 0, animAlpha);
-        drawText("INFO", baseX + 12, infoY + 8, infoLabelColor, 10);
+        // "INFO" badge with glow
+        let badgeGlow = getRainbowColor(0, Math.floor(100 * menuOpenAnim));
+        drawRect(baseX + 8, infoY + 8, 50, 20, badgeGlow);
+        let badgeBg = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(220 * menuOpenAnim));
+        drawRect(baseX + 10, infoY + 10, 46, 16, badgeBg);
+        let badgeText = toColour(0, 0, 0, animAlpha);
+        drawText("INFO", baseX + 16, infoY + 12, badgeText, 11);
 
-        // Description text - white with shadow
-        let descShadow = toColour(0, 0, 0, Math.floor(200 * menuOpenAnim));
-        let descColor = toColour(MDB.StatsItem.r, MDB.StatsItem.g, MDB.StatsItem.b, animAlpha);
-        drawText(currentDescription, baseX + 13, infoY + 28, descShadow, 11);
-        drawText(currentDescription, baseX + 12, infoY + 27, descColor, 11);
+        // Description with glow effect
+        let descGlow = toColour(255, 255, 200, Math.floor(80 * menuOpenAnim));
+        let descMain = toColour(255, 255, 255, animAlpha);
+        let descShadow = toColour(0, 0, 0, animAlpha);
+        drawText(currentDescription, baseX + 14, infoY + 36, descShadow, 12);
+        drawText(currentDescription, baseX + 12, infoY + 34, descGlow, 12);
+        drawText(currentDescription, baseX + 12, infoY + 34, descMain, 12);
     }
 });
 
