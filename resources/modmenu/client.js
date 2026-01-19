@@ -78,6 +78,160 @@ let rainbowHue = 0;             // For rainbow car feature
 let matrixEffect = 0;           // For matrix mode feature
 
 // ============================================================================
+// GTA IV VEHICLE COLOR DATABASE (from carcols.dat)
+// Color ID 0-133 with names and RGB values
+// ============================================================================
+const GTA_IV_COLORS = [
+    { id: 0, name: "Black", r: 0, g: 0, b: 0 },
+    { id: 1, name: "Black 2", r: 1, g: 1, b: 1 },
+    { id: 2, name: "Graphite", r: 15, g: 15, b: 15 },
+    { id: 3, name: "Anthracite", r: 28, g: 28, b: 28 },
+    { id: 4, name: "Dark Gray", r: 38, g: 38, b: 38 },
+    { id: 5, name: "Charcoal", r: 45, g: 45, b: 45 },
+    { id: 6, name: "Stone Gray", r: 54, g: 54, b: 54 },
+    { id: 7, name: "Dolphin Gray", r: 71, g: 71, b: 71 },
+    { id: 8, name: "Light Gray", r: 90, g: 90, b: 90 },
+    { id: 9, name: "Aluminum", r: 100, g: 100, b: 100 },
+    { id: 10, name: "Smoke Gray", r: 116, g: 116, b: 116 },
+    { id: 11, name: "Ash Gray", r: 128, g: 128, b: 128 },
+    { id: 12, name: "Silver", r: 140, g: 140, b: 140 },
+    { id: 13, name: "Pearl Silver", r: 155, g: 155, b: 155 },
+    { id: 14, name: "Light Silver", r: 170, g: 170, b: 170 },
+    { id: 15, name: "Platinum", r: 185, g: 185, b: 185 },
+    { id: 16, name: "Bright Silver", r: 200, g: 200, b: 200 },
+    { id: 17, name: "Off White", r: 220, g: 220, b: 220 },
+    { id: 18, name: "White", r: 255, g: 255, b: 255 },
+    { id: 19, name: "Frost White", r: 245, g: 245, b: 245 },
+    { id: 20, name: "Cream", r: 255, g: 253, b: 245 },
+    { id: 21, name: "Ivory", r: 255, g: 255, b: 240 },
+    { id: 22, name: "Pearl White", r: 240, g: 240, b: 235 },
+    { id: 23, name: "Champagne", r: 230, g: 220, b: 200 },
+    { id: 24, name: "Desert Sand", r: 210, g: 195, b: 170 },
+    { id: 25, name: "Tan", r: 190, g: 170, b: 140 },
+    { id: 26, name: "Dark Tan", r: 160, g: 140, b: 110 },
+    { id: 27, name: "Red", r: 255, g: 0, b: 0 },
+    { id: 28, name: "Dark Red", r: 180, g: 0, b: 0 },
+    { id: 29, name: "Wine Red", r: 140, g: 20, b: 35 },
+    { id: 30, name: "Candy Red", r: 255, g: 50, b: 50 },
+    { id: 31, name: "Torch Red", r: 230, g: 25, b: 25 },
+    { id: 32, name: "Garnet Red", r: 165, g: 30, b: 45 },
+    { id: 33, name: "Maroon", r: 100, g: 20, b: 30 },
+    { id: 34, name: "Burgundy", r: 90, g: 10, b: 25 },
+    { id: 35, name: "Cherry Red", r: 200, g: 10, b: 35 },
+    { id: 36, name: "Orange", r: 255, g: 130, b: 0 },
+    { id: 37, name: "Gold", r: 255, g: 190, b: 0 },
+    { id: 38, name: "Bronze", r: 180, g: 130, b: 70 },
+    { id: 39, name: "Copper", r: 200, g: 120, b: 80 },
+    { id: 40, name: "Sunset Orange", r: 255, g: 100, b: 50 },
+    { id: 41, name: "Tangerine", r: 255, g: 150, b: 50 },
+    { id: 42, name: "Peach", r: 255, g: 200, b: 150 },
+    { id: 43, name: "Light Tan", r: 220, g: 190, b: 160 },
+    { id: 44, name: "Beige", r: 195, g: 175, b: 145 },
+    { id: 45, name: "Brown", r: 110, g: 70, b: 40 },
+    { id: 46, name: "Dark Brown", r: 75, g: 45, b: 25 },
+    { id: 47, name: "Chocolate", r: 65, g: 35, b: 20 },
+    { id: 48, name: "Saddle Brown", r: 130, g: 85, b: 50 },
+    { id: 49, name: "Mocha", r: 95, g: 60, b: 35 },
+    { id: 50, name: "Green", r: 0, g: 180, b: 0 },
+    { id: 51, name: "Racing Green", r: 0, g: 100, b: 50 },
+    { id: 52, name: "Dark Green", r: 0, g: 80, b: 40 },
+    { id: 53, name: "Forest Green", r: 35, g: 90, b: 45 },
+    { id: 54, name: "Hunter Green", r: 25, g: 70, b: 35 },
+    { id: 55, name: "Lime Green", r: 130, g: 255, b: 0 },
+    { id: 56, name: "Seafoam", r: 100, g: 200, b: 150 },
+    { id: 57, name: "Teal", r: 0, g: 130, b: 130 },
+    { id: 58, name: "Turquoise", r: 70, g: 200, b: 180 },
+    { id: 59, name: "Aqua", r: 0, g: 255, b: 200 },
+    { id: 60, name: "Mint Green", r: 150, g: 255, b: 180 },
+    { id: 61, name: "Army Green", r: 80, g: 95, b: 50 },
+    { id: 62, name: "Blue", r: 0, g: 100, b: 255 },
+    { id: 63, name: "Dark Navy", r: 0, g: 20, b: 60 },
+    { id: 64, name: "Dark Blue", r: 0, g: 40, b: 100 },
+    { id: 65, name: "Navy Blue", r: 20, g: 50, b: 120 },
+    { id: 66, name: "Midnight Blue", r: 25, g: 35, b: 80 },
+    { id: 67, name: "Cobalt Blue", r: 0, g: 70, b: 170 },
+    { id: 68, name: "Royal Blue", r: 30, g: 80, b: 180 },
+    { id: 69, name: "Sapphire Blue", r: 15, g: 80, b: 200 },
+    { id: 70, name: "Ocean Blue", r: 50, g: 120, b: 190 },
+    { id: 71, name: "Steel Blue", r: 70, g: 130, b: 180 },
+    { id: 72, name: "Slate Blue", r: 90, g: 110, b: 160 },
+    { id: 73, name: "Light Blue", r: 100, g: 180, b: 255 },
+    { id: 74, name: "Sky Blue", r: 135, g: 200, b: 250 },
+    { id: 75, name: "Baby Blue", r: 175, g: 220, b: 255 },
+    { id: 76, name: "Ice Blue", r: 200, g: 230, b: 255 },
+    { id: 77, name: "Powder Blue", r: 180, g: 210, b: 240 },
+    { id: 78, name: "Cyan", r: 0, g: 255, b: 255 },
+    { id: 79, name: "Electric Blue", r: 0, g: 150, b: 255 },
+    { id: 80, name: "Surf Blue", r: 50, g: 180, b: 220 },
+    { id: 81, name: "Marine Blue", r: 30, g: 90, b: 150 },
+    { id: 82, name: "Bright Blue", r: 0, g: 130, b: 255 },
+    { id: 83, name: "Ultra Blue", r: 30, g: 60, b: 200 },
+    { id: 84, name: "Racing Blue", r: 0, g: 90, b: 200 },
+    { id: 85, name: "Harbor Blue", r: 60, g: 100, b: 140 },
+    { id: 86, name: "Denim Blue", r: 80, g: 100, b: 130 },
+    { id: 87, name: "Petrol Blue", r: 40, g: 70, b: 90 },
+    { id: 88, name: "Galaxy Blue", r: 10, g: 30, b: 80 },
+    { id: 89, name: "Yellow", r: 255, g: 255, b: 0 },
+    { id: 90, name: "Taxi Yellow", r: 250, g: 210, b: 0 },
+    { id: 91, name: "Bright Yellow", r: 255, g: 240, b: 0 },
+    { id: 92, name: "Canary Yellow", r: 255, g: 230, b: 100 },
+    { id: 93, name: "Lemon Yellow", r: 255, g: 250, b: 140 },
+    { id: 94, name: "Flax Yellow", r: 230, g: 220, b: 100 },
+    { id: 95, name: "Mustard", r: 200, g: 170, b: 50 },
+    { id: 96, name: "Dark Yellow", r: 180, g: 160, b: 30 },
+    { id: 97, name: "Sand Yellow", r: 210, g: 200, b: 140 },
+    { id: 98, name: "Olive", r: 120, g: 120, b: 50 },
+    { id: 99, name: "Purple", r: 150, g: 0, b: 200 },
+    { id: 100, name: "Pink", r: 255, g: 150, b: 200 },
+    { id: 101, name: "Hot Pink", r: 255, g: 50, b: 150 },
+    { id: 102, name: "Magenta", r: 255, g: 0, b: 150 },
+    { id: 103, name: "Fuchsia", r: 230, g: 50, b: 130 },
+    { id: 104, name: "Violet", r: 130, g: 50, b: 180 },
+    { id: 105, name: "Plum", r: 100, g: 30, b: 100 },
+    { id: 106, name: "Dark Purple", r: 70, g: 20, b: 90 },
+    { id: 107, name: "Grape", r: 90, g: 40, b: 120 },
+    { id: 108, name: "Lavender", r: 200, g: 180, b: 220 },
+    { id: 109, name: "Lilac", r: 210, g: 175, b: 210 },
+    { id: 110, name: "Orchid", r: 180, g: 130, b: 200 },
+    { id: 111, name: "Mauve", r: 160, g: 130, b: 160 },
+    { id: 112, name: "Salmon", r: 255, g: 150, b: 130 },
+    { id: 113, name: "Coral", r: 255, g: 130, b: 100 },
+    { id: 114, name: "Rose", r: 255, g: 180, b: 180 },
+    { id: 115, name: "Blush", r: 255, g: 200, b: 200 },
+    { id: 116, name: "Light Pink", r: 255, g: 220, b: 230 },
+    { id: 117, name: "Crimson", r: 200, g: 20, b: 60 },
+    { id: 118, name: "Scarlet", r: 230, g: 40, b: 40 },
+    { id: 119, name: "Fire Red", r: 255, g: 65, b: 0 },
+    { id: 120, name: "Vermillion", r: 230, g: 75, b: 50 },
+    { id: 121, name: "Rust", r: 150, g: 70, b: 40 },
+    { id: 122, name: "Terracotta", r: 180, g: 90, b: 60 },
+    { id: 123, name: "Auburn", r: 130, g: 60, b: 50 },
+    { id: 124, name: "Sienna", r: 140, g: 80, b: 55 },
+    { id: 125, name: "Metallic Black", r: 20, g: 25, b: 30 },
+    { id: 126, name: "Metallic Silver", r: 170, g: 175, b: 180 },
+    { id: 127, name: "Metallic Red", r: 200, g: 50, b: 60 },
+    { id: 128, name: "Metallic Blue", r: 50, g: 100, b: 200 },
+    { id: 129, name: "Metallic Green", r: 50, g: 150, b: 80 },
+    { id: 130, name: "Metallic Gold", r: 200, g: 170, b: 80 },
+    { id: 131, name: "Metallic Orange", r: 230, g: 130, b: 50 },
+    { id: 132, name: "Metallic Purple", r: 130, g: 70, b: 170 },
+    { id: 133, name: "Police Blue", r: 40, g: 60, b: 120 }
+];
+
+// Vehicle Color Editor State
+let colorEditorActive = false;
+let colorEditorSlot = 0; // 0-3 for Color 1-4
+let colorEditorValues = [0, 0, 0, 0]; // Current color ID for each slot
+
+// Get color info by ID
+function getColorById(id) {
+    if (id >= 0 && id < GTA_IV_COLORS.length) {
+        return GTA_IV_COLORS[id];
+    }
+    return GTA_IV_COLORS[0]; // Default to black
+}
+
+// ============================================================================
 // THEME SYSTEM - Clean Modern Themes
 // ============================================================================
 let currentTheme = "midnight"; // Default theme - Clean dark
@@ -207,6 +361,8 @@ const itemDescriptions = {
     "veh_color_2": "🎨 SECONDARY COLOR - Accent/trim color of the vehicle!",
     "veh_color_3": "🎨 TERTIARY COLOR - Additional color detail!",
     "veh_color_4": "🎨 QUATERNARY COLOR - Extra color option!",
+    "color_slot_edit": "🎨 Use LEFT/RIGHT arrows to change color (0-133 from GTA IV carcols.dat)",
+    "color_preset": "🎨 Apply preset colors to all 4 vehicle color slots instantly!",
 
     // Vehicle Upgrade descriptions
     "veh_upgrade_add": "🔧 Add upgrade - Enhance your vehicle with this mod!",
@@ -898,11 +1054,8 @@ const menuData = {
             { label: "Purple", action: "veh_color", value: [99, 99] },
             { label: "Pink", action: "veh_color", value: [100, 100] },
             { label: "Gold", action: "veh_color", value: [37, 37] },
-            { label: "--- Custom Color Slots ---", action: "none" },
-            { label: "Color 1 (Primary)", action: "submenu", target: "veh_color_1" },
-            { label: "Color 2 (Secondary)", action: "submenu", target: "veh_color_2" },
-            { label: "Color 3 (Tertiary)", action: "submenu", target: "veh_color_3" },
-            { label: "Color 4 (Quaternary)", action: "submenu", target: "veh_color_4" },
+            { label: "--- Color Editor (4 Slots) ---", action: "none" },
+            { label: "Open Color Editor", action: "submenu", target: "vehColorEditor" },
             { label: "--- Two Tone ---", action: "none" },
             { label: "Black/Red", action: "veh_color", value: [0, 27] },
             { label: "Black/White", action: "veh_color", value: [0, 18] },
@@ -913,123 +1066,23 @@ const menuData = {
         ]
     },
 
-    veh_color_1: {
-        title: "COLOR 1 (PRIMARY)",
+    // Vehicle Color Editor - special menu with horizontal scrolling
+    // Use LEFT/RIGHT arrows to change color ID, UP/DOWN to select slot
+    vehColorEditor: {
+        title: "VEHICLE COLOR EDITOR",
+        isColorEditor: true,
         items: [
-            { label: "Black (0)", action: "veh_color_slot", slot: 1, value: 0 },
-            { label: "White (18)", action: "veh_color_slot", slot: 1, value: 18 },
-            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 1, value: 4 },
-            { label: "Light Gray (8)", action: "veh_color_slot", slot: 1, value: 8 },
-            { label: "Silver (12)", action: "veh_color_slot", slot: 1, value: 12 },
-            { label: "Red (27)", action: "veh_color_slot", slot: 1, value: 27 },
-            { label: "Dark Red (28)", action: "veh_color_slot", slot: 1, value: 28 },
-            { label: "Candy Red (30)", action: "veh_color_slot", slot: 1, value: 30 },
-            { label: "Orange (36)", action: "veh_color_slot", slot: 1, value: 36 },
-            { label: "Yellow (89)", action: "veh_color_slot", slot: 1, value: 89 },
-            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 1, value: 91 },
-            { label: "Green (50)", action: "veh_color_slot", slot: 1, value: 50 },
-            { label: "Dark Green (52)", action: "veh_color_slot", slot: 1, value: 52 },
-            { label: "Lime Green (55)", action: "veh_color_slot", slot: 1, value: 55 },
-            { label: "Blue (62)", action: "veh_color_slot", slot: 1, value: 62 },
-            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 1, value: 64 },
-            { label: "Light Blue (73)", action: "veh_color_slot", slot: 1, value: 73 },
-            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 1, value: 82 },
-            { label: "Purple (99)", action: "veh_color_slot", slot: 1, value: 99 },
-            { label: "Pink (100)", action: "veh_color_slot", slot: 1, value: 100 },
-            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 1, value: 101 },
-            { label: "Brown (45)", action: "veh_color_slot", slot: 1, value: 45 },
-            { label: "Beige (44)", action: "veh_color_slot", slot: 1, value: 44 },
-            { label: "Gold (37)", action: "veh_color_slot", slot: 1, value: 37 }
-        ]
-    },
-
-    veh_color_2: {
-        title: "COLOR 2 (SECONDARY)",
-        items: [
-            { label: "Black (0)", action: "veh_color_slot", slot: 2, value: 0 },
-            { label: "White (18)", action: "veh_color_slot", slot: 2, value: 18 },
-            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 2, value: 4 },
-            { label: "Light Gray (8)", action: "veh_color_slot", slot: 2, value: 8 },
-            { label: "Silver (12)", action: "veh_color_slot", slot: 2, value: 12 },
-            { label: "Red (27)", action: "veh_color_slot", slot: 2, value: 27 },
-            { label: "Dark Red (28)", action: "veh_color_slot", slot: 2, value: 28 },
-            { label: "Candy Red (30)", action: "veh_color_slot", slot: 2, value: 30 },
-            { label: "Orange (36)", action: "veh_color_slot", slot: 2, value: 36 },
-            { label: "Yellow (89)", action: "veh_color_slot", slot: 2, value: 89 },
-            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 2, value: 91 },
-            { label: "Green (50)", action: "veh_color_slot", slot: 2, value: 50 },
-            { label: "Dark Green (52)", action: "veh_color_slot", slot: 2, value: 52 },
-            { label: "Lime Green (55)", action: "veh_color_slot", slot: 2, value: 55 },
-            { label: "Blue (62)", action: "veh_color_slot", slot: 2, value: 62 },
-            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 2, value: 64 },
-            { label: "Light Blue (73)", action: "veh_color_slot", slot: 2, value: 73 },
-            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 2, value: 82 },
-            { label: "Purple (99)", action: "veh_color_slot", slot: 2, value: 99 },
-            { label: "Pink (100)", action: "veh_color_slot", slot: 2, value: 100 },
-            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 2, value: 101 },
-            { label: "Brown (45)", action: "veh_color_slot", slot: 2, value: 45 },
-            { label: "Beige (44)", action: "veh_color_slot", slot: 2, value: 44 },
-            { label: "Gold (37)", action: "veh_color_slot", slot: 2, value: 37 }
-        ]
-    },
-
-    veh_color_3: {
-        title: "COLOR 3 (TERTIARY)",
-        items: [
-            { label: "Black (0)", action: "veh_color_slot", slot: 3, value: 0 },
-            { label: "White (18)", action: "veh_color_slot", slot: 3, value: 18 },
-            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 3, value: 4 },
-            { label: "Light Gray (8)", action: "veh_color_slot", slot: 3, value: 8 },
-            { label: "Silver (12)", action: "veh_color_slot", slot: 3, value: 12 },
-            { label: "Red (27)", action: "veh_color_slot", slot: 3, value: 27 },
-            { label: "Dark Red (28)", action: "veh_color_slot", slot: 3, value: 28 },
-            { label: "Candy Red (30)", action: "veh_color_slot", slot: 3, value: 30 },
-            { label: "Orange (36)", action: "veh_color_slot", slot: 3, value: 36 },
-            { label: "Yellow (89)", action: "veh_color_slot", slot: 3, value: 89 },
-            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 3, value: 91 },
-            { label: "Green (50)", action: "veh_color_slot", slot: 3, value: 50 },
-            { label: "Dark Green (52)", action: "veh_color_slot", slot: 3, value: 52 },
-            { label: "Lime Green (55)", action: "veh_color_slot", slot: 3, value: 55 },
-            { label: "Blue (62)", action: "veh_color_slot", slot: 3, value: 62 },
-            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 3, value: 64 },
-            { label: "Light Blue (73)", action: "veh_color_slot", slot: 3, value: 73 },
-            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 3, value: 82 },
-            { label: "Purple (99)", action: "veh_color_slot", slot: 3, value: 99 },
-            { label: "Pink (100)", action: "veh_color_slot", slot: 3, value: 100 },
-            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 3, value: 101 },
-            { label: "Brown (45)", action: "veh_color_slot", slot: 3, value: 45 },
-            { label: "Beige (44)", action: "veh_color_slot", slot: 3, value: 44 },
-            { label: "Gold (37)", action: "veh_color_slot", slot: 3, value: 37 }
-        ]
-    },
-
-    veh_color_4: {
-        title: "COLOR 4 (QUATERNARY)",
-        items: [
-            { label: "Black (0)", action: "veh_color_slot", slot: 4, value: 0 },
-            { label: "White (18)", action: "veh_color_slot", slot: 4, value: 18 },
-            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 4, value: 4 },
-            { label: "Light Gray (8)", action: "veh_color_slot", slot: 4, value: 8 },
-            { label: "Silver (12)", action: "veh_color_slot", slot: 4, value: 12 },
-            { label: "Red (27)", action: "veh_color_slot", slot: 4, value: 27 },
-            { label: "Dark Red (28)", action: "veh_color_slot", slot: 4, value: 28 },
-            { label: "Candy Red (30)", action: "veh_color_slot", slot: 4, value: 30 },
-            { label: "Orange (36)", action: "veh_color_slot", slot: 4, value: 36 },
-            { label: "Yellow (89)", action: "veh_color_slot", slot: 4, value: 89 },
-            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 4, value: 91 },
-            { label: "Green (50)", action: "veh_color_slot", slot: 4, value: 50 },
-            { label: "Dark Green (52)", action: "veh_color_slot", slot: 4, value: 52 },
-            { label: "Lime Green (55)", action: "veh_color_slot", slot: 4, value: 55 },
-            { label: "Blue (62)", action: "veh_color_slot", slot: 4, value: 62 },
-            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 4, value: 64 },
-            { label: "Light Blue (73)", action: "veh_color_slot", slot: 4, value: 73 },
-            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 4, value: 82 },
-            { label: "Purple (99)", action: "veh_color_slot", slot: 4, value: 99 },
-            { label: "Pink (100)", action: "veh_color_slot", slot: 4, value: 100 },
-            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 4, value: 101 },
-            { label: "Brown (45)", action: "veh_color_slot", slot: 4, value: 45 },
-            { label: "Beige (44)", action: "veh_color_slot", slot: 4, value: 44 },
-            { label: "Gold (37)", action: "veh_color_slot", slot: 4, value: 37 }
+            { label: "Color 1 (Primary)", action: "color_slot_edit", slot: 0 },
+            { label: "Color 2 (Secondary)", action: "color_slot_edit", slot: 1 },
+            { label: "Color 3 (Tertiary)", action: "color_slot_edit", slot: 2 },
+            { label: "Color 4 (Quaternary)", action: "color_slot_edit", slot: 3 },
+            { label: "--- Quick Presets ---", action: "none" },
+            { label: "All Black", action: "color_preset", values: [0, 0, 0, 0] },
+            { label: "All White", action: "color_preset", values: [18, 18, 18, 18] },
+            { label: "All Red", action: "color_preset", values: [27, 27, 27, 27] },
+            { label: "All Blue", action: "color_preset", values: [62, 62, 62, 62] },
+            { label: "Police Colors", action: "color_preset", values: [133, 18, 133, 18] },
+            { label: "Taxi Yellow", action: "color_preset", values: [90, 90, 0, 0] }
         ]
     },
 
@@ -1310,12 +1363,109 @@ addEventHandler("OnKeyUp", function(event, key, scanCode, mods) {
         navigateUp();
     } else if (key === SDLK_DOWN) {
         navigateDown();
+    } else if (key === SDLK_LEFT) {
+        // Left arrow - decrease color value in color editor
+        handleColorEditorLeft();
+    } else if (key === SDLK_RIGHT) {
+        // Right arrow - increase color value in color editor
+        handleColorEditorRight();
     } else if (key === SDLK_RETURN || key === SDLK_KP_ENTER) {
         selectItem();
     } else if (key === SDLK_BACKSPACE || key === SDLK_ESCAPE) {
         goBack();
     }
 });
+
+// Handle left arrow in color editor
+function handleColorEditorLeft() {
+    if (currentMenu !== "vehColorEditor") return;
+
+    let items = getCurrentMenuItems();
+    let item = items[selectedIndex];
+
+    if (item && item.action === "color_slot_edit") {
+        let slot = item.slot;
+        colorEditorValues[slot]--;
+        if (colorEditorValues[slot] < 0) {
+            colorEditorValues[slot] = GTA_IV_COLORS.length - 1;
+        }
+        applyColorToVehicle(slot, colorEditorValues[slot]);
+    }
+}
+
+// Handle right arrow in color editor
+function handleColorEditorRight() {
+    if (currentMenu !== "vehColorEditor") return;
+
+    let items = getCurrentMenuItems();
+    let item = items[selectedIndex];
+
+    if (item && item.action === "color_slot_edit") {
+        let slot = item.slot;
+        colorEditorValues[slot]++;
+        if (colorEditorValues[slot] >= GTA_IV_COLORS.length) {
+            colorEditorValues[slot] = 0;
+        }
+        applyColorToVehicle(slot, colorEditorValues[slot]);
+    }
+}
+
+// Apply color to vehicle slot
+function applyColorToVehicle(slot, colorId) {
+    if (!localPlayer || !localPlayer.vehicle) {
+        showNotification("Not in vehicle!");
+        return;
+    }
+
+    let veh = localPlayer.vehicle;
+    let colorInfo = getColorById(colorId);
+
+    try {
+        switch(slot) {
+            case 0:
+                veh.colour1 = colorId;
+                break;
+            case 1:
+                veh.colour2 = colorId;
+                break;
+            case 2:
+                veh.colour3 = colorId;
+                break;
+            case 3:
+                veh.colour4 = colorId;
+                break;
+        }
+        showNotification("Color " + (slot + 1) + ": " + colorInfo.name + " (" + colorId + ")");
+    } catch(e) {
+        // Fallback for older API
+        try {
+            if (slot === 0 || slot === 1) {
+                let col1 = slot === 0 ? colorId : colorEditorValues[0];
+                let col2 = slot === 1 ? colorId : colorEditorValues[1];
+                natives.changeCarColour(veh, col1, col2);
+                showNotification("Color " + (slot + 1) + ": " + colorInfo.name);
+            }
+        } catch(e2) {
+            console.log("[ColorEditor] Failed: " + e2);
+        }
+    }
+}
+
+// Load current vehicle colors into editor
+function loadVehicleColorsToEditor() {
+    if (!localPlayer || !localPlayer.vehicle) return;
+
+    let veh = localPlayer.vehicle;
+    try {
+        colorEditorValues[0] = veh.colour1 || 0;
+        colorEditorValues[1] = veh.colour2 || 0;
+        colorEditorValues[2] = veh.colour3 || 0;
+        colorEditorValues[3] = veh.colour4 || 0;
+    } catch(e) {
+        // Default to black if can't read
+        colorEditorValues = [0, 0, 0, 0];
+    }
+}
 
 function navigateUp() {
     let items = getCurrentMenuItems();
@@ -1348,6 +1498,17 @@ function updateScroll(items) {
 }
 
 function goBack() {
+    // Deactivate color editor when leaving
+    if (currentMenu === "vehColorEditor") {
+        colorEditorActive = false;
+    }
+
+    // Deactivate handling editor when leaving handling menus
+    if (currentMenu === "handlingEditor" || currentMenu.startsWith("handling_")) {
+        handlingEditorActive = false;
+        selectedHandlingParam = "";
+    }
+
     if (menuStack.length > 0) {
         let prev = menuStack.pop();
         currentMenu = prev.menu;
@@ -1443,6 +1604,12 @@ function selectItem() {
                 // Auto-refresh player list when entering network menu
                 if (item.target === "network") {
                     refreshPlayerList();
+                }
+
+                // Load vehicle colors when entering color editor
+                if (item.target === "vehColorEditor") {
+                    loadVehicleColorsToEditor();
+                    colorEditorActive = true;
                 }
 
                 // Activate handling editor visualization when entering handling menus
@@ -1667,6 +1834,37 @@ function selectItem() {
                         console.log("[Color] Failed to set color slot: " + e2);
                     }
                 }
+            }
+            break;
+
+        case "color_slot_edit":
+            // Color editor slot - pressing Enter does nothing, use LEFT/RIGHT
+            showNotification("Use LEFT/RIGHT arrows to change color");
+            break;
+
+        case "color_preset":
+            // Apply preset colors to all 4 slots
+            if (localPlayer && localPlayer.vehicle) {
+                let veh = localPlayer.vehicle;
+                let vals = item.values;
+                try {
+                    veh.colour1 = vals[0];
+                    veh.colour2 = vals[1];
+                    veh.colour3 = vals[2];
+                    veh.colour4 = vals[3];
+                    colorEditorValues = [vals[0], vals[1], vals[2], vals[3]];
+                    showNotification("Preset applied: " + item.label);
+                } catch(e) {
+                    try {
+                        natives.changeCarColour(veh, vals[0], vals[1]);
+                        colorEditorValues = [vals[0], vals[1], 0, 0];
+                        showNotification("Preset applied (2 colors)");
+                    } catch(e2) {
+                        console.log("[ColorEditor] Preset failed: " + e2);
+                    }
+                }
+            } else {
+                showNotification("Not in vehicle!");
             }
             break;
 
@@ -2999,6 +3197,62 @@ addEventHandler("OnDrawnHUD", function(event) {
                 toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, animAlpha);
             drawText(">", arrowX, textY, arrowCol, textSize);
         }
+
+        // Color Editor Slot - show color preview box and left/right arrows with color ID
+        if (item.action === "color_slot_edit") {
+            let slot = item.slot;
+            let colorId = colorEditorValues[slot];
+            let colorInfo = getColorById(colorId);
+
+            // Color preview box (on the right side)
+            let boxX = baseX + menu.width - 145;
+            let boxY = itemY + 8;
+            let boxW = 28;
+            let boxH = 28;
+
+            // Color box shadow
+            let shadowCol = toColour(0, 0, 0, Math.floor(80 * menuOpenAnim));
+            drawRect(boxX + 2, boxY + 2, boxW, boxH, shadowCol);
+
+            // Color box background (the actual color)
+            let colorCol = toColour(colorInfo.r, colorInfo.g, colorInfo.b, animAlpha);
+            drawRect(boxX, boxY, boxW, boxH, colorCol);
+
+            // Color box border
+            let borderCol = isSelected ?
+                toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha) :
+                toColour(UI.border.r, UI.border.g, UI.border.b, animAlpha);
+            drawRect(boxX, boxY, boxW, 1, borderCol);
+            drawRect(boxX, boxY + boxH - 1, boxW, 1, borderCol);
+            drawRect(boxX, boxY, 1, boxH, borderCol);
+            drawRect(boxX + boxW - 1, boxY, 1, boxH, borderCol);
+
+            // Left arrow "<"
+            let leftArrowX = boxX - 22;
+            let arrowY = boxY + 6;
+            let arrowCol = isSelected ?
+                toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha) :
+                toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, Math.floor(animAlpha * 0.5));
+            drawText("<", leftArrowX, arrowY, arrowCol, 14);
+
+            // Color ID number between arrows and box
+            let idTextX = boxX + boxW + 8;
+            let idCol = isSelected ?
+                toColour(UI.textPrimary.r, UI.textPrimary.g, UI.textPrimary.b, animAlpha) :
+                toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, animAlpha);
+            drawText(String(colorId), idTextX, arrowY, idCol, 12);
+
+            // Right arrow ">"
+            let rightArrowX = idTextX + 28;
+            drawText(">", rightArrowX, arrowY, arrowCol, 14);
+
+            // Glow effect when selected
+            if (isSelected) {
+                let glowAlpha = Math.floor(40 * menuOpenAnim * selectionGlow);
+                let glowCol = toColour(colorInfo.r, colorInfo.g, colorInfo.b, glowAlpha);
+                drawRect(boxX - 4, boxY - 4, boxW + 8, boxH + 8, glowCol);
+            }
+        }
     }
 
     // ===== FOOTER =====
@@ -3016,20 +3270,43 @@ addEventHandler("OnDrawnHUD", function(event) {
     let hintCol = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, animAlpha);
     let keyCol = toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, animAlpha);
 
-    drawText("[", baseX + 15, hintY, hintCol, 10);
-    drawText("UP/DOWN", baseX + 22, hintY, keyCol, 10);
-    drawText("]", baseX + 72, hintY, hintCol, 10);
-    drawText("Navigate", baseX + 82, hintY, hintCol, 10);
+    // Show different hints for color editor
+    if (currentMenu === "vehColorEditor") {
+        drawText("[", baseX + 10, hintY, hintCol, 10);
+        drawText("UP/DN", baseX + 17, hintY, keyCol, 10);
+        drawText("]", baseX + 52, hintY, hintCol, 10);
+        drawText("Slot", baseX + 60, hintY, hintCol, 10);
 
-    drawText("[", baseX + 145, hintY, hintCol, 10);
-    drawText("ENTER", baseX + 152, hintY, keyCol, 10);
-    drawText("]", baseX + 190, hintY, hintCol, 10);
-    drawText("Select", baseX + 200, hintY, hintCol, 10);
+        drawText("[", baseX + 95, hintY, hintCol, 10);
+        drawText("L/R", baseX + 102, hintY, keyCol, 10);
+        drawText("]", baseX + 125, hintY, hintCol, 10);
+        drawText("Color", baseX + 133, hintY, hintCol, 10);
 
-    drawText("[", baseX + 255, hintY, hintCol, 10);
-    drawText("BACK", baseX + 262, hintY, keyCol, 10);
-    drawText("]", baseX + 295, hintY, hintCol, 10);
-    drawText("Return", baseX + 305, hintY, hintCol, 10);
+        drawText("[", baseX + 175, hintY, hintCol, 10);
+        drawText("ENTER", baseX + 182, hintY, keyCol, 10);
+        drawText("]", baseX + 220, hintY, hintCol, 10);
+        drawText("Preset", baseX + 228, hintY, hintCol, 10);
+
+        drawText("[", baseX + 280, hintY, hintCol, 10);
+        drawText("BACK", baseX + 287, hintY, keyCol, 10);
+        drawText("]", baseX + 320, hintY, hintCol, 10);
+        drawText("Exit", baseX + 328, hintY, hintCol, 10);
+    } else {
+        drawText("[", baseX + 15, hintY, hintCol, 10);
+        drawText("UP/DOWN", baseX + 22, hintY, keyCol, 10);
+        drawText("]", baseX + 72, hintY, hintCol, 10);
+        drawText("Navigate", baseX + 82, hintY, hintCol, 10);
+
+        drawText("[", baseX + 145, hintY, hintCol, 10);
+        drawText("ENTER", baseX + 152, hintY, keyCol, 10);
+        drawText("]", baseX + 190, hintY, hintCol, 10);
+        drawText("Select", baseX + 200, hintY, hintCol, 10);
+
+        drawText("[", baseX + 255, hintY, hintCol, 10);
+        drawText("BACK", baseX + 262, hintY, keyCol, 10);
+        drawText("]", baseX + 295, hintY, hintCol, 10);
+        drawText("Return", baseX + 305, hintY, hintCol, 10);
+    }
 
     // ===== GLOWING SCROLLBAR =====
     if (items.length > menu.maxVisibleItems) {
