@@ -1085,8 +1085,7 @@ let toggleStates = {
 let neonObjects = [];
 let neonColor = { r: 255, g: 0, b: 255 }; // Default purple
 
-// Rainbow color cycling
-let rainbowHue = 0;
+// Sky color cycling
 let skyColorIndex = 0;
 
 // Sky colors for selection
