@@ -62,6 +62,17 @@ let hoverAlpha = 0;             // Smooth hover transition
 let selectionAlpha = 0;         // Selection highlight alpha
 let smoothSelectedIndex = 0;    // Smooth selection position
 
+// Glowing scrollbar animation
+let scrollbarGlow = 0;          // Pulsing glow intensity for scrollbar
+let scrollbarPulse = 0;         // Pulse timer
+
+// Selection glow animation
+let selectionGlow = 0;          // Pulsing glow for selected item
+let selectionPulseDir = 1;      // Pulse direction
+
+// Accent line animation
+let accentLineGlow = 0;         // Top accent line glow effect
+
 // Game feature variables (rainbow car, matrix mode)
 let rainbowHue = 0;             // For rainbow car feature
 let matrixEffect = 0;           // For matrix mode feature
@@ -189,6 +200,19 @@ const itemDescriptions = {
     "matrixMode": "💻 MATRIX MODE - Digital rain effect overlay!",
     "thermalVision": "🌡️ THERMAL VISION - See heat signatures in dark!",
     "nightVision": "🌙 NIGHT VISION - Enhanced vision in darkness!",
+
+    // Vehicle Color descriptions
+    "veh_color_slot": "🎨 Set individual color slot - customize each color independently!",
+    "veh_color_1": "🎨 PRIMARY COLOR - Main body color of the vehicle!",
+    "veh_color_2": "🎨 SECONDARY COLOR - Accent/trim color of the vehicle!",
+    "veh_color_3": "🎨 TERTIARY COLOR - Additional color detail!",
+    "veh_color_4": "🎨 QUATERNARY COLOR - Extra color option!",
+
+    // Vehicle Upgrade descriptions
+    "veh_upgrade_add": "🔧 Add upgrade - Enhance your vehicle with this mod!",
+    "veh_upgrade_remove": "❌ Remove upgrade - Take off this modification!",
+    "veh_upgrade_remove_all": "🗑️ REMOVE ALL - Strip all upgrades from vehicle!",
+    "veh_upgrades": "🔧 UPGRADES - Add NOS, hydraulics, wheels, spoilers and more!",
 
     // Handling Editor descriptions
     "handling_reset": "🔄 RESET - Restore all handling values to vehicle defaults!",
@@ -577,7 +601,9 @@ const menuData = {
             { label: "Repair Vehicle", action: "veh_repair" },
             { label: "Flip Vehicle", action: "veh_flip" },
             { label: "Vehicle Colors", action: "submenu", target: "veh_colors" },
+            { label: "Vehicle Upgrades", action: "submenu", target: "veh_upgrades" },
             { label: "Handling Editor", action: "submenu", target: "handlingEditor" },
+            { label: "--- Toggles ---", action: "none" },
             { label: "God Mode", action: "toggle", target: "vehGodMode", state: false },
             { label: "Nitro Boost", action: "veh_nitro" },
             { label: "Drive On Water", action: "toggle", target: "driveOnWater", state: false },
@@ -592,6 +618,54 @@ const menuData = {
             { label: "Toggle Engine", action: "veh_engine" },
             { label: "Pop Tires", action: "veh_poptires" },
             { label: "Fix Tires", action: "veh_fixtires" }
+        ]
+    },
+
+    veh_upgrades: {
+        title: "VEHICLE UPGRADES",
+        items: [
+            { label: "--- Performance ---", action: "none" },
+            { label: "Add Nitro", action: "veh_upgrade_add", value: 1010 },
+            { label: "Add Hydraulics", action: "veh_upgrade_add", value: 1087 },
+            { label: "--- Wheels ---", action: "none" },
+            { label: "Offroad Wheels", action: "veh_upgrade_add", value: 1025 },
+            { label: "Shadow Wheels", action: "veh_upgrade_add", value: 1073 },
+            { label: "Mega Wheels", action: "veh_upgrade_add", value: 1074 },
+            { label: "Rimshine Wheels", action: "veh_upgrade_add", value: 1075 },
+            { label: "Wires Wheels", action: "veh_upgrade_add", value: 1076 },
+            { label: "Classic Wheels", action: "veh_upgrade_add", value: 1077 },
+            { label: "Twist Wheels", action: "veh_upgrade_add", value: 1078 },
+            { label: "Cutter Wheels", action: "veh_upgrade_add", value: 1079 },
+            { label: "Switch Wheels", action: "veh_upgrade_add", value: 1080 },
+            { label: "Grove Wheels", action: "veh_upgrade_add", value: 1081 },
+            { label: "Import Wheels", action: "veh_upgrade_add", value: 1082 },
+            { label: "Dollar Wheels", action: "veh_upgrade_add", value: 1083 },
+            { label: "--- Exhausts ---", action: "none" },
+            { label: "Upswept Exhaust", action: "veh_upgrade_add", value: 1018 },
+            { label: "Twin Exhaust", action: "veh_upgrade_add", value: 1019 },
+            { label: "Large Exhaust", action: "veh_upgrade_add", value: 1020 },
+            { label: "Medium Exhaust", action: "veh_upgrade_add", value: 1021 },
+            { label: "Small Exhaust", action: "veh_upgrade_add", value: 1022 },
+            { label: "--- Spoilers ---", action: "none" },
+            { label: "Pro Spoiler", action: "veh_upgrade_add", value: 1000 },
+            { label: "Win Spoiler", action: "veh_upgrade_add", value: 1001 },
+            { label: "Drag Spoiler", action: "veh_upgrade_add", value: 1002 },
+            { label: "Alpha Spoiler", action: "veh_upgrade_add", value: 1003 },
+            { label: "Champ Spoiler", action: "veh_upgrade_add", value: 1014 },
+            { label: "Fury Spoiler", action: "veh_upgrade_add", value: 1015 },
+            { label: "--- Roof ---", action: "none" },
+            { label: "Roof Scoop", action: "veh_upgrade_add", value: 1006 },
+            { label: "Roof Vent", action: "veh_upgrade_add", value: 1032 },
+            { label: "Alien Roof Vent", action: "veh_upgrade_add", value: 1033 },
+            { label: "--- Side Skirts ---", action: "none" },
+            { label: "Right Alien Skirt", action: "veh_upgrade_add", value: 1007 },
+            { label: "Left Alien Skirt", action: "veh_upgrade_add", value: 1017 },
+            { label: "Right Chrome Skirt", action: "veh_upgrade_add", value: 1027 },
+            { label: "Left Chrome Skirt", action: "veh_upgrade_add", value: 1031 },
+            { label: "--- Remove Upgrades ---", action: "none" },
+            { label: "Remove Nitro", action: "veh_upgrade_remove", value: 1010 },
+            { label: "Remove Hydraulics", action: "veh_upgrade_remove", value: 1087 },
+            { label: "Remove All Upgrades", action: "veh_upgrade_remove_all" }
         ]
     },
 
@@ -808,30 +882,27 @@ const menuData = {
     veh_colors: {
         title: "VEHICLE COLORS",
         items: [
+            { label: "--- Quick Colors ---", action: "none" },
             { label: "Black", action: "veh_color", value: [0, 0] },
             { label: "White", action: "veh_color", value: [18, 18] },
             { label: "Dark Gray", action: "veh_color", value: [4, 4] },
-            { label: "Light Gray", action: "veh_color", value: [8, 8] },
             { label: "Silver", action: "veh_color", value: [12, 12] },
             { label: "Red", action: "veh_color", value: [27, 27] },
-            { label: "Dark Red", action: "veh_color", value: [28, 28] },
             { label: "Candy Red", action: "veh_color", value: [30, 30] },
             { label: "Orange", action: "veh_color", value: [36, 36] },
             { label: "Yellow", action: "veh_color", value: [89, 89] },
-            { label: "Bright Yellow", action: "veh_color", value: [91, 91] },
             { label: "Green", action: "veh_color", value: [50, 50] },
-            { label: "Dark Green", action: "veh_color", value: [52, 52] },
             { label: "Lime Green", action: "veh_color", value: [55, 55] },
             { label: "Blue", action: "veh_color", value: [62, 62] },
-            { label: "Dark Blue", action: "veh_color", value: [64, 64] },
             { label: "Light Blue", action: "veh_color", value: [73, 73] },
-            { label: "Bright Blue", action: "veh_color", value: [82, 82] },
             { label: "Purple", action: "veh_color", value: [99, 99] },
             { label: "Pink", action: "veh_color", value: [100, 100] },
-            { label: "Hot Pink", action: "veh_color", value: [101, 101] },
-            { label: "Brown", action: "veh_color", value: [45, 45] },
-            { label: "Beige", action: "veh_color", value: [44, 44] },
             { label: "Gold", action: "veh_color", value: [37, 37] },
+            { label: "--- Custom Color Slots ---", action: "none" },
+            { label: "Color 1 (Primary)", action: "submenu", target: "veh_color_1" },
+            { label: "Color 2 (Secondary)", action: "submenu", target: "veh_color_2" },
+            { label: "Color 3 (Tertiary)", action: "submenu", target: "veh_color_3" },
+            { label: "Color 4 (Quaternary)", action: "submenu", target: "veh_color_4" },
             { label: "--- Two Tone ---", action: "none" },
             { label: "Black/Red", action: "veh_color", value: [0, 27] },
             { label: "Black/White", action: "veh_color", value: [0, 18] },
@@ -839,6 +910,126 @@ const menuData = {
             { label: "Blue/White", action: "veh_color", value: [62, 18] },
             { label: "Green/White", action: "veh_color", value: [50, 18] },
             { label: "Random", action: "veh_color_random" }
+        ]
+    },
+
+    veh_color_1: {
+        title: "COLOR 1 (PRIMARY)",
+        items: [
+            { label: "Black (0)", action: "veh_color_slot", slot: 1, value: 0 },
+            { label: "White (18)", action: "veh_color_slot", slot: 1, value: 18 },
+            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 1, value: 4 },
+            { label: "Light Gray (8)", action: "veh_color_slot", slot: 1, value: 8 },
+            { label: "Silver (12)", action: "veh_color_slot", slot: 1, value: 12 },
+            { label: "Red (27)", action: "veh_color_slot", slot: 1, value: 27 },
+            { label: "Dark Red (28)", action: "veh_color_slot", slot: 1, value: 28 },
+            { label: "Candy Red (30)", action: "veh_color_slot", slot: 1, value: 30 },
+            { label: "Orange (36)", action: "veh_color_slot", slot: 1, value: 36 },
+            { label: "Yellow (89)", action: "veh_color_slot", slot: 1, value: 89 },
+            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 1, value: 91 },
+            { label: "Green (50)", action: "veh_color_slot", slot: 1, value: 50 },
+            { label: "Dark Green (52)", action: "veh_color_slot", slot: 1, value: 52 },
+            { label: "Lime Green (55)", action: "veh_color_slot", slot: 1, value: 55 },
+            { label: "Blue (62)", action: "veh_color_slot", slot: 1, value: 62 },
+            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 1, value: 64 },
+            { label: "Light Blue (73)", action: "veh_color_slot", slot: 1, value: 73 },
+            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 1, value: 82 },
+            { label: "Purple (99)", action: "veh_color_slot", slot: 1, value: 99 },
+            { label: "Pink (100)", action: "veh_color_slot", slot: 1, value: 100 },
+            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 1, value: 101 },
+            { label: "Brown (45)", action: "veh_color_slot", slot: 1, value: 45 },
+            { label: "Beige (44)", action: "veh_color_slot", slot: 1, value: 44 },
+            { label: "Gold (37)", action: "veh_color_slot", slot: 1, value: 37 }
+        ]
+    },
+
+    veh_color_2: {
+        title: "COLOR 2 (SECONDARY)",
+        items: [
+            { label: "Black (0)", action: "veh_color_slot", slot: 2, value: 0 },
+            { label: "White (18)", action: "veh_color_slot", slot: 2, value: 18 },
+            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 2, value: 4 },
+            { label: "Light Gray (8)", action: "veh_color_slot", slot: 2, value: 8 },
+            { label: "Silver (12)", action: "veh_color_slot", slot: 2, value: 12 },
+            { label: "Red (27)", action: "veh_color_slot", slot: 2, value: 27 },
+            { label: "Dark Red (28)", action: "veh_color_slot", slot: 2, value: 28 },
+            { label: "Candy Red (30)", action: "veh_color_slot", slot: 2, value: 30 },
+            { label: "Orange (36)", action: "veh_color_slot", slot: 2, value: 36 },
+            { label: "Yellow (89)", action: "veh_color_slot", slot: 2, value: 89 },
+            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 2, value: 91 },
+            { label: "Green (50)", action: "veh_color_slot", slot: 2, value: 50 },
+            { label: "Dark Green (52)", action: "veh_color_slot", slot: 2, value: 52 },
+            { label: "Lime Green (55)", action: "veh_color_slot", slot: 2, value: 55 },
+            { label: "Blue (62)", action: "veh_color_slot", slot: 2, value: 62 },
+            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 2, value: 64 },
+            { label: "Light Blue (73)", action: "veh_color_slot", slot: 2, value: 73 },
+            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 2, value: 82 },
+            { label: "Purple (99)", action: "veh_color_slot", slot: 2, value: 99 },
+            { label: "Pink (100)", action: "veh_color_slot", slot: 2, value: 100 },
+            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 2, value: 101 },
+            { label: "Brown (45)", action: "veh_color_slot", slot: 2, value: 45 },
+            { label: "Beige (44)", action: "veh_color_slot", slot: 2, value: 44 },
+            { label: "Gold (37)", action: "veh_color_slot", slot: 2, value: 37 }
+        ]
+    },
+
+    veh_color_3: {
+        title: "COLOR 3 (TERTIARY)",
+        items: [
+            { label: "Black (0)", action: "veh_color_slot", slot: 3, value: 0 },
+            { label: "White (18)", action: "veh_color_slot", slot: 3, value: 18 },
+            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 3, value: 4 },
+            { label: "Light Gray (8)", action: "veh_color_slot", slot: 3, value: 8 },
+            { label: "Silver (12)", action: "veh_color_slot", slot: 3, value: 12 },
+            { label: "Red (27)", action: "veh_color_slot", slot: 3, value: 27 },
+            { label: "Dark Red (28)", action: "veh_color_slot", slot: 3, value: 28 },
+            { label: "Candy Red (30)", action: "veh_color_slot", slot: 3, value: 30 },
+            { label: "Orange (36)", action: "veh_color_slot", slot: 3, value: 36 },
+            { label: "Yellow (89)", action: "veh_color_slot", slot: 3, value: 89 },
+            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 3, value: 91 },
+            { label: "Green (50)", action: "veh_color_slot", slot: 3, value: 50 },
+            { label: "Dark Green (52)", action: "veh_color_slot", slot: 3, value: 52 },
+            { label: "Lime Green (55)", action: "veh_color_slot", slot: 3, value: 55 },
+            { label: "Blue (62)", action: "veh_color_slot", slot: 3, value: 62 },
+            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 3, value: 64 },
+            { label: "Light Blue (73)", action: "veh_color_slot", slot: 3, value: 73 },
+            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 3, value: 82 },
+            { label: "Purple (99)", action: "veh_color_slot", slot: 3, value: 99 },
+            { label: "Pink (100)", action: "veh_color_slot", slot: 3, value: 100 },
+            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 3, value: 101 },
+            { label: "Brown (45)", action: "veh_color_slot", slot: 3, value: 45 },
+            { label: "Beige (44)", action: "veh_color_slot", slot: 3, value: 44 },
+            { label: "Gold (37)", action: "veh_color_slot", slot: 3, value: 37 }
+        ]
+    },
+
+    veh_color_4: {
+        title: "COLOR 4 (QUATERNARY)",
+        items: [
+            { label: "Black (0)", action: "veh_color_slot", slot: 4, value: 0 },
+            { label: "White (18)", action: "veh_color_slot", slot: 4, value: 18 },
+            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 4, value: 4 },
+            { label: "Light Gray (8)", action: "veh_color_slot", slot: 4, value: 8 },
+            { label: "Silver (12)", action: "veh_color_slot", slot: 4, value: 12 },
+            { label: "Red (27)", action: "veh_color_slot", slot: 4, value: 27 },
+            { label: "Dark Red (28)", action: "veh_color_slot", slot: 4, value: 28 },
+            { label: "Candy Red (30)", action: "veh_color_slot", slot: 4, value: 30 },
+            { label: "Orange (36)", action: "veh_color_slot", slot: 4, value: 36 },
+            { label: "Yellow (89)", action: "veh_color_slot", slot: 4, value: 89 },
+            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 4, value: 91 },
+            { label: "Green (50)", action: "veh_color_slot", slot: 4, value: 50 },
+            { label: "Dark Green (52)", action: "veh_color_slot", slot: 4, value: 52 },
+            { label: "Lime Green (55)", action: "veh_color_slot", slot: 4, value: 55 },
+            { label: "Blue (62)", action: "veh_color_slot", slot: 4, value: 62 },
+            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 4, value: 64 },
+            { label: "Light Blue (73)", action: "veh_color_slot", slot: 4, value: 73 },
+            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 4, value: 82 },
+            { label: "Purple (99)", action: "veh_color_slot", slot: 4, value: 99 },
+            { label: "Pink (100)", action: "veh_color_slot", slot: 4, value: 100 },
+            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 4, value: 101 },
+            { label: "Brown (45)", action: "veh_color_slot", slot: 4, value: 45 },
+            { label: "Beige (44)", action: "veh_color_slot", slot: 4, value: 44 },
+            { label: "Gold (37)", action: "veh_color_slot", slot: 4, value: 37 }
         ]
     },
 
@@ -1438,6 +1629,86 @@ function selectItem() {
             let c2 = Math.floor(Math.random() * 132);
             triggerNetworkEvent("ModMenu:VehicleColor", c1, c2);
             showNotification("Random color!");
+            break;
+
+        case "veh_color_slot":
+            // Set individual color slot using vehicle.colour1/2/3/4
+            if (localPlayer && localPlayer.vehicle) {
+                let veh = localPlayer.vehicle;
+                try {
+                    switch(item.slot) {
+                        case 1:
+                            veh.colour1 = item.value;
+                            showNotification("Color 1 set to " + item.value);
+                            break;
+                        case 2:
+                            veh.colour2 = item.value;
+                            showNotification("Color 2 set to " + item.value);
+                            break;
+                        case 3:
+                            veh.colour3 = item.value;
+                            showNotification("Color 3 set to " + item.value);
+                            break;
+                        case 4:
+                            veh.colour4 = item.value;
+                            showNotification("Color 4 set to " + item.value);
+                            break;
+                    }
+                } catch(e) {
+                    // Fallback using natives.changeCarColour for slots 1-2
+                    try {
+                        if (item.slot === 1 || item.slot === 2) {
+                            let col1 = item.slot === 1 ? item.value : veh.colour1;
+                            let col2 = item.slot === 2 ? item.value : veh.colour2;
+                            natives.changeCarColour(veh, col1, col2);
+                            showNotification("Color " + item.slot + " set!");
+                        }
+                    } catch(e2) {
+                        console.log("[Color] Failed to set color slot: " + e2);
+                    }
+                }
+            }
+            break;
+
+        case "veh_upgrade_add":
+            // Add upgrade using vehicle.addUpgrade(upgradeId)
+            if (localPlayer && localPlayer.vehicle) {
+                try {
+                    localPlayer.vehicle.addUpgrade(item.value);
+                    showNotification("Upgrade added!");
+                } catch(e) {
+                    console.log("[Upgrades] addUpgrade failed: " + e);
+                    showNotification("Upgrade not available for this vehicle");
+                }
+            }
+            break;
+
+        case "veh_upgrade_remove":
+            // Remove upgrade using vehicle.removeUpgrade(upgradeId)
+            if (localPlayer && localPlayer.vehicle) {
+                try {
+                    localPlayer.vehicle.removeUpgrade(item.value);
+                    showNotification("Upgrade removed!");
+                } catch(e) {
+                    console.log("[Upgrades] removeUpgrade failed: " + e);
+                }
+            }
+            break;
+
+        case "veh_upgrade_remove_all":
+            // Remove all common upgrades
+            if (localPlayer && localPlayer.vehicle) {
+                let veh = localPlayer.vehicle;
+                let upgradeIds = [1010, 1087, 1025, 1073, 1074, 1075, 1076, 1077, 1078, 1079, 1080, 1081, 1082, 1083,
+                                  1018, 1019, 1020, 1021, 1022, 1000, 1001, 1002, 1003, 1014, 1015, 1006, 1032, 1033,
+                                  1007, 1017, 1027, 1031];
+                for (let i = 0; i < upgradeIds.length; i++) {
+                    try {
+                        veh.removeUpgrade(upgradeIds[i]);
+                    } catch(e) {}
+                }
+                showNotification("All upgrades removed!");
+            }
             break;
 
         case "vehicle_delete":
@@ -2395,6 +2666,18 @@ addEventHandler("OnProcess", function(event) {
     // Selection alpha pulse (subtle)
     selectionAlpha = 0.5 + Math.sin(animTime * 2) * 0.1;
 
+    // Scrollbar glow pulse animation
+    scrollbarPulse += 0.04;
+    scrollbarGlow = 0.5 + Math.sin(scrollbarPulse) * 0.5;
+
+    // Selection glow pulse (breathing effect)
+    selectionGlow += 0.025 * selectionPulseDir;
+    if (selectionGlow >= 1) selectionPulseDir = -1;
+    if (selectionGlow <= 0.3) selectionPulseDir = 1;
+
+    // Accent line glow animation
+    accentLineGlow = 0.7 + Math.sin(animTime * 1.5) * 0.3;
+
     // Screen shake decay
     if (screenShake > 0) {
         screenShake -= 0.1;
@@ -2538,9 +2821,22 @@ addEventHandler("OnDrawnHUD", function(event) {
     let headerBg = toColour(UI.bgPanel.r, UI.bgPanel.g, UI.bgPanel.b, Math.floor(255 * menuOpenAnim));
     drawRect(baseX + 1, headerY + 1, menu.width - 2, headerH - 1, headerBg);
 
-    // Accent line at top of header
+    // Accent line at top of header with glow animation
+    let glowLineAlpha = Math.floor(60 * menuOpenAnim * accentLineGlow);
+    let accentGlowCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, glowLineAlpha);
+    drawRect(baseX - 2, headerY - 3, menu.width + 4, 8, accentGlowCol);
+
     let accentCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha);
     drawRect(baseX, headerY, menu.width, 2, accentCol);
+
+    // Bright center highlight
+    let brightAccent = toColour(
+        Math.min(255, theme.accent.r + 80),
+        Math.min(255, theme.accent.g + 80),
+        Math.min(255, theme.accent.b + 80),
+        Math.floor(animAlpha * accentLineGlow)
+    );
+    drawRect(baseX + menu.width * 0.25, headerY, menu.width * 0.5, 2, brightAccent);
 
     // Title text
     let logoX = baseX + 16;
@@ -2582,12 +2878,29 @@ addEventHandler("OnDrawnHUD", function(event) {
         let itemY = yPos + (i - scrollOffset) * menu.itemHeight;
 
         if (isSelected) {
-            // Selected item - accent background
+            // Selected item - glowing accent background
+            let glowIntensity = 0.15 + selectionGlow * 0.15;
+
+            // Outer glow layer
+            let outerGlowAlpha = Math.floor(40 * menuOpenAnim * selectionGlow);
+            let outerGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, outerGlowAlpha);
+            drawRect(baseX, itemY - 2, menu.width, menu.itemHeight + 2, outerGlow);
+
+            // Main selection background
             let selBgAlpha = Math.floor(255 * menuOpenAnim);
             let selBg = toColour(UI.bgSelected.r, UI.bgSelected.g, UI.bgSelected.b, selBgAlpha);
             drawRect(baseX + 1, itemY, menu.width - 2, menu.itemHeight - 2, selBg);
 
-            // Left accent bar
+            // Inner accent overlay (subtle)
+            let innerGlowAlpha = Math.floor(25 * menuOpenAnim * selectionGlow);
+            let innerGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, innerGlowAlpha);
+            drawRect(baseX + 1, itemY, menu.width - 2, menu.itemHeight - 2, innerGlow);
+
+            // Left accent bar with glow
+            let barGlowAlpha = Math.floor(100 * menuOpenAnim * selectionGlow);
+            let barGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, barGlowAlpha);
+            drawRect(baseX - 2, itemY, 8, menu.itemHeight - 2, barGlow);
+
             let accentBarCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha);
             drawRect(baseX + 1, itemY, 3, menu.itemHeight - 2, accentBarCol);
 
@@ -2631,7 +2944,7 @@ addEventHandler("OnDrawnHUD", function(event) {
             drawText(item.label, textX, textY, normCol, textSize);
         }
 
-        // Toggle status indicator
+        // Toggle status indicator with glow effects
         if (item.action === "toggle") {
             let isOn = toggleStates[item.target];
             let stateX = baseX + menu.width - 55;
@@ -2640,15 +2953,39 @@ addEventHandler("OnDrawnHUD", function(event) {
             let boxH = 20;
 
             if (isOn) {
-                // ON state - green pill
-                let onBg = toColour(UI.success.r, UI.success.g, UI.success.b, Math.floor(200 * menuOpenAnim));
+                // ON state - green pill with pulsing glow
+                let glowIntensity = 0.5 + selectionGlow * 0.5;
+
+                // Outer glow
+                let glowAlpha = Math.floor(50 * menuOpenAnim * glowIntensity);
+                let glowCol = toColour(UI.success.r, UI.success.g, UI.success.b, glowAlpha);
+                drawRect(stateX - 3, boxY - 3, boxW + 6, boxH + 6, glowCol);
+
+                // Main pill
+                let onBg = toColour(UI.success.r, UI.success.g, UI.success.b, Math.floor(220 * menuOpenAnim));
                 drawRect(stateX, boxY, boxW, boxH, onBg);
+
+                // Inner highlight
+                let highlightAlpha = Math.floor(80 * menuOpenAnim * glowIntensity);
+                let highlightCol = toColour(
+                    Math.min(255, UI.success.r + 60),
+                    Math.min(255, UI.success.g + 60),
+                    Math.min(255, UI.success.b + 60),
+                    highlightAlpha
+                );
+                drawRect(stateX + 2, boxY + 2, boxW - 4, 8, highlightCol);
+
                 let onText = toColour(255, 255, 255, animAlpha);
                 drawText("ON", stateX + 12, boxY + 4, onText, 10);
             } else {
-                // OFF state - muted
+                // OFF state - muted with subtle border
                 let offBg = toColour(UI.bgHover.r, UI.bgHover.g, UI.bgHover.b, Math.floor(180 * menuOpenAnim));
                 drawRect(stateX, boxY, boxW, boxH, offBg);
+
+                // Subtle inner shadow
+                let shadowCol = toColour(0, 0, 0, Math.floor(30 * menuOpenAnim));
+                drawRect(stateX, boxY, boxW, 2, shadowCol);
+
                 let offText = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, animAlpha);
                 drawText("OFF", stateX + 9, boxY + 4, offText, 10);
             }
@@ -2694,28 +3031,56 @@ addEventHandler("OnDrawnHUD", function(event) {
     drawText("]", baseX + 295, hintY, hintCol, 10);
     drawText("Return", baseX + 305, hintY, hintCol, 10);
 
-    // ===== SCROLLBAR =====
+    // ===== GLOWING SCROLLBAR =====
     if (items.length > menu.maxVisibleItems) {
-        let scrollbarX = baseX + menu.width - 8;
+        let scrollbarX = baseX + menu.width - 10;
         let scrollbarY = baseY + menu.headerHeight + 8;
         let scrollbarH = visibleCount * menu.itemHeight - 16;
         let maxScroll = items.length - visibleCount;
         let scrollProgress = scrollOffset / maxScroll;
-        let thumbH = Math.max(30, scrollbarH * (visibleCount / items.length));
+        let thumbH = Math.max(35, scrollbarH * (visibleCount / items.length));
         let thumbY = scrollbarY + scrollProgress * (scrollbarH - thumbH);
 
-        // Track
-        let trackBg = toColour(UI.bgHover.r, UI.bgHover.g, UI.bgHover.b, Math.floor(150 * menuOpenAnim));
-        drawRect(scrollbarX, scrollbarY, 4, scrollbarH, trackBg);
+        // Outer glow effect for track
+        let glowAlpha = Math.floor(30 * menuOpenAnim * scrollbarGlow);
+        let trackGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, glowAlpha);
+        drawRect(scrollbarX - 3, scrollbarY - 2, 12, scrollbarH + 4, trackGlow);
 
-        // Thumb
-        let thumbCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(200 * menuOpenAnim));
-        drawRect(scrollbarX, thumbY, 4, thumbH, thumbCol);
+        // Track background with subtle gradient look
+        let trackBg = toColour(UI.bgHover.r, UI.bgHover.g, UI.bgHover.b, Math.floor(180 * menuOpenAnim));
+        drawRect(scrollbarX, scrollbarY, 6, scrollbarH, trackBg);
 
-        // Page indicator
+        // Inner track line
+        let trackInner = toColour(UI.bgDark.r, UI.bgDark.g, UI.bgDark.b, Math.floor(150 * menuOpenAnim));
+        drawRect(scrollbarX + 1, scrollbarY + 1, 4, scrollbarH - 2, trackInner);
+
+        // Thumb outer glow (pulsing)
+        let thumbGlowAlpha = Math.floor(80 * menuOpenAnim * scrollbarGlow);
+        let thumbGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, thumbGlowAlpha);
+        drawRect(scrollbarX - 4, thumbY - 3, 14, thumbH + 6, thumbGlow);
+
+        // Thumb mid glow
+        let thumbMidGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(120 * menuOpenAnim * scrollbarGlow));
+        drawRect(scrollbarX - 2, thumbY - 1, 10, thumbH + 2, thumbMidGlow);
+
+        // Thumb main body
+        let thumbCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(255 * menuOpenAnim));
+        drawRect(scrollbarX, thumbY, 6, thumbH, thumbCol);
+
+        // Thumb highlight (brighter center)
+        let highlightAlpha = Math.floor(255 * menuOpenAnim * (0.5 + scrollbarGlow * 0.5));
+        let thumbHighlight = toColour(
+            Math.min(255, theme.accent.r + 50),
+            Math.min(255, theme.accent.g + 50),
+            Math.min(255, theme.accent.b + 50),
+            highlightAlpha
+        );
+        drawRect(scrollbarX + 1, thumbY + 2, 4, thumbH - 4, thumbHighlight);
+
+        // Page indicator with subtle styling
         let pageText = (scrollOffset + 1) + "/" + (maxScroll + 1);
         let pageCol = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, animAlpha);
-        drawText(pageText, baseX + menu.width - 40, footerY + 26, pageCol, 9);
+        drawText(pageText, baseX + menu.width - 45, footerY + 26, pageCol, 9);
     }
 
     // ===== INFO BAR =====
@@ -3582,7 +3947,12 @@ addEventHandler("OnPedWeaponShoot", function(event, ped, weapon) {
 // ============================================================================
 
 // Apply a single handling value to the current vehicle
-// Uses verified GTA IV natives and GTA Connected OOP properties
+// Uses GTA Connected API from wiki documentation:
+// - vehicle.setSuspensionHeight(suspensionId, height) - suspension height
+// - physical.mass - vehicle mass (read/write)
+// - physical.turnVelocity - rotational velocity Vec3
+// - vehicle.strongGrip - grip on bikes (server only)
+// - natives.changeCarColour - color changes
 function applyHandlingValue(param, value) {
     if (!localPlayer || !localPlayer.vehicle) return;
 
@@ -3592,7 +3962,6 @@ function applyHandlingValue(param, value) {
         switch(param) {
             case "tractionCurveMax":
                 // SET_CAR_TRACTION - Verified GTA IV native
-                // Multiplies the vehicle's traction
                 try {
                     natives.setCarTraction(veh, value);
                 } catch(e) {
@@ -3610,7 +3979,6 @@ function applyHandlingValue(param, value) {
 
             case "tractionBias":
                 // Adjust traction based on front/rear distribution
-                // Lower values = more rear grip, higher = more front
                 try {
                     let adjustedTraction = handlingValues.tractionCurveMax * (0.5 + (value - 0.5) * 0.5);
                     natives.setCarTraction(veh, adjustedTraction);
@@ -3619,7 +3987,6 @@ function applyHandlingValue(param, value) {
 
             case "tractionLoss":
                 // Higher values = easier to lose traction
-                // Apply reduced traction based on loss value
                 try {
                     let lossTraction = handlingValues.tractionCurveMax / (1 + (value - 0.8));
                     natives.setCarTraction(veh, Math.max(0.3, lossTraction));
@@ -3627,13 +3994,24 @@ function applyHandlingValue(param, value) {
                 break;
 
             case "suspensionForce":
-                // Visual feedback - suspension stiffness affects bounce animation
-                suspensionOffset = (value - 2.0) * 0.02; // Stiffer = less bounce
+                // Suspension stiffness - affects bounce
+                suspensionOffset = (value - 2.0) * 0.02;
                 break;
 
             case "suspensionRaise":
-                // Visual suspension height offset
-                suspensionOffset = value;
+                // Use vehicle.setSuspensionHeight for all 4 wheels
+                // suspensionId: 0=FL, 1=FR, 2=RL, 3=RR
+                try {
+                    for (let wheelId = 0; wheelId < 4; wheelId++) {
+                        veh.setSuspensionHeight(wheelId, value);
+                    }
+                    suspensionOffset = value;
+                    console.log("[Handling] Suspension height set to: " + value);
+                } catch(e) {
+                    console.log("[Handling] setSuspensionHeight failed: " + e);
+                    // Visual fallback
+                    suspensionOffset = value;
+                }
                 break;
 
             case "suspensionCompDamp":
@@ -3643,7 +4021,6 @@ function applyHandlingValue(param, value) {
             case "driveForce":
                 // Engine power - affects acceleration multiplier
                 handlingMods.acceleration = value / 0.25;
-                // For actual speed boost, we'll apply this in the process loop
                 break;
 
             case "initialDriveMaxVel":
@@ -3657,14 +4034,14 @@ function applyHandlingValue(param, value) {
                 break;
 
             case "mass":
-                // SET_CAR_MASS or use OOP property
+                // Use physical.mass property (GTA Connected API)
                 try {
-                    // Try native first
-                    natives.setCarMass(veh, value);
+                    veh.mass = value;
+                    console.log("[Handling] Mass set to: " + value);
                 } catch(e1) {
-                    // Fallback to OOP property if available
+                    // Fallback to native
                     try {
-                        veh.mass = value;
+                        natives.setCarMass(veh, value);
                     } catch(e2) {
                         console.log("[Handling] mass set failed: " + e2);
                     }
@@ -3672,18 +4049,27 @@ function applyHandlingValue(param, value) {
                 break;
 
             case "centreOfMassZ":
-                // Try OOP property for center of mass
+                // Adjust turn velocity to simulate center of mass change
+                // Higher CoM = more likely to flip
                 try {
-                    if (veh.centerOfMass) {
-                        let com = veh.centerOfMass;
-                        veh.centerOfMass = new Vec3(com.x, com.y, value);
+                    // Use turnVelocity to apply subtle rotational adjustments
+                    let currentTurn = veh.turnVelocity;
+                    if (value > 0) {
+                        // Higher center = add slight instability
+                        let instability = value * 0.1;
+                        veh.turnVelocity = new Vec3(
+                            currentTurn.x * (1 + instability),
+                            currentTurn.y * (1 + instability),
+                            currentTurn.z
+                        );
                     }
-                } catch(e) {}
+                } catch(e) {
+                    console.log("[Handling] turnVelocity adjustment failed: " + e);
+                }
                 break;
 
             case "steeringLock":
                 // Steering angle - visual/stored only
-                // GTA IV doesn't have a runtime native for this
                 break;
         }
     } catch(e) {
@@ -3720,23 +4106,40 @@ function resetHandlingToDefault() {
     suspensionOffset = 0;
     selectedHandlingParam = "";
 
-    // Apply defaults to vehicle
+    // Apply defaults to vehicle using proper API
     if (localPlayer && localPlayer.vehicle) {
         let veh = localPlayer.vehicle;
+
         // Reset traction
         try {
             natives.setCarTraction(veh, 2.0);
         } catch(e) {
             console.log("[Handling] Reset traction failed: " + e);
         }
-        // Reset mass
+
+        // Reset mass using physical.mass property
         try {
-            natives.setCarMass(veh, 1500.0);
+            veh.mass = 1500.0;
         } catch(e1) {
             try {
-                veh.mass = 1500.0;
+                natives.setCarMass(veh, 1500.0);
             } catch(e2) {}
         }
+
+        // Reset suspension height using vehicle.setSuspensionHeight
+        try {
+            for (let wheelId = 0; wheelId < 4; wheelId++) {
+                veh.setSuspensionHeight(wheelId, 0.0);
+            }
+        } catch(e) {
+            console.log("[Handling] Reset suspension failed: " + e);
+        }
+
+        // Reset turn velocity
+        try {
+            veh.turnVelocity = new Vec3(0, 0, 0);
+        } catch(e) {}
+
         // Repair vehicle to reset any damage-based handling issues
         try {
             natives.fixCar(veh);
