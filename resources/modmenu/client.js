@@ -1,8 +1,8 @@
 
 // ============================================================================
-// MD REVOLUTION MOD MENU - Client Side (MDB Trident Style)
+// MD REVOLUTION MOD MENU - Client Side
 // MADE BY - DEVILSDESIGN & IIV_NATHAN_VII & SHOCKixiXixiWAVE (Original Template)
-// Steel Blue / Gold / Orange color scheme with flash effects
+// Clean Modern Dark Theme - Glassmorphism Style
 // Press F5 to open/close menu, Arrow keys to navigate, Enter to select
 // ============================================================================
 
@@ -14,115 +14,94 @@ let menuStack = [];
 let scrollOffset = 0;
 
 // ============================================================================
-// MDB TRIDENT COLOR DEFINITIONS (Exact from MDB_Template.c)
+// CLEAN MODERN UI - Dark Glassmorphism Theme
 // ============================================================================
-const MDB = {
-    // Primary Colors
-    Gold: { r: 164, g: 134, b: 35 },
-    Steelblue: { r: 70, g: 130, b: 180 },
-    DevilsRed: { r: 153, g: 0, b: 0 },
-    Chocolate: { r: 210, g: 105, b: 30 },
+const UI = {
+    // Background colors
+    bgDark: { r: 13, g: 17, b: 23 },           // Deep dark background
+    bgPanel: { r: 22, g: 27, b: 34 },          // Panel background
+    bgHover: { r: 33, g: 38, b: 45 },          // Hover state
+    bgSelected: { r: 45, g: 50, b: 58 },       // Selected item
 
-    // Header Colors
-    Header: { r: 177, g: 19, b: 26 },
-    SubHeader: { r: 58, g: 95, b: 205 },
+    // Accent colors - clean cyan
+    accent: { r: 0, g: 212, b: 255 },          // Primary accent (cyan)
+    accentDim: { r: 0, g: 150, b: 180 },       // Dimmed accent
+    accentGlow: { r: 0, g: 180, b: 220 },      // Glow effect
 
-    // Line Colors (White separator)
-    Line: { r: 255, g: 255, b: 255 },
+    // Text colors
+    textPrimary: { r: 230, g: 237, b: 243 },   // Primary text (almost white)
+    textSecondary: { r: 139, g: 148, b: 158 }, // Secondary text (gray)
+    textMuted: { r: 88, g: 96, b: 105 },       // Muted text
 
-    // Item Colors
-    Item: { r: 180, g: 180, b: 180 },
-    ItemHighlight: { r: 255, g: 143, b: 0 },
-    ScrollItem: { r: 255, g: 255, b: 255 },
-    SubMenu: { r: 139, g: 134, b: 130 },
+    // Status colors
+    success: { r: 63, g: 185, b: 80 },         // Green for ON
+    error: { r: 248, g: 81, b: 73 },           // Red for errors
+    warning: { r: 210, g: 153, b: 34 },        // Yellow/gold for warnings
 
-    // Bool/Toggle Colors
-    Bool: { r: 255, g: 128, b: 0 },
+    // Border colors
+    border: { r: 48, g: 54, b: 61 },           // Subtle border
+    borderFocus: { r: 0, g: 212, b: 255 },     // Focused border (accent)
 
-    // JumpOver (Section headers)
-    JumpOver: { r: 58, g: 95, b: 205 },
-
-    // Stats Colors
-    StatsItem: { r: 255, g: 255, b: 255 },
-    StatsValue: { r: 255, g: 143, b: 0 },
-    StatsYes: { r: 204, g: 0, b: 0 },      // Red for "Yes/Active"
-    StatsNo: { r: 0, g: 204, b: 0 },       // Green for "No/Inactive"
-
-    // Alert Colors
-    Alert: { r: 255, g: 0, b: 0 },
-    Ghost: { r: 0, g: 102, b: 204 },
-    Holy: { r: 127, g: 0, b: 255 },
-
-    // Misc
-    Orange: { r: 255, g: 69, b: 0 },
-    MicTalk: { r: 255, g: 140, b: 0 },
-    HasMic: { r: 255, g: 255, b: 255 }
+    // Section header
+    sectionText: { r: 88, g: 166, b: 255 }     // Blue for section headers
 };
 
 // ============================================================================
-// MDB ANIMATION STATE
+// CLEAN ANIMATION STATE - Smooth, minimal effects only
 // ============================================================================
 let animTime = 0;
 let smoothScrollY = 0;
 let targetScrollY = 0;
-let titlePulse = 0;
 let menuOpenAnim = 0;
-let selectedPulse = 0;
-let colorShift = 0;
-let particleTime = 0;
 let screenShake = 0;
 let flashAlpha = 0;
 let currentDescription = "";
 
-// MDB Flashing/Glowing Effects (from MDB_Template.c)
-let FlashingGhost = 200;        // Ranges 150-255, used for header text flash
-let FlashingGhostIncrement = true;
-let Glowing = 100;              // Ranges 0-190, used for scrollbar glow
-let GlowingIncrement = true;
-let Rotating360 = 0;            // For spinning icons
-let Fading_100 = 100;           // Fade in effect
-let Fading_150 = 150;           // Fade in effect
-let dropdown_y = 1.2;           // Dropdown animation
+// Clean animation variables
+let hoverAlpha = 0;             // Smooth hover transition
+let selectionAlpha = 0;         // Selection highlight alpha
+let smoothSelectedIndex = 0;    // Smooth selection position
 
-// Enhanced UI Animation State
-let borderGlow = 0;             // Animated border glow (0-1)
-let borderGlowIncrement = true;
-let cornerPulse = 0;            // Corner decoration pulse
-let headerWaveOffset = 0;       // Header wave animation
-let scrollbarPulse = 0;         // Scrollbar glow pulse
-let logoRotation = 0;           // Logo rotation angle
-let statsUpdateTime = 0;        // Stats panel update timer
-let particleArray = [];         // Particle system
-let bannerShimmer = 0;          // Banner shimmer effect
-let footerPulse = 0;            // Footer pulse animation
-let itemHoverScale = [];        // Per-item hover scale
+// Glowing scrollbar animation
+let scrollbarGlow = 0;          // Pulsing glow intensity for scrollbar
+let scrollbarPulse = 0;         // Pulse timer
+
+// Selection glow animation
+let selectionGlow = 0;          // Pulsing glow for selected item
+let selectionPulseDir = 1;      // Pulse direction
+
+// Accent line animation
+let accentLineGlow = 0;         // Top accent line glow effect
+
+// Game feature variables (rainbow car, matrix mode)
+let rainbowHue = 0;             // For rainbow car feature
+let matrixEffect = 0;           // For matrix mode feature
 
 // ============================================================================
-// THEME SYSTEM
+// THEME SYSTEM - Clean Modern Themes
 // ============================================================================
-let currentTheme = "trident"; // Default theme - Trident style
+let currentTheme = "midnight"; // Default theme - Clean dark
 
-// Trident-style color scheme
+// Clean modern themes
 const themes = {
-    // Primary Trident theme - Steel Blue with Gold/Orange accents (MDB Style)
-    trident: {
-        primary: { r: 70, g: 130, b: 180 },      // Steelblue
-        accent: { r: 164, g: 134, b: 35 },        // Gold (exact MDB)
-        highlight: { r: 255, g: 143, b: 0 },      // Item Highlight (exact MDB)
-        name: "Trident"
+    // Midnight - Default clean dark theme with cyan accent
+    midnight: {
+        primary: { r: 22, g: 27, b: 34 },
+        accent: { r: 0, g: 212, b: 255 },
+        highlight: { r: 0, g: 212, b: 255 },
+        name: "Midnight"
     },
-    black: { primary: { r: 80, g: 80, b: 80 }, accent: { r: 150, g: 150, b: 150 }, highlight: { r: 200, g: 200, b: 200 }, name: "Black" },
-    red: { primary: { r: 200, g: 30, b: 30 }, accent: { r: 255, g: 80, b: 80 }, highlight: { r: 255, g: 120, b: 80 }, name: "Red" },
-    blue: { primary: { r: 30, g: 80, b: 200 }, accent: { r: 80, g: 150, b: 255 }, highlight: { r: 100, g: 200, b: 255 }, name: "Blue" },
-    green: { primary: { r: 30, g: 160, b: 60 }, accent: { r: 80, g: 220, b: 100 }, highlight: { r: 120, g: 255, b: 120 }, name: "Green" },
-    purple: { primary: { r: 120, g: 40, b: 180 }, accent: { r: 180, g: 100, b: 255 }, highlight: { r: 220, g: 150, b: 255 }, name: "Purple" },
-    pink: { primary: { r: 200, g: 60, b: 120 }, accent: { r: 255, g: 120, b: 180 }, highlight: { r: 255, g: 180, b: 200 }, name: "Pink" },
-    gold: { primary: { r: 180, g: 140, b: 30 }, accent: { r: 255, g: 200, b: 80 }, highlight: { r: 255, g: 220, b: 100 }, name: "Gold" },
-    gray: { primary: { r: 100, g: 100, b: 110 }, accent: { r: 160, g: 160, b: 170 }, highlight: { r: 200, g: 200, b: 210 }, name: "Gray" }
+    ocean: { primary: { r: 20, g: 30, b: 48 }, accent: { r: 59, g: 130, b: 246 }, highlight: { r: 96, g: 165, b: 250 }, name: "Ocean" },
+    emerald: { primary: { r: 20, g: 30, b: 25 }, accent: { r: 16, g: 185, b: 129 }, highlight: { r: 52, g: 211, b: 153 }, name: "Emerald" },
+    rose: { primary: { r: 30, g: 20, b: 25 }, accent: { r: 244, g: 63, b: 94 }, highlight: { r: 251, g: 113, b: 133 }, name: "Rose" },
+    amber: { primary: { r: 30, g: 25, b: 18 }, accent: { r: 245, g: 158, b: 11 }, highlight: { r: 251, g: 191, b: 36 }, name: "Amber" },
+    violet: { primary: { r: 25, g: 20, b: 35 }, accent: { r: 139, g: 92, b: 246 }, highlight: { r: 167, g: 139, b: 250 }, name: "Violet" },
+    slate: { primary: { r: 30, g: 32, b: 36 }, accent: { r: 148, g: 163, b: 184 }, highlight: { r: 203, g: 213, b: 225 }, name: "Slate" },
+    crimson: { primary: { r: 28, g: 18, b: 18 }, accent: { r: 239, g: 68, b: 68 }, highlight: { r: 248, g: 113, b: 113 }, name: "Crimson" }
 };
 
 function getTheme() {
-    return themes[currentTheme] || themes.trident;
+    return themes[currentTheme] || themes.midnight;
 }
 
 // Info bar configuration
@@ -222,6 +201,19 @@ const itemDescriptions = {
     "thermalVision": "🌡️ THERMAL VISION - See heat signatures in dark!",
     "nightVision": "🌙 NIGHT VISION - Enhanced vision in darkness!",
 
+    // Vehicle Color descriptions
+    "veh_color_slot": "🎨 Set individual color slot - customize each color independently!",
+    "veh_color_1": "🎨 PRIMARY COLOR - Main body color of the vehicle!",
+    "veh_color_2": "🎨 SECONDARY COLOR - Accent/trim color of the vehicle!",
+    "veh_color_3": "🎨 TERTIARY COLOR - Additional color detail!",
+    "veh_color_4": "🎨 QUATERNARY COLOR - Extra color option!",
+
+    // Vehicle Upgrade descriptions
+    "veh_upgrade_add": "🔧 Add upgrade - Enhance your vehicle with this mod!",
+    "veh_upgrade_remove": "❌ Remove upgrade - Take off this modification!",
+    "veh_upgrade_remove_all": "🗑️ REMOVE ALL - Strip all upgrades from vehicle!",
+    "veh_upgrades": "🔧 UPGRADES - Add NOS, hydraulics, wheels, spoilers and more!",
+
     // Handling Editor descriptions
     "handling_reset": "🔄 RESET - Restore all handling values to vehicle defaults!",
     "handling_preset": "⚡ PRESET - Apply a pre-configured handling setup instantly!",
@@ -240,21 +232,20 @@ const itemDescriptions = {
     "handling_com": "🎯 CENTER OF MASS - Affects roll and flip tendency!",
     "handling_steering": "🎮 STEERING - How far wheels can turn!"
 };
-let matrixEffect = 0;
 
 // Font for text rendering (will be loaded on resource start)
 let menuFont = null;
 let titleFont = null;
 
-// Menu dimensions in pixels - positioned on right side
+// Menu dimensions in pixels - positioned center-right for premium look
 const menu = {
-    x: 1050,
-    y: 100,
-    width: 340,
-    headerHeight: 60,
-    itemHeight: 42,
-    footerHeight: 35,
-    maxVisibleItems: 11
+    x: 480,
+    y: 80,
+    width: 420,
+    headerHeight: 85,
+    itemHeight: 48,
+    footerHeight: 45,
+    maxVisibleItems: 12
 };
 
 // Player list cache
@@ -333,17 +324,16 @@ const menuData = {
     },
 
     themes: {
-        title: "MOD MENU THEME",
+        title: "MENU THEME",
         items: [
-            { label: "Trident (Default)", action: "theme", value: "trident" },
-            { label: "Black", action: "theme", value: "black" },
-            { label: "Red", action: "theme", value: "red" },
-            { label: "Blue", action: "theme", value: "blue" },
-            { label: "Green", action: "theme", value: "green" },
-            { label: "Purple", action: "theme", value: "purple" },
-            { label: "Pink", action: "theme", value: "pink" },
-            { label: "Gold", action: "theme", value: "gold" },
-            { label: "Gray", action: "theme", value: "gray" }
+            { label: "Midnight (Default)", action: "theme", value: "midnight" },
+            { label: "Ocean", action: "theme", value: "ocean" },
+            { label: "Emerald", action: "theme", value: "emerald" },
+            { label: "Rose", action: "theme", value: "rose" },
+            { label: "Amber", action: "theme", value: "amber" },
+            { label: "Violet", action: "theme", value: "violet" },
+            { label: "Slate", action: "theme", value: "slate" },
+            { label: "Crimson", action: "theme", value: "crimson" }
         ]
     },
 
@@ -611,7 +601,9 @@ const menuData = {
             { label: "Repair Vehicle", action: "veh_repair" },
             { label: "Flip Vehicle", action: "veh_flip" },
             { label: "Vehicle Colors", action: "submenu", target: "veh_colors" },
+            { label: "Vehicle Upgrades", action: "submenu", target: "veh_upgrades" },
             { label: "Handling Editor", action: "submenu", target: "handlingEditor" },
+            { label: "--- Toggles ---", action: "none" },
             { label: "God Mode", action: "toggle", target: "vehGodMode", state: false },
             { label: "Nitro Boost", action: "veh_nitro" },
             { label: "Drive On Water", action: "toggle", target: "driveOnWater", state: false },
@@ -626,6 +618,54 @@ const menuData = {
             { label: "Toggle Engine", action: "veh_engine" },
             { label: "Pop Tires", action: "veh_poptires" },
             { label: "Fix Tires", action: "veh_fixtires" }
+        ]
+    },
+
+    veh_upgrades: {
+        title: "VEHICLE UPGRADES",
+        items: [
+            { label: "--- Performance ---", action: "none" },
+            { label: "Add Nitro", action: "veh_upgrade_add", value: 1010 },
+            { label: "Add Hydraulics", action: "veh_upgrade_add", value: 1087 },
+            { label: "--- Wheels ---", action: "none" },
+            { label: "Offroad Wheels", action: "veh_upgrade_add", value: 1025 },
+            { label: "Shadow Wheels", action: "veh_upgrade_add", value: 1073 },
+            { label: "Mega Wheels", action: "veh_upgrade_add", value: 1074 },
+            { label: "Rimshine Wheels", action: "veh_upgrade_add", value: 1075 },
+            { label: "Wires Wheels", action: "veh_upgrade_add", value: 1076 },
+            { label: "Classic Wheels", action: "veh_upgrade_add", value: 1077 },
+            { label: "Twist Wheels", action: "veh_upgrade_add", value: 1078 },
+            { label: "Cutter Wheels", action: "veh_upgrade_add", value: 1079 },
+            { label: "Switch Wheels", action: "veh_upgrade_add", value: 1080 },
+            { label: "Grove Wheels", action: "veh_upgrade_add", value: 1081 },
+            { label: "Import Wheels", action: "veh_upgrade_add", value: 1082 },
+            { label: "Dollar Wheels", action: "veh_upgrade_add", value: 1083 },
+            { label: "--- Exhausts ---", action: "none" },
+            { label: "Upswept Exhaust", action: "veh_upgrade_add", value: 1018 },
+            { label: "Twin Exhaust", action: "veh_upgrade_add", value: 1019 },
+            { label: "Large Exhaust", action: "veh_upgrade_add", value: 1020 },
+            { label: "Medium Exhaust", action: "veh_upgrade_add", value: 1021 },
+            { label: "Small Exhaust", action: "veh_upgrade_add", value: 1022 },
+            { label: "--- Spoilers ---", action: "none" },
+            { label: "Pro Spoiler", action: "veh_upgrade_add", value: 1000 },
+            { label: "Win Spoiler", action: "veh_upgrade_add", value: 1001 },
+            { label: "Drag Spoiler", action: "veh_upgrade_add", value: 1002 },
+            { label: "Alpha Spoiler", action: "veh_upgrade_add", value: 1003 },
+            { label: "Champ Spoiler", action: "veh_upgrade_add", value: 1014 },
+            { label: "Fury Spoiler", action: "veh_upgrade_add", value: 1015 },
+            { label: "--- Roof ---", action: "none" },
+            { label: "Roof Scoop", action: "veh_upgrade_add", value: 1006 },
+            { label: "Roof Vent", action: "veh_upgrade_add", value: 1032 },
+            { label: "Alien Roof Vent", action: "veh_upgrade_add", value: 1033 },
+            { label: "--- Side Skirts ---", action: "none" },
+            { label: "Right Alien Skirt", action: "veh_upgrade_add", value: 1007 },
+            { label: "Left Alien Skirt", action: "veh_upgrade_add", value: 1017 },
+            { label: "Right Chrome Skirt", action: "veh_upgrade_add", value: 1027 },
+            { label: "Left Chrome Skirt", action: "veh_upgrade_add", value: 1031 },
+            { label: "--- Remove Upgrades ---", action: "none" },
+            { label: "Remove Nitro", action: "veh_upgrade_remove", value: 1010 },
+            { label: "Remove Hydraulics", action: "veh_upgrade_remove", value: 1087 },
+            { label: "Remove All Upgrades", action: "veh_upgrade_remove_all" }
         ]
     },
 
@@ -842,30 +882,27 @@ const menuData = {
     veh_colors: {
         title: "VEHICLE COLORS",
         items: [
+            { label: "--- Quick Colors ---", action: "none" },
             { label: "Black", action: "veh_color", value: [0, 0] },
             { label: "White", action: "veh_color", value: [18, 18] },
             { label: "Dark Gray", action: "veh_color", value: [4, 4] },
-            { label: "Light Gray", action: "veh_color", value: [8, 8] },
             { label: "Silver", action: "veh_color", value: [12, 12] },
             { label: "Red", action: "veh_color", value: [27, 27] },
-            { label: "Dark Red", action: "veh_color", value: [28, 28] },
             { label: "Candy Red", action: "veh_color", value: [30, 30] },
             { label: "Orange", action: "veh_color", value: [36, 36] },
             { label: "Yellow", action: "veh_color", value: [89, 89] },
-            { label: "Bright Yellow", action: "veh_color", value: [91, 91] },
             { label: "Green", action: "veh_color", value: [50, 50] },
-            { label: "Dark Green", action: "veh_color", value: [52, 52] },
             { label: "Lime Green", action: "veh_color", value: [55, 55] },
             { label: "Blue", action: "veh_color", value: [62, 62] },
-            { label: "Dark Blue", action: "veh_color", value: [64, 64] },
             { label: "Light Blue", action: "veh_color", value: [73, 73] },
-            { label: "Bright Blue", action: "veh_color", value: [82, 82] },
             { label: "Purple", action: "veh_color", value: [99, 99] },
             { label: "Pink", action: "veh_color", value: [100, 100] },
-            { label: "Hot Pink", action: "veh_color", value: [101, 101] },
-            { label: "Brown", action: "veh_color", value: [45, 45] },
-            { label: "Beige", action: "veh_color", value: [44, 44] },
             { label: "Gold", action: "veh_color", value: [37, 37] },
+            { label: "--- Custom Color Slots ---", action: "none" },
+            { label: "Color 1 (Primary)", action: "submenu", target: "veh_color_1" },
+            { label: "Color 2 (Secondary)", action: "submenu", target: "veh_color_2" },
+            { label: "Color 3 (Tertiary)", action: "submenu", target: "veh_color_3" },
+            { label: "Color 4 (Quaternary)", action: "submenu", target: "veh_color_4" },
             { label: "--- Two Tone ---", action: "none" },
             { label: "Black/Red", action: "veh_color", value: [0, 27] },
             { label: "Black/White", action: "veh_color", value: [0, 18] },
@@ -873,6 +910,126 @@ const menuData = {
             { label: "Blue/White", action: "veh_color", value: [62, 18] },
             { label: "Green/White", action: "veh_color", value: [50, 18] },
             { label: "Random", action: "veh_color_random" }
+        ]
+    },
+
+    veh_color_1: {
+        title: "COLOR 1 (PRIMARY)",
+        items: [
+            { label: "Black (0)", action: "veh_color_slot", slot: 1, value: 0 },
+            { label: "White (18)", action: "veh_color_slot", slot: 1, value: 18 },
+            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 1, value: 4 },
+            { label: "Light Gray (8)", action: "veh_color_slot", slot: 1, value: 8 },
+            { label: "Silver (12)", action: "veh_color_slot", slot: 1, value: 12 },
+            { label: "Red (27)", action: "veh_color_slot", slot: 1, value: 27 },
+            { label: "Dark Red (28)", action: "veh_color_slot", slot: 1, value: 28 },
+            { label: "Candy Red (30)", action: "veh_color_slot", slot: 1, value: 30 },
+            { label: "Orange (36)", action: "veh_color_slot", slot: 1, value: 36 },
+            { label: "Yellow (89)", action: "veh_color_slot", slot: 1, value: 89 },
+            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 1, value: 91 },
+            { label: "Green (50)", action: "veh_color_slot", slot: 1, value: 50 },
+            { label: "Dark Green (52)", action: "veh_color_slot", slot: 1, value: 52 },
+            { label: "Lime Green (55)", action: "veh_color_slot", slot: 1, value: 55 },
+            { label: "Blue (62)", action: "veh_color_slot", slot: 1, value: 62 },
+            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 1, value: 64 },
+            { label: "Light Blue (73)", action: "veh_color_slot", slot: 1, value: 73 },
+            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 1, value: 82 },
+            { label: "Purple (99)", action: "veh_color_slot", slot: 1, value: 99 },
+            { label: "Pink (100)", action: "veh_color_slot", slot: 1, value: 100 },
+            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 1, value: 101 },
+            { label: "Brown (45)", action: "veh_color_slot", slot: 1, value: 45 },
+            { label: "Beige (44)", action: "veh_color_slot", slot: 1, value: 44 },
+            { label: "Gold (37)", action: "veh_color_slot", slot: 1, value: 37 }
+        ]
+    },
+
+    veh_color_2: {
+        title: "COLOR 2 (SECONDARY)",
+        items: [
+            { label: "Black (0)", action: "veh_color_slot", slot: 2, value: 0 },
+            { label: "White (18)", action: "veh_color_slot", slot: 2, value: 18 },
+            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 2, value: 4 },
+            { label: "Light Gray (8)", action: "veh_color_slot", slot: 2, value: 8 },
+            { label: "Silver (12)", action: "veh_color_slot", slot: 2, value: 12 },
+            { label: "Red (27)", action: "veh_color_slot", slot: 2, value: 27 },
+            { label: "Dark Red (28)", action: "veh_color_slot", slot: 2, value: 28 },
+            { label: "Candy Red (30)", action: "veh_color_slot", slot: 2, value: 30 },
+            { label: "Orange (36)", action: "veh_color_slot", slot: 2, value: 36 },
+            { label: "Yellow (89)", action: "veh_color_slot", slot: 2, value: 89 },
+            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 2, value: 91 },
+            { label: "Green (50)", action: "veh_color_slot", slot: 2, value: 50 },
+            { label: "Dark Green (52)", action: "veh_color_slot", slot: 2, value: 52 },
+            { label: "Lime Green (55)", action: "veh_color_slot", slot: 2, value: 55 },
+            { label: "Blue (62)", action: "veh_color_slot", slot: 2, value: 62 },
+            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 2, value: 64 },
+            { label: "Light Blue (73)", action: "veh_color_slot", slot: 2, value: 73 },
+            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 2, value: 82 },
+            { label: "Purple (99)", action: "veh_color_slot", slot: 2, value: 99 },
+            { label: "Pink (100)", action: "veh_color_slot", slot: 2, value: 100 },
+            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 2, value: 101 },
+            { label: "Brown (45)", action: "veh_color_slot", slot: 2, value: 45 },
+            { label: "Beige (44)", action: "veh_color_slot", slot: 2, value: 44 },
+            { label: "Gold (37)", action: "veh_color_slot", slot: 2, value: 37 }
+        ]
+    },
+
+    veh_color_3: {
+        title: "COLOR 3 (TERTIARY)",
+        items: [
+            { label: "Black (0)", action: "veh_color_slot", slot: 3, value: 0 },
+            { label: "White (18)", action: "veh_color_slot", slot: 3, value: 18 },
+            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 3, value: 4 },
+            { label: "Light Gray (8)", action: "veh_color_slot", slot: 3, value: 8 },
+            { label: "Silver (12)", action: "veh_color_slot", slot: 3, value: 12 },
+            { label: "Red (27)", action: "veh_color_slot", slot: 3, value: 27 },
+            { label: "Dark Red (28)", action: "veh_color_slot", slot: 3, value: 28 },
+            { label: "Candy Red (30)", action: "veh_color_slot", slot: 3, value: 30 },
+            { label: "Orange (36)", action: "veh_color_slot", slot: 3, value: 36 },
+            { label: "Yellow (89)", action: "veh_color_slot", slot: 3, value: 89 },
+            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 3, value: 91 },
+            { label: "Green (50)", action: "veh_color_slot", slot: 3, value: 50 },
+            { label: "Dark Green (52)", action: "veh_color_slot", slot: 3, value: 52 },
+            { label: "Lime Green (55)", action: "veh_color_slot", slot: 3, value: 55 },
+            { label: "Blue (62)", action: "veh_color_slot", slot: 3, value: 62 },
+            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 3, value: 64 },
+            { label: "Light Blue (73)", action: "veh_color_slot", slot: 3, value: 73 },
+            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 3, value: 82 },
+            { label: "Purple (99)", action: "veh_color_slot", slot: 3, value: 99 },
+            { label: "Pink (100)", action: "veh_color_slot", slot: 3, value: 100 },
+            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 3, value: 101 },
+            { label: "Brown (45)", action: "veh_color_slot", slot: 3, value: 45 },
+            { label: "Beige (44)", action: "veh_color_slot", slot: 3, value: 44 },
+            { label: "Gold (37)", action: "veh_color_slot", slot: 3, value: 37 }
+        ]
+    },
+
+    veh_color_4: {
+        title: "COLOR 4 (QUATERNARY)",
+        items: [
+            { label: "Black (0)", action: "veh_color_slot", slot: 4, value: 0 },
+            { label: "White (18)", action: "veh_color_slot", slot: 4, value: 18 },
+            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 4, value: 4 },
+            { label: "Light Gray (8)", action: "veh_color_slot", slot: 4, value: 8 },
+            { label: "Silver (12)", action: "veh_color_slot", slot: 4, value: 12 },
+            { label: "Red (27)", action: "veh_color_slot", slot: 4, value: 27 },
+            { label: "Dark Red (28)", action: "veh_color_slot", slot: 4, value: 28 },
+            { label: "Candy Red (30)", action: "veh_color_slot", slot: 4, value: 30 },
+            { label: "Orange (36)", action: "veh_color_slot", slot: 4, value: 36 },
+            { label: "Yellow (89)", action: "veh_color_slot", slot: 4, value: 89 },
+            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 4, value: 91 },
+            { label: "Green (50)", action: "veh_color_slot", slot: 4, value: 50 },
+            { label: "Dark Green (52)", action: "veh_color_slot", slot: 4, value: 52 },
+            { label: "Lime Green (55)", action: "veh_color_slot", slot: 4, value: 55 },
+            { label: "Blue (62)", action: "veh_color_slot", slot: 4, value: 62 },
+            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 4, value: 64 },
+            { label: "Light Blue (73)", action: "veh_color_slot", slot: 4, value: 73 },
+            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 4, value: 82 },
+            { label: "Purple (99)", action: "veh_color_slot", slot: 4, value: 99 },
+            { label: "Pink (100)", action: "veh_color_slot", slot: 4, value: 100 },
+            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 4, value: 101 },
+            { label: "Brown (45)", action: "veh_color_slot", slot: 4, value: 45 },
+            { label: "Beige (44)", action: "veh_color_slot", slot: 4, value: 44 },
+            { label: "Gold (37)", action: "veh_color_slot", slot: 4, value: 37 }
         ]
     },
 
@@ -1066,8 +1223,7 @@ let toggleStates = {
 let neonObjects = [];
 let neonColor = { r: 255, g: 0, b: 255 }; // Default purple
 
-// Rainbow color cycling
-let rainbowHue = 0;
+// Sky color cycling
 let skyColorIndex = 0;
 
 // Sky colors for selection
@@ -1473,6 +1629,86 @@ function selectItem() {
             let c2 = Math.floor(Math.random() * 132);
             triggerNetworkEvent("ModMenu:VehicleColor", c1, c2);
             showNotification("Random color!");
+            break;
+
+        case "veh_color_slot":
+            // Set individual color slot using vehicle.colour1/2/3/4
+            if (localPlayer && localPlayer.vehicle) {
+                let veh = localPlayer.vehicle;
+                try {
+                    switch(item.slot) {
+                        case 1:
+                            veh.colour1 = item.value;
+                            showNotification("Color 1 set to " + item.value);
+                            break;
+                        case 2:
+                            veh.colour2 = item.value;
+                            showNotification("Color 2 set to " + item.value);
+                            break;
+                        case 3:
+                            veh.colour3 = item.value;
+                            showNotification("Color 3 set to " + item.value);
+                            break;
+                        case 4:
+                            veh.colour4 = item.value;
+                            showNotification("Color 4 set to " + item.value);
+                            break;
+                    }
+                } catch(e) {
+                    // Fallback using natives.changeCarColour for slots 1-2
+                    try {
+                        if (item.slot === 1 || item.slot === 2) {
+                            let col1 = item.slot === 1 ? item.value : veh.colour1;
+                            let col2 = item.slot === 2 ? item.value : veh.colour2;
+                            natives.changeCarColour(veh, col1, col2);
+                            showNotification("Color " + item.slot + " set!");
+                        }
+                    } catch(e2) {
+                        console.log("[Color] Failed to set color slot: " + e2);
+                    }
+                }
+            }
+            break;
+
+        case "veh_upgrade_add":
+            // Add upgrade using vehicle.addUpgrade(upgradeId)
+            if (localPlayer && localPlayer.vehicle) {
+                try {
+                    localPlayer.vehicle.addUpgrade(item.value);
+                    showNotification("Upgrade added!");
+                } catch(e) {
+                    console.log("[Upgrades] addUpgrade failed: " + e);
+                    showNotification("Upgrade not available for this vehicle");
+                }
+            }
+            break;
+
+        case "veh_upgrade_remove":
+            // Remove upgrade using vehicle.removeUpgrade(upgradeId)
+            if (localPlayer && localPlayer.vehicle) {
+                try {
+                    localPlayer.vehicle.removeUpgrade(item.value);
+                    showNotification("Upgrade removed!");
+                } catch(e) {
+                    console.log("[Upgrades] removeUpgrade failed: " + e);
+                }
+            }
+            break;
+
+        case "veh_upgrade_remove_all":
+            // Remove all common upgrades
+            if (localPlayer && localPlayer.vehicle) {
+                let veh = localPlayer.vehicle;
+                let upgradeIds = [1010, 1087, 1025, 1073, 1074, 1075, 1076, 1077, 1078, 1079, 1080, 1081, 1082, 1083,
+                                  1018, 1019, 1020, 1021, 1022, 1000, 1001, 1002, 1003, 1014, 1015, 1006, 1032, 1033,
+                                  1007, 1017, 1027, 1031];
+                for (let i = 0; i < upgradeIds.length; i++) {
+                    try {
+                        veh.removeUpgrade(upgradeIds[i]);
+                    } catch(e) {}
+                }
+                showNotification("All upgrades removed!");
+            }
             break;
 
         case "vehicle_delete":
@@ -2415,102 +2651,43 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
 });
 
 // ============================================================================
-// RENDERING - MD REVOLUTION MOD MENU (Trident Style)
-// Steel Blue primary, Gold/Orange accents, Flash effects
+// RENDERING - MD REVOLUTION MOD MENU
+// Clean Modern Dark Theme with customizable accent colors
 // ============================================================================
 
-// MDB Animation Effects Update (from MDB_Template.c Menu_Effects)
+// Animation Effects Update - Smooth transitions only
 addEventHandler("OnProcess", function(event) {
     // Update animation time
-    animTime += 0.02;
-    titlePulse += 0.04;
-    selectedPulse += 0.06;
-    colorShift += 0.01;
-    particleTime += 0.05;
+    animTime += 0.016;
 
-    // ===== MDB FlashingGhost Effect (150-255 range) =====
-    // Used for header text pulsing
-    if (FlashingGhost >= 255) FlashingGhostIncrement = false;
-    else if (FlashingGhost < 150) FlashingGhostIncrement = true;
-    if (FlashingGhostIncrement) {
-        if (FlashingGhost > 240) {
-            FlashingGhost += (255 - FlashingGhost);
-            FlashingGhostIncrement = false;
-        } else {
-            FlashingGhost += 2;
-        }
-    } else {
-        FlashingGhost -= 2;
-    }
+    // Smooth selection interpolation
+    smoothSelectedIndex += (selectedIndex - smoothSelectedIndex) * 0.15;
 
-    // ===== MDB Glowing Effect (0-190 range) =====
-    // Used for scrollbar glow
-    if (Glowing >= 190) GlowingIncrement = false;
-    if (Glowing <= 0) GlowingIncrement = true;
-    if (GlowingIncrement) {
-        if (Glowing > 185) Glowing++;
-        else Glowing += 2;
-    } else {
-        if (Glowing < 10) Glowing--;
-        else Glowing -= 2;
-    }
+    // Selection alpha pulse (subtle)
+    selectionAlpha = 0.5 + Math.sin(animTime * 2) * 0.1;
 
-    // ===== MDB Rotating Icon Effect =====
-    if (Rotating360 >= 360) Rotating360 = 0;
-    else Rotating360 += 5;
+    // Scrollbar glow pulse animation
+    scrollbarPulse += 0.04;
+    scrollbarGlow = 0.5 + Math.sin(scrollbarPulse) * 0.5;
 
-    // ===== MDB Fading Effects =====
-    if (Fading_100 < 255) Fading_100 += 5;
-    if (Fading_150 < 255) Fading_150 += 5;
+    // Selection glow pulse (breathing effect)
+    selectionGlow += 0.025 * selectionPulseDir;
+    if (selectionGlow >= 1) selectionPulseDir = -1;
+    if (selectionGlow <= 0.3) selectionPulseDir = 1;
 
-    // ===== MDB Dropdown Animation =====
-    if (dropdown_y > 0.96) dropdown_y -= 0.01;
-    else dropdown_y = 0.95;
-
-    // ===== Enhanced UI Animations =====
-    // Border glow effect (0-1 smooth pulse)
-    if (borderGlow >= 1) borderGlowIncrement = false;
-    else if (borderGlow <= 0) borderGlowIncrement = true;
-    borderGlow += borderGlowIncrement ? 0.015 : -0.015;
-
-    // Corner pulse effect
-    cornerPulse = (cornerPulse + 0.03) % (Math.PI * 2);
-
-    // Header wave animation
-    headerWaveOffset = (headerWaveOffset + 0.05) % (Math.PI * 2);
-
-    // Scrollbar pulse
-    scrollbarPulse = (scrollbarPulse + 0.08) % (Math.PI * 2);
-
-    // Logo rotation (slow spin)
-    logoRotation = (logoRotation + 0.5) % 360;
-
-    // Banner shimmer effect
-    bannerShimmer = (bannerShimmer + 0.04) % (Math.PI * 2);
-
-    // Footer pulse
-    footerPulse = (footerPulse + 0.05) % (Math.PI * 2);
-
-    // Stats update timer
-    statsUpdateTime += 0.02;
+    // Accent line glow animation
+    accentLineGlow = 0.7 + Math.sin(animTime * 1.5) * 0.3;
 
     // Screen shake decay
     if (screenShake > 0) {
         screenShake -= 0.1;
         if (screenShake < 0) screenShake = 0;
     }
-    
+
     // Flash effect decay
     if (flashAlpha > 0) {
         flashAlpha -= 0.05;
         if (flashAlpha < 0) flashAlpha = 0;
-    }
-    
-    // Matrix effect
-    if (toggleStates.matrixMode) {
-        matrixEffect += 0.1;
-    } else {
-        matrixEffect *= 0.9;
     }
 
     // Apply continuous effects when menu is closed
@@ -2535,27 +2712,23 @@ addEventHandler("OnProcess", function(event) {
                 }
             }
 
-            // Night Vision - using timecycle modifier as alternative
+            // Night Vision
             if (toggleStates.nightVision) {
                 try {
-                    // Try native first
                     natives.setNightvision(true);
                 } catch(e) {
                     try {
-                        // Alternative: use timecycle for green tint effect
                         natives.setTimecycleModifier("nightvision");
                     } catch(e2) {}
                 }
             }
 
-            // Thermal Vision - using timecycle modifier as alternative
+            // Thermal Vision
             if (toggleStates.thermalVision) {
                 try {
-                    // Try native first
                     natives.setInfaredvision(true);
                 } catch(e) {
                     try {
-                        // Alternative: use timecycle for thermal effect
                         natives.setTimecycleModifier("thermal");
                     } catch(e2) {}
                 }
@@ -2569,14 +2742,13 @@ addEventHandler("OnProcess", function(event) {
                 } catch(e) {}
             }
 
-            // Screen shake effect - apply camera shake
+            // Screen shake effect
             if (screenShake > 0.01) {
                 try {
                     let shakeAmount = screenShake * 50;
                     natives.shakeCam(1, Math.floor(shakeAmount));
                 } catch(e) {
                     try {
-                        // Alternative: move camera slightly
                         natives.setGameCamShake(true, Math.floor(screenShake * 3));
                     } catch(e2) {}
                 }
@@ -2584,142 +2756,120 @@ addEventHandler("OnProcess", function(event) {
         } catch(e) {}
     }
 
-    // Smooth scroll interpolation - very smooth
-    smoothScrollY += (targetScrollY - smoothScrollY) * 0.15;
+    // Matrix effect update (for matrix mode toggle)
+    if (toggleStates.matrixMode) {
+        matrixEffect += 0.1;
+    } else {
+        matrixEffect *= 0.9;
+    }
 
-    // Menu open animation - smooth transition
+    // Smooth scroll interpolation
+    smoothScrollY += (targetScrollY - smoothScrollY) * 0.12;
+
+    // Menu open animation - smooth ease out
     if (menuOpen && menuOpenAnim < 1) {
-        menuOpenAnim += 0.08;
-        if (menuOpenAnim > 1) {
-            menuOpenAnim = 1;
-        }
+        menuOpenAnim += (1 - menuOpenAnim) * 0.12;
+        if (menuOpenAnim > 0.99) menuOpenAnim = 1;
     } else if (!menuOpen && menuOpenAnim > 0) {
-        menuOpenAnim -= 0.12;
-        if (menuOpenAnim < 0) menuOpenAnim = 0;
+        menuOpenAnim -= menuOpenAnim * 0.15;
+        if (menuOpenAnim < 0.01) menuOpenAnim = 0;
     }
 });
 
-// Enhanced eye-melting menu rendering (optimized)
+// ============================================================================
+// CLEAN MODERN MENU RENDERING - Dark Glassmorphism Style
+// ============================================================================
 addEventHandler("OnDrawnHUD", function(event) {
     if (menuOpenAnim <= 0) return;
 
     let currentData = menuData[currentMenu];
     let items = getCurrentMenuItems();
     let title = currentData ? currentData.title : currentMenu.toUpperCase();
+    let theme = getTheme();
 
     let visibleCount = Math.min(items.length, menu.maxVisibleItems);
     let totalHeight = menu.headerHeight + (visibleCount * menu.itemHeight) + menu.footerHeight;
 
     let animAlpha = Math.floor(255 * menuOpenAnim);
 
-    // Calculate animated position (smooth slide in from right)
-    let slideOffset = (1 - menuOpenAnim) * 120;
+    // Smooth slide animation (no bounce, no elastic)
+    let slideOffset = (1 - menuOpenAnim) * 80;
     let baseX = menu.x + slideOffset;
     let baseY = menu.y;
 
-    // ===== ENHANCED OUTER GLOW/SHADOW =====
-    let glowIntensity = 0.3 + borderGlow * 0.2;
-    let outerGlowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(40 * glowIntensity * menuOpenAnim));
-    drawRect(baseX - 8, baseY - 8, menu.width + 16, totalHeight + 26, outerGlowColor);
-    let shadowBg = toColour(0, 0, 0, Math.floor(120 * menuOpenAnim));
-    drawRect(baseX - 4, baseY - 4, menu.width + 8, totalHeight + 18, shadowBg);
+    // ===== SUBTLE DROP SHADOW =====
+    let shadowAlpha = Math.floor(80 * menuOpenAnim);
+    drawRect(baseX + 4, baseY + 4, menu.width, totalHeight + 10, toColour(0, 0, 0, shadowAlpha));
 
-    // ===== MDB WINDOW BACKGROUND - Enhanced gradient-style =====
-    let windowBgColor = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(190 * menuOpenAnim));
-    drawRect(baseX, baseY, menu.width, totalHeight + 10, windowBgColor);
+    // ===== MAIN PANEL BACKGROUND - Clean dark =====
+    let panelBg = toColour(UI.bgDark.r, UI.bgDark.g, UI.bgDark.b, Math.floor(245 * menuOpenAnim));
+    drawRect(baseX, baseY, menu.width, totalHeight + 10, panelBg);
 
-    // Inner darker panel for depth
-    let innerBgColor = toColour(30, 50, 70, Math.floor(100 * menuOpenAnim));
-    drawRect(baseX + 3, baseY + 3, menu.width - 6, totalHeight + 4, innerBgColor);
+    // ===== SUBTLE BORDER =====
+    let borderAlpha = Math.floor(100 * menuOpenAnim);
+    let borderCol = toColour(UI.border.r, UI.border.g, UI.border.b, borderAlpha);
+    drawRect(baseX, baseY, menu.width, 1, borderCol);
+    drawRect(baseX, baseY + totalHeight + 9, menu.width, 1, borderCol);
+    drawRect(baseX, baseY, 1, totalHeight + 10, borderCol);
+    drawRect(baseX + menu.width - 1, baseY, 1, totalHeight + 10, borderCol);
 
-    // ===== ANIMATED BORDER =====
-    let borderAlpha = Math.floor((180 + borderGlow * 75) * menuOpenAnim);
-    let borderColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, borderAlpha);
-    // Top border
-    drawRect(baseX, baseY, menu.width, 2, borderColor);
-    // Bottom border
-    drawRect(baseX, baseY + totalHeight + 8, menu.width, 2, borderColor);
-    // Left border
-    drawRect(baseX, baseY, 2, totalHeight + 10, borderColor);
-    // Right border
-    drawRect(baseX + menu.width - 2, baseY, 2, totalHeight + 10, borderColor);
+    // ===== HEADER =====
+    let headerY = baseY;
+    let headerH = menu.headerHeight;
 
-    // ===== DECORATIVE CORNER ELEMENTS =====
-    let cornerSize = 12;
-    let cornerAlpha = Math.floor((200 + Math.sin(cornerPulse) * 55) * menuOpenAnim);
-    let cornerColor = toColour(255, 200, 100, cornerAlpha);
-    // Top-left corner
-    drawRect(baseX, baseY, cornerSize, 3, cornerColor);
-    drawRect(baseX, baseY, 3, cornerSize, cornerColor);
-    // Top-right corner
-    drawRect(baseX + menu.width - cornerSize, baseY, cornerSize, 3, cornerColor);
-    drawRect(baseX + menu.width - 3, baseY, 3, cornerSize, cornerColor);
-    // Bottom-left corner
-    drawRect(baseX, baseY + totalHeight + 7, cornerSize, 3, cornerColor);
-    drawRect(baseX, baseY + totalHeight + 10 - cornerSize, 3, cornerSize, cornerColor);
-    // Bottom-right corner
-    drawRect(baseX + menu.width - cornerSize, baseY + totalHeight + 7, cornerSize, 3, cornerColor);
-    drawRect(baseX + menu.width - 3, baseY + totalHeight + 10 - cornerSize, 3, cornerSize, cornerColor);
+    // Header background - slightly lighter
+    let headerBg = toColour(UI.bgPanel.r, UI.bgPanel.g, UI.bgPanel.b, Math.floor(255 * menuOpenAnim));
+    drawRect(baseX + 1, headerY + 1, menu.width - 2, headerH - 1, headerBg);
 
-    // ===== ENHANCED HEADER BANNER =====
-    let headerY = baseY + 5;
-    // Header background gradient
-    let headerBg1 = toColour(40, 60, 90, Math.floor(220 * menuOpenAnim));
-    let headerBg2 = toColour(60, 90, 130, Math.floor(220 * menuOpenAnim));
-    drawRect(baseX + 4, headerY - 2, menu.width - 8, 55, headerBg1);
-    // Header shimmer effect
-    let shimmerX = baseX + 4 + ((Math.sin(bannerShimmer) + 1) * 0.5) * (menu.width - 80);
-    let shimmerColor = toColour(255, 255, 255, Math.floor(30 * menuOpenAnim));
-    drawRect(shimmerX, headerY - 2, 60, 55, shimmerColor);
+    // Accent line at top of header with glow animation
+    let glowLineAlpha = Math.floor(60 * menuOpenAnim * accentLineGlow);
+    let accentGlowCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, glowLineAlpha);
+    drawRect(baseX - 2, headerY - 3, menu.width + 4, 8, accentGlowCol);
 
-    // "MD" Prefix - Enhanced with glow
-    let shadowColor = toColour(0, 0, 0, Math.floor(255 * menuOpenAnim));
-    drawText("MD", baseX + 13, headerY + 3, shadowColor, 28);
-    drawText("MD", baseX + 11, headerY + 1, shadowColor, 28);
-    // Main "MD" in bright Steelblue
-    let mdGlowColor = toColour(100, 160, 220, Math.floor(FlashingGhost * menuOpenAnim));
-    let mdColor = toColour(MDB.Steelblue.r + 30, MDB.Steelblue.g + 30, MDB.Steelblue.b + 30, animAlpha);
-    drawText("MD", baseX + 10, headerY, mdGlowColor, 28);
-    drawText("MD", baseX + 10, headerY, mdColor, 28);
+    let accentCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha);
+    drawRect(baseX, headerY, menu.width, 2, accentCol);
 
-    // "REVOLUTION" - Enhanced with glow effect
-    drawText("REVOLUTION", baseX + 58, headerY + 8, shadowColor, 20);
-    drawText("REVOLUTION", baseX + 56, headerY + 6, shadowColor, 20);
-    // Main header in Gold with enhanced FlashingGhost effect
-    let headerGlowColor = toColour(255, 200, 100, Math.floor(FlashingGhost * 0.7 * menuOpenAnim));
-    let headerGoldColor = toColour(MDB.Gold.r + 40, MDB.Gold.g + 40, MDB.Gold.b, Math.floor(FlashingGhost * menuOpenAnim));
-    drawText("REVOLUTION", baseX + 55, headerY + 5, headerGlowColor, 20);
-    drawText("REVOLUTION", baseX + 55, headerY + 5, headerGoldColor, 20);
+    // Bright center highlight
+    let brightAccent = toColour(
+        Math.min(255, theme.accent.r + 80),
+        Math.min(255, theme.accent.g + 80),
+        Math.min(255, theme.accent.b + 80),
+        Math.floor(animAlpha * accentLineGlow)
+    );
+    drawRect(baseX + menu.width * 0.25, headerY, menu.width * 0.5, 2, brightAccent);
 
-    // Version badge - Enhanced with box
-    let badgeX = baseX + menu.width - 78;
-    let badgeY = headerY + 18;
-    let badgeBg = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(200 * menuOpenAnim));
-    drawRect(badgeX - 4, badgeY - 2, 70, 18, badgeBg);
-    let versionColor = toColour(255, 255, 255, animAlpha);
-    drawText("TRIDENT", badgeX, badgeY + 2, versionColor, 11);
+    // Title text
+    let logoX = baseX + 16;
+    let logoY = headerY + 18;
 
-    // Sub Header - Enhanced with underline effect
-    let subHeaderColor = toColour(MDB.SubHeader.r + 40, MDB.SubHeader.g + 40, MDB.SubHeader.b + 40, animAlpha);
-    let subHeaderText = currentMenu === "main" ? "MAJOR DISTRIBUTION" : title;
-    let subHeaderX = baseX + (menu.width / 2) - (subHeaderText.length * 3.5);
-    drawText(subHeaderText, subHeaderX + 1, headerY + 40, shadowColor, 12);
-    drawText(subHeaderText, subHeaderX, headerY + 39, subHeaderColor, 12);
+    // "MD REVOLUTION" - Clean white text
+    let titleCol = toColour(UI.textPrimary.r, UI.textPrimary.g, UI.textPrimary.b, animAlpha);
+    drawText("MD", logoX, logoY, titleCol, 26);
 
-    // ===== ENHANCED WHITE LINE SEPARATOR =====
-    // Gradient-style separator
-    let lineColorL = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(200 * menuOpenAnim));
-    let lineColorC = toColour(MDB.Line.r, MDB.Line.g, MDB.Line.b, animAlpha);
-    let lineColorR = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(200 * menuOpenAnim));
-    drawRect(baseX + 10, baseY + menu.headerHeight - 5, 30, 2, lineColorL);
-    drawRect(baseX + 40, baseY + menu.headerHeight - 5, menu.width - 80, 2, lineColorC);
-    drawRect(baseX + menu.width - 40, baseY + menu.headerHeight - 5, 30, 2, lineColorR);
-    // Add glow line under
-    let glowLineColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(60 * borderGlow * menuOpenAnim));
-    drawRect(baseX + 10, baseY + menu.headerHeight - 3, menu.width - 20, 3, glowLineColor);
+    let revCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha);
+    drawText("REVOLUTION", logoX + 58, logoY + 4, revCol, 18);
 
-    // ===== MDB MENU ITEMS =====
-    let yPos = baseY + menu.headerHeight;
+    // Submenu title
+    let subTitleY = headerY + headerH - 26;
+    let subText = currentMenu === "main" ? "MAIN MENU" : title;
+    let subCol = toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, animAlpha);
+    drawText(subText, baseX + 16, subTitleY, subCol, 12);
+
+    // Theme indicator badge
+    let themeName = theme.name.toUpperCase();
+    let badgeX = baseX + menu.width - 16 - (themeName.length * 6);
+    let badgeBg = toColour(UI.bgHover.r, UI.bgHover.g, UI.bgHover.b, Math.floor(200 * menuOpenAnim));
+    drawRect(badgeX - 8, headerY + 12, themeName.length * 6 + 16, 18, badgeBg);
+    let badgeTextCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha);
+    drawText(themeName, badgeX, headerY + 15, badgeTextCol, 10);
+
+    // ===== SEPARATOR LINE =====
+    let sepY = baseY + menu.headerHeight;
+    let sepCol = toColour(UI.border.r, UI.border.g, UI.border.b, Math.floor(150 * menuOpenAnim));
+    drawRect(baseX + 1, sepY, menu.width - 2, 1, sepCol);
+
+    // ===== MENU ITEMS =====
+    let yPos = baseY + menu.headerHeight + 1;
     targetScrollY = scrollOffset * menu.itemHeight;
 
     for (let i = scrollOffset; i < scrollOffset + visibleCount && i < items.length; i++) {
@@ -2728,186 +2878,235 @@ addEventHandler("OnDrawnHUD", function(event) {
         let itemY = yPos + (i - scrollOffset) * menu.itemHeight;
 
         if (isSelected) {
-            // ===== ENHANCED SELECTED ITEM - Multi-layer glow effect =====
-            // Outer glow
-            let outerGlowAlpha = Math.floor((80 + Math.sin(scrollbarPulse) * 40) * menuOpenAnim);
-            let outerGlowCol = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, outerGlowAlpha);
-            drawRect(baseX + 4, itemY - 2, menu.width - 8, menu.itemHeight + 2, outerGlowCol);
+            // Selected item - glowing accent background
+            let glowIntensity = 0.15 + selectionGlow * 0.15;
 
-            // Main selection background with enhanced Glowing effect
-            let scrollbarAlpha = Math.floor((160 + Math.sin(scrollbarPulse) * 30) * menuOpenAnim);
-            let scrollbarColor = toColour(Glowing, Glowing + 30, 220, scrollbarAlpha);
-            drawRect(baseX + 6, itemY, menu.width - 12, menu.itemHeight - 2, scrollbarColor);
+            // Outer glow layer
+            let outerGlowAlpha = Math.floor(40 * menuOpenAnim * selectionGlow);
+            let outerGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, outerGlowAlpha);
+            drawRect(baseX, itemY - 2, menu.width, menu.itemHeight + 2, outerGlow);
 
-            // Inner highlight line (top)
-            let highlightLineColor = toColour(255, 255, 255, Math.floor(100 * menuOpenAnim));
-            drawRect(baseX + 8, itemY + 1, menu.width - 16, 1, highlightLineColor);
+            // Main selection background
+            let selBgAlpha = Math.floor(255 * menuOpenAnim);
+            let selBg = toColour(UI.bgSelected.r, UI.bgSelected.g, UI.bgSelected.b, selBgAlpha);
+            drawRect(baseX + 1, itemY, menu.width - 2, menu.itemHeight - 2, selBg);
 
-            // Left accent bar
-            let accentColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, animAlpha);
-            drawRect(baseX + 6, itemY + 2, 3, menu.itemHeight - 6, accentColor);
+            // Inner accent overlay (subtle)
+            let innerGlowAlpha = Math.floor(25 * menuOpenAnim * selectionGlow);
+            let innerGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, innerGlowAlpha);
+            drawRect(baseX + 1, itemY, menu.width - 2, menu.itemHeight - 2, innerGlow);
+
+            // Left accent bar with glow
+            let barGlowAlpha = Math.floor(100 * menuOpenAnim * selectionGlow);
+            let barGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, barGlowAlpha);
+            drawRect(baseX - 2, itemY, 8, menu.itemHeight - 2, barGlow);
+
+            let accentBarCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha);
+            drawRect(baseX + 1, itemY, 3, menu.itemHeight - 2, accentBarCol);
 
         } else if (item.action === "none") {
-            // ===== MDB Separator/JumpOver - Enhanced with subtle line =====
-            let sepLineColor = toColour(MDB.JumpOver.r, MDB.JumpOver.g, MDB.JumpOver.b, Math.floor(80 * menuOpenAnim));
-            drawRect(baseX + 20, itemY + menu.itemHeight - 4, menu.width - 40, 1, sepLineColor);
-        }
-        // Normal items have no background in MDB style (transparent over Steelblue window)
-
-        // ===== MDB ITEM TEXT =====
-        let textX = baseX + 22;
-
-        if (item.action === "none") {
-            // ===== MDB JumpOver/Separator Text - JumpOver color (58,95,205) =====
-            let jumpOverColor = toColour(MDB.JumpOver.r, MDB.JumpOver.g, MDB.JumpOver.b, animAlpha);
-            drawText(item.label, baseX + 20, itemY + 12, jumpOverColor, 12);
-        } else if (item.action === "toggle" && toggleStates[item.target]) {
-            // ===== MDB Toggle ON - ItemHighlight color (255,143,0) with FlashingGhost =====
-            let highlightColor = toColour(MDB.ItemHighlight.r, MDB.ItemHighlight.g, MDB.ItemHighlight.b, animAlpha);
-            drawText(item.label, textX, itemY + 12, highlightColor, 14);
-        } else if (isSelected) {
-            // ===== MDB Selected Item Text - ScrollItem white (255,255,255) =====
-            let selectedTextColor = toColour(MDB.ScrollItem.r, MDB.ScrollItem.g, MDB.ScrollItem.b, animAlpha);
-            drawText(item.label, textX, itemY + 12, selectedTextColor, 14);
+            // Section header - no background, just spacing
         } else {
-            // ===== MDB Normal Item Text - Item gray (180,180,180) =====
-            let normalTextColor = toColour(MDB.Item.r, MDB.Item.g, MDB.Item.b, animAlpha);
-            drawText(item.label, textX, itemY + 12, normalTextColor, 14);
-        }
-
-        // ===== MDB TOGGLE INDICATORS - Bool color (255,128,0) arrow =====
-        if (item.action === "toggle") {
-            let isOn = toggleStates[item.target];
-            // Draw arrow indicator like MDB (arrowLeftRight sprite equivalent)
-            let arrowColor = toColour(MDB.Bool.r, MDB.Bool.g, MDB.Bool.b, Math.floor(Fading_100 * menuOpenAnim));
-            drawText(">", baseX + 12, itemY + 12, arrowColor, 12);
-
-            // Status text on right side
-            let stateX = baseX + menu.width - 50;
-            if (isOn) {
-                // MDB ON state - ItemHighlight with FlashingGhost
-                let onColor = toColour(MDB.ItemHighlight.r, MDB.ItemHighlight.g, MDB.ItemHighlight.b, Math.floor(FlashingGhost * menuOpenAnim));
-                drawText("ON", stateX, itemY + 12, onColor, 12);
-            } else {
-                // MDB OFF state - gray
-                let offColor = toColour(MDB.Item.r, MDB.Item.g, MDB.Item.b, animAlpha);
-                drawText("OFF", stateX, itemY + 12, offColor, 12);
+            // Non-selected item - subtle hover effect on every other row
+            if ((i - scrollOffset) % 2 === 1) {
+                let altBg = toColour(UI.bgPanel.r, UI.bgPanel.g, UI.bgPanel.b, Math.floor(60 * menuOpenAnim));
+                drawRect(baseX + 1, itemY, menu.width - 2, menu.itemHeight - 2, altBg);
             }
         }
 
-        // ===== MDB Submenu Arrow =====
+        // Item text
+        let textX = baseX + 20;
+        let textY = itemY + 14;
+        let textSize = 13;
+
+        if (item.action === "none") {
+            // Section header - muted blue text
+            let secCol = toColour(UI.sectionText.r, UI.sectionText.g, UI.sectionText.b, Math.floor(200 * menuOpenAnim));
+            drawText(item.label, textX, textY, secCol, 11);
+
+            // Subtle line under section header
+            let lineCol = toColour(UI.border.r, UI.border.g, UI.border.b, Math.floor(80 * menuOpenAnim));
+            drawRect(baseX + 16, itemY + menu.itemHeight - 6, menu.width - 32, 1, lineCol);
+
+        } else if (item.action === "toggle" && toggleStates[item.target]) {
+            // Toggle ON - accent color text
+            let toggleCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha);
+            drawText(item.label, textX, textY, toggleCol, textSize);
+
+        } else if (isSelected) {
+            // Selected item - white text
+            let selTextCol = toColour(UI.textPrimary.r, UI.textPrimary.g, UI.textPrimary.b, animAlpha);
+            drawText(item.label, textX, textY, selTextCol, textSize);
+
+        } else {
+            // Normal item - secondary text color
+            let normCol = toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, animAlpha);
+            drawText(item.label, textX, textY, normCol, textSize);
+        }
+
+        // Toggle status indicator with glow effects
+        if (item.action === "toggle") {
+            let isOn = toggleStates[item.target];
+            let stateX = baseX + menu.width - 55;
+            let boxY = itemY + 10;
+            let boxW = 40;
+            let boxH = 20;
+
+            if (isOn) {
+                // ON state - green pill with pulsing glow
+                let glowIntensity = 0.5 + selectionGlow * 0.5;
+
+                // Outer glow
+                let glowAlpha = Math.floor(50 * menuOpenAnim * glowIntensity);
+                let glowCol = toColour(UI.success.r, UI.success.g, UI.success.b, glowAlpha);
+                drawRect(stateX - 3, boxY - 3, boxW + 6, boxH + 6, glowCol);
+
+                // Main pill
+                let onBg = toColour(UI.success.r, UI.success.g, UI.success.b, Math.floor(220 * menuOpenAnim));
+                drawRect(stateX, boxY, boxW, boxH, onBg);
+
+                // Inner highlight
+                let highlightAlpha = Math.floor(80 * menuOpenAnim * glowIntensity);
+                let highlightCol = toColour(
+                    Math.min(255, UI.success.r + 60),
+                    Math.min(255, UI.success.g + 60),
+                    Math.min(255, UI.success.b + 60),
+                    highlightAlpha
+                );
+                drawRect(stateX + 2, boxY + 2, boxW - 4, 8, highlightCol);
+
+                let onText = toColour(255, 255, 255, animAlpha);
+                drawText("ON", stateX + 12, boxY + 4, onText, 10);
+            } else {
+                // OFF state - muted with subtle border
+                let offBg = toColour(UI.bgHover.r, UI.bgHover.g, UI.bgHover.b, Math.floor(180 * menuOpenAnim));
+                drawRect(stateX, boxY, boxW, boxH, offBg);
+
+                // Subtle inner shadow
+                let shadowCol = toColour(0, 0, 0, Math.floor(30 * menuOpenAnim));
+                drawRect(stateX, boxY, boxW, 2, shadowCol);
+
+                let offText = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, animAlpha);
+                drawText("OFF", stateX + 9, boxY + 4, offText, 10);
+            }
+        }
+
+        // Submenu arrow
         if (item.action === "submenu") {
             let arrowX = baseX + menu.width - 25;
-            // MDB uses spinning blip icon, we'll use animated arrow
-            let arrowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, animAlpha);
-            drawText(">", arrowX, itemY + 12, arrowColor, 14);
+            let arrowCol = isSelected ?
+                toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha) :
+                toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, animAlpha);
+            drawText(">", arrowX, textY, arrowCol, textSize);
         }
     }
 
-    // ===== ENHANCED FOOTER =====
+    // ===== FOOTER =====
     let footerY = yPos + visibleCount * menu.itemHeight;
 
-    // Footer background with gradient effect
-    let footerBgColor = toColour(30, 50, 70, Math.floor(180 * menuOpenAnim));
-    drawRect(baseX + 4, footerY + 2, menu.width - 8, menu.footerHeight - 4, footerBgColor);
+    // Footer separator
+    drawRect(baseX + 1, footerY, menu.width - 2, 1, sepCol);
 
-    // Footer top line
-    let footerLineColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor((150 + Math.sin(footerPulse) * 50) * menuOpenAnim));
-    drawRect(baseX + 10, footerY + 2, menu.width - 20, 1, footerLineColor);
+    // Footer background
+    let footerBg = toColour(UI.bgPanel.r, UI.bgPanel.g, UI.bgPanel.b, Math.floor(200 * menuOpenAnim));
+    drawRect(baseX + 1, footerY + 1, menu.width - 2, menu.footerHeight - 2, footerBg);
 
-    // Navigation hints with icons
-    let helperTextColor = toColour(MDB.StatsItem.r, MDB.StatsItem.g, MDB.StatsItem.b, Math.floor(220 * menuOpenAnim));
-    let helperAccentColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(220 * menuOpenAnim));
+    // Navigation hints
+    let hintY = footerY + 14;
+    let hintCol = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, animAlpha);
+    let keyCol = toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, animAlpha);
 
-    // Draw key hints
-    drawText("[", baseX + 12, footerY + 12, helperAccentColor, 10);
-    drawText("UP/DOWN", baseX + 18, footerY + 12, helperTextColor, 10);
-    drawText("]", baseX + 68, footerY + 12, helperAccentColor, 10);
-    drawText("Navigate", baseX + 76, footerY + 12, helperTextColor, 9);
+    drawText("[", baseX + 15, hintY, hintCol, 10);
+    drawText("UP/DOWN", baseX + 22, hintY, keyCol, 10);
+    drawText("]", baseX + 72, hintY, hintCol, 10);
+    drawText("Navigate", baseX + 82, hintY, hintCol, 10);
 
-    drawText("[", baseX + 130, footerY + 12, helperAccentColor, 10);
-    drawText("ENTER", baseX + 136, footerY + 12, helperTextColor, 10);
-    drawText("]", baseX + 172, footerY + 12, helperAccentColor, 10);
-    drawText("Select", baseX + 180, footerY + 12, helperTextColor, 9);
+    drawText("[", baseX + 145, hintY, hintCol, 10);
+    drawText("ENTER", baseX + 152, hintY, keyCol, 10);
+    drawText("]", baseX + 190, hintY, hintCol, 10);
+    drawText("Select", baseX + 200, hintY, hintCol, 10);
 
-    drawText("[", baseX + 225, footerY + 12, helperAccentColor, 10);
-    drawText("BACK", baseX + 231, footerY + 12, helperTextColor, 10);
-    drawText("]", baseX + 260, footerY + 12, helperAccentColor, 10);
-    drawText("Return", baseX + 268, footerY + 12, helperTextColor, 9);
+    drawText("[", baseX + 255, hintY, hintCol, 10);
+    drawText("BACK", baseX + 262, hintY, keyCol, 10);
+    drawText("]", baseX + 295, hintY, hintCol, 10);
+    drawText("Return", baseX + 305, hintY, hintCol, 10);
 
-    // ===== ENHANCED SCROLLBAR (RIGHT SIDE) =====
+    // ===== GLOWING SCROLLBAR =====
     if (items.length > menu.maxVisibleItems) {
         let scrollbarX = baseX + menu.width - 10;
-        let scrollbarY = baseY + menu.headerHeight + 5;
-        let scrollbarH = visibleCount * menu.itemHeight - 10;
+        let scrollbarY = baseY + menu.headerHeight + 8;
+        let scrollbarH = visibleCount * menu.itemHeight - 16;
         let maxScroll = items.length - visibleCount;
         let scrollProgress = scrollOffset / maxScroll;
-        let thumbH = Math.max(30, scrollbarH * (visibleCount / items.length));
+        let thumbH = Math.max(35, scrollbarH * (visibleCount / items.length));
         let thumbY = scrollbarY + scrollProgress * (scrollbarH - thumbH);
 
-        // Scrollbar track
-        let trackColor = toColour(40, 40, 50, Math.floor(150 * menuOpenAnim));
-        drawRect(scrollbarX, scrollbarY, 5, scrollbarH, trackColor);
+        // Outer glow effect for track
+        let glowAlpha = Math.floor(30 * menuOpenAnim * scrollbarGlow);
+        let trackGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, glowAlpha);
+        drawRect(scrollbarX - 3, scrollbarY - 2, 12, scrollbarH + 4, trackGlow);
 
-        // Scrollbar thumb with glow
-        let thumbGlowAlpha = Math.floor((60 + Math.sin(scrollbarPulse) * 30) * menuOpenAnim);
-        let thumbGlowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, thumbGlowAlpha);
-        drawRect(scrollbarX - 1, thumbY - 1, 7, thumbH + 2, thumbGlowColor);
+        // Track background with subtle gradient look
+        let trackBg = toColour(UI.bgHover.r, UI.bgHover.g, UI.bgHover.b, Math.floor(180 * menuOpenAnim));
+        drawRect(scrollbarX, scrollbarY, 6, scrollbarH, trackBg);
 
-        let thumbColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(220 * menuOpenAnim));
-        drawRect(scrollbarX, thumbY, 5, thumbH, thumbColor);
+        // Inner track line
+        let trackInner = toColour(UI.bgDark.r, UI.bgDark.g, UI.bgDark.b, Math.floor(150 * menuOpenAnim));
+        drawRect(scrollbarX + 1, scrollbarY + 1, 4, scrollbarH - 2, trackInner);
 
-        // Up arrow - Gold color, show when not at top
-        if (scrollOffset > 0) {
-            let upArrowY = baseY + menu.headerHeight + 2;
-            let upArrowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(FlashingGhost * menuOpenAnim));
-            drawText("^", baseX + menu.width / 2 - 5, upArrowY, upArrowColor, 14);
-        }
+        // Thumb outer glow (pulsing)
+        let thumbGlowAlpha = Math.floor(80 * menuOpenAnim * scrollbarGlow);
+        let thumbGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, thumbGlowAlpha);
+        drawRect(scrollbarX - 4, thumbY - 3, 14, thumbH + 6, thumbGlow);
 
-        // Down arrow - Gold color, show when not at bottom
-        if (scrollOffset < maxScroll) {
-            let downArrowY = footerY - 16;
-            let downArrowColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(FlashingGhost * menuOpenAnim));
-            drawText("v", baseX + menu.width / 2 - 5, downArrowY, downArrowColor, 14);
-        }
+        // Thumb mid glow
+        let thumbMidGlow = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(120 * menuOpenAnim * scrollbarGlow));
+        drawRect(scrollbarX - 2, thumbY - 1, 10, thumbH + 2, thumbMidGlow);
 
-        // Page indicator
+        // Thumb main body
+        let thumbCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, Math.floor(255 * menuOpenAnim));
+        drawRect(scrollbarX, thumbY, 6, thumbH, thumbCol);
+
+        // Thumb highlight (brighter center)
+        let highlightAlpha = Math.floor(255 * menuOpenAnim * (0.5 + scrollbarGlow * 0.5));
+        let thumbHighlight = toColour(
+            Math.min(255, theme.accent.r + 50),
+            Math.min(255, theme.accent.g + 50),
+            Math.min(255, theme.accent.b + 50),
+            highlightAlpha
+        );
+        drawRect(scrollbarX + 1, thumbY + 2, 4, thumbH - 4, thumbHighlight);
+
+        // Page indicator with subtle styling
         let pageText = (scrollOffset + 1) + "/" + (maxScroll + 1);
-        let pageColor = toColour(150, 150, 160, Math.floor(180 * menuOpenAnim));
-        drawText(pageText, baseX + menu.width - 45, footerY + 12, pageColor, 9);
+        let pageCol = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, animAlpha);
+        drawText(pageText, baseX + menu.width - 45, footerY + 26, pageCol, 9);
     }
 
-    // ===== ENHANCED INFO BAR =====
+    // ===== INFO BAR =====
     if (currentDescription && currentDescription.length > 0) {
-        let infoY = baseY + totalHeight + 15;
-        let infoBarHeight = infoBar.height + 5;
+        let infoY = baseY + totalHeight + 16;
+        let infoBarHeight = 50;
 
         // Shadow
-        let infoShadow = toColour(0, 0, 0, Math.floor(100 * menuOpenAnim));
-        drawRect(baseX - 2, infoY - 2, menu.width + 4, infoBarHeight + 4, infoShadow);
+        drawRect(baseX + 4, infoY + 4, menu.width, infoBarHeight, toColour(0, 0, 0, Math.floor(60 * menuOpenAnim)));
 
-        // Background - Enhanced with gradient look
-        let infoBgColor = toColour(MDB.Steelblue.r - 20, MDB.Steelblue.g - 20, MDB.Steelblue.b - 20, Math.floor(200 * menuOpenAnim));
-        drawRect(baseX, infoY, menu.width, infoBarHeight, infoBgColor);
+        // Background
+        let infoBg = toColour(UI.bgDark.r, UI.bgDark.g, UI.bgDark.b, Math.floor(240 * menuOpenAnim));
+        drawRect(baseX, infoY, menu.width, infoBarHeight, infoBg);
 
         // Border
-        let infoBorderColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(180 * menuOpenAnim));
-        drawRect(baseX, infoY, menu.width, 2, infoBorderColor);
-        drawRect(baseX, infoY + infoBarHeight - 2, menu.width, 2, infoBorderColor);
-        drawRect(baseX, infoY, 2, infoBarHeight, infoBorderColor);
-        drawRect(baseX + menu.width - 2, infoY, 2, infoBarHeight, infoBorderColor);
+        drawRect(baseX, infoY, menu.width, 1, borderCol);
+        drawRect(baseX, infoY + infoBarHeight - 1, menu.width, 1, borderCol);
+        drawRect(baseX, infoY, 1, infoBarHeight, borderCol);
+        drawRect(baseX + menu.width - 1, infoY, 1, infoBarHeight, borderCol);
 
-        // "INFO" label box
-        let infoLabelBg = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(200 * menuOpenAnim));
-        drawRect(baseX + 8, infoY + 6, 40, 16, infoLabelBg);
-        let infoLabelColor = toColour(0, 0, 0, animAlpha);
-        drawText("INFO", baseX + 12, infoY + 8, infoLabelColor, 10);
+        // Accent line
+        drawRect(baseX, infoY, 3, infoBarHeight, accentCol);
 
-        // Description text - white with shadow
-        let descShadow = toColour(0, 0, 0, Math.floor(200 * menuOpenAnim));
-        let descColor = toColour(MDB.StatsItem.r, MDB.StatsItem.g, MDB.StatsItem.b, animAlpha);
-        drawText(currentDescription, baseX + 13, infoY + 28, descShadow, 11);
-        drawText(currentDescription, baseX + 12, infoY + 27, descColor, 11);
+        // Description text
+        let descCol = toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, animAlpha);
+        drawText(currentDescription, baseX + 14, infoY + 18, descCol, 11);
     }
 });
 
@@ -3003,7 +3202,7 @@ addEventHandler("OnDrawnHUD", function(event) {
 });
 
 // ============================================================================
-// PLAYER STATS PANEL - Shows player info when menu is open
+// PLAYER STATS PANEL - Clean Modern Design
 // ============================================================================
 addEventHandler("OnDrawnHUD", function(event) {
     if (menuOpenAnim <= 0) return;
@@ -3015,52 +3214,42 @@ addEventHandler("OnDrawnHUD", function(event) {
     // Panel position (top-left of screen)
     let panelX = 30;
     let panelY = 100;
-    let panelW = 220;
-    let panelH = 240;
+    let panelW = 200;
+    let panelH = 220;
 
     // Slide in animation from left
-    let slideOffset = (1 - menuOpenAnim) * -100;
+    let slideOffset = (1 - menuOpenAnim) * -60;
     panelX += slideOffset;
 
-    // ===== PANEL SHADOW =====
-    let shadowColor = toColour(0, 0, 0, Math.floor(100 * menuOpenAnim));
-    drawRect(panelX - 3, panelY - 3, panelW + 6, panelH + 6, shadowColor);
+    // Shadow
+    drawRect(panelX + 3, panelY + 3, panelW, panelH, toColour(0, 0, 0, Math.floor(60 * menuOpenAnim)));
 
-    // ===== PANEL BACKGROUND =====
-    let bgColor = toColour(MDB.Steelblue.r - 30, MDB.Steelblue.g - 30, MDB.Steelblue.b - 30, Math.floor(200 * menuOpenAnim));
+    // Panel background
+    let bgColor = toColour(UI.bgDark.r, UI.bgDark.g, UI.bgDark.b, Math.floor(240 * menuOpenAnim));
     drawRect(panelX, panelY, panelW, panelH, bgColor);
 
-    // Inner panel
-    let innerBg = toColour(20, 35, 55, Math.floor(150 * menuOpenAnim));
-    drawRect(panelX + 3, panelY + 3, panelW - 6, panelH - 6, innerBg);
+    // Border
+    let borderCol = toColour(UI.border.r, UI.border.g, UI.border.b, Math.floor(100 * menuOpenAnim));
+    drawRect(panelX, panelY, panelW, 1, borderCol);
+    drawRect(panelX, panelY + panelH - 1, panelW, 1, borderCol);
+    drawRect(panelX, panelY, 1, panelH, borderCol);
+    drawRect(panelX + panelW - 1, panelY, 1, panelH, borderCol);
 
-    // ===== PANEL BORDER =====
-    let borderCol = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor((180 + borderGlow * 50) * menuOpenAnim));
-    drawRect(panelX, panelY, panelW, 2, borderCol);
-    drawRect(panelX, panelY + panelH - 2, panelW, 2, borderCol);
-    drawRect(panelX, panelY, 2, panelH, borderCol);
-    drawRect(panelX + panelW - 2, panelY, 2, panelH, borderCol);
+    // Accent line at top
+    let accentCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, alpha);
+    drawRect(panelX, panelY, panelW, 2, accentCol);
 
-    // Corner accents
-    let cornerCol = toColour(255, 200, 100, Math.floor((200 + Math.sin(cornerPulse) * 55) * menuOpenAnim));
-    drawRect(panelX, panelY, 10, 2, cornerCol);
-    drawRect(panelX, panelY, 2, 10, cornerCol);
-    drawRect(panelX + panelW - 10, panelY, 10, 2, cornerCol);
-    drawRect(panelX + panelW - 2, panelY, 2, 10, cornerCol);
+    // Header
+    let headerBg = toColour(UI.bgPanel.r, UI.bgPanel.g, UI.bgPanel.b, Math.floor(200 * menuOpenAnim));
+    drawRect(panelX + 1, panelY + 2, panelW - 2, 28, headerBg);
 
-    // ===== HEADER =====
-    let headerBg = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(220 * menuOpenAnim));
-    drawRect(panelX + 4, panelY + 4, panelW - 8, 28, headerBg);
+    let titleCol = toColour(UI.textPrimary.r, UI.textPrimary.g, UI.textPrimary.b, alpha);
+    drawText("PLAYER STATUS", panelX + 12, panelY + 10, titleCol, 11);
 
-    let titleCol = toColour(255, 255, 255, alpha);
-    let titleShadow = toColour(0, 0, 0, alpha);
-    drawText("PLAYER STATUS", panelX + 11, panelY + 10, titleShadow, 13);
-    drawText("PLAYER STATUS", panelX + 10, panelY + 9, titleCol, 13);
-
-    // ===== STATS CONTENT =====
-    let contentY = panelY + 40;
-    let labelCol = toColour(MDB.Item.r, MDB.Item.g, MDB.Item.b, alpha);
-    let valueCol = toColour(255, 255, 255, alpha);
+    // Content
+    let contentY = panelY + 38;
+    let labelCol = toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, alpha);
+    let valueCol = toColour(UI.textPrimary.r, UI.textPrimary.g, UI.textPrimary.b, alpha);
     let rowH = 24;
 
     // Health bar
@@ -3068,92 +3257,81 @@ addEventHandler("OnDrawnHUD", function(event) {
     let health = localPlayer.health || 0;
     let maxHealth = 200;
     let healthPct = Math.min(1, health / maxHealth);
-    let healthBarBg = toColour(40, 40, 50, alpha);
-    drawRect(panelX + 12, contentY + 14, panelW - 24, 8, healthBarBg);
-    let healthCol = healthPct > 0.5 ? toColour(50, 200, 50, alpha) : healthPct > 0.25 ? toColour(255, 200, 0, alpha) : toColour(255, 50, 50, alpha);
-    drawRect(panelX + 12, contentY + 14, (panelW - 24) * healthPct, 8, healthCol);
-    drawText(Math.floor(health), panelX + panelW - 40, contentY, valueCol, 10);
-    contentY += rowH + 4;
+    let barBg = toColour(UI.bgHover.r, UI.bgHover.g, UI.bgHover.b, alpha);
+    drawRect(panelX + 12, contentY + 14, panelW - 24, 6, barBg);
+    let healthCol = healthPct > 0.5 ? toColour(UI.success.r, UI.success.g, UI.success.b, alpha) :
+                    healthPct > 0.25 ? toColour(UI.warning.r, UI.warning.g, UI.warning.b, alpha) :
+                    toColour(UI.error.r, UI.error.g, UI.error.b, alpha);
+    drawRect(panelX + 12, contentY + 14, (panelW - 24) * healthPct, 6, healthCol);
+    drawText(Math.floor(health).toString(), panelX + panelW - 35, contentY, valueCol, 10);
+    contentY += rowH + 2;
 
     // Armor bar
     drawText("Armor", panelX + 12, contentY, labelCol, 10);
     let armor = localPlayer.armour || 0;
     let armorPct = Math.min(1, armor / 100);
-    drawRect(panelX + 12, contentY + 14, panelW - 24, 8, healthBarBg);
-    let armorCol = toColour(100, 150, 255, alpha);
-    drawRect(panelX + 12, contentY + 14, (panelW - 24) * armorPct, 8, armorCol);
-    drawText(Math.floor(armor), panelX + panelW - 40, contentY, valueCol, 10);
-    contentY += rowH + 8;
+    drawRect(panelX + 12, contentY + 14, panelW - 24, 6, barBg);
+    let armorCol = toColour(59, 130, 246, alpha);
+    drawRect(panelX + 12, contentY + 14, (panelW - 24) * armorPct, 6, armorCol);
+    drawText(Math.floor(armor).toString(), panelX + panelW - 35, contentY, valueCol, 10);
+    contentY += rowH + 6;
 
-    // Separator line
-    let sepCol = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(100 * menuOpenAnim));
-    drawRect(panelX + 10, contentY, panelW - 20, 1, sepCol);
-    contentY += 8;
+    // Separator
+    let sepCol = toColour(UI.border.r, UI.border.g, UI.border.b, Math.floor(80 * menuOpenAnim));
+    drawRect(panelX + 12, contentY, panelW - 24, 1, sepCol);
+    contentY += 10;
 
     // Wanted Level
-    drawText("Wanted Level", panelX + 12, contentY, labelCol, 10);
+    drawText("Wanted", panelX + 12, contentY, labelCol, 10);
     let wanted = 0;
     try { wanted = localPlayer.wantedLevel || 0; } catch(e) {}
-    // Draw stars
     for (let i = 0; i < 6; i++) {
-        let starCol = i < wanted ? toColour(255, 200, 0, alpha) : toColour(60, 60, 70, alpha);
-        drawRect(panelX + 100 + i * 18, contentY + 2, 12, 12, starCol);
+        let starCol = i < wanted ? toColour(UI.warning.r, UI.warning.g, UI.warning.b, alpha) : toColour(UI.bgHover.r, UI.bgHover.g, UI.bgHover.b, alpha);
+        drawRect(panelX + 80 + i * 16, contentY + 2, 10, 10, starCol);
     }
     contentY += rowH;
 
     // Vehicle Status
     drawText("Vehicle", panelX + 12, contentY, labelCol, 10);
     let vehStatus = "On Foot";
-    let vehStatusCol = toColour(150, 150, 150, alpha);
+    let vehStatusCol = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, alpha);
     if (localPlayer.vehicle) {
         vehStatus = "In Vehicle";
-        vehStatusCol = toColour(100, 255, 100, alpha);
+        vehStatusCol = toColour(UI.success.r, UI.success.g, UI.success.b, alpha);
     }
-    drawText(vehStatus, panelX + 100, contentY, vehStatusCol, 10);
+    drawText(vehStatus, panelX + 80, contentY, vehStatusCol, 10);
     contentY += rowH;
 
-    // Active Toggles Counter
+    // Active Mods
     drawText("Active Mods", panelX + 12, contentY, labelCol, 10);
     let activeCount = 0;
     for (let key in toggleStates) {
         if (toggleStates[key]) activeCount++;
     }
-    let modCountCol = activeCount > 0 ? toColour(MDB.ItemHighlight.r, MDB.ItemHighlight.g, MDB.ItemHighlight.b, alpha) : valueCol;
-    drawText(activeCount.toString(), panelX + 100, contentY, modCountCol, 10);
-    contentY += rowH + 8;
+    let modCountCol = activeCount > 0 ? toColour(theme.accent.r, theme.accent.g, theme.accent.b, alpha) : valueCol;
+    drawText(activeCount.toString(), panelX + 80, contentY, modCountCol, 10);
+    contentY += rowH + 4;
 
-    // ===== CLOCK / TIME DISPLAY =====
-    let clockY = panelY + panelH - 35;
-    drawRect(panelX + 10, clockY - 5, panelW - 20, 1, sepCol);
+    // Time display
+    drawRect(panelX + 12, contentY, panelW - 24, 1, sepCol);
+    contentY += 8;
 
-    // Get current time
     let now = new Date();
-    let hours = now.getHours().toString().padStart(2, '0');
-    let mins = now.getMinutes().toString().padStart(2, '0');
-    let secs = now.getSeconds().toString().padStart(2, '0');
-    let timeStr = hours + ":" + mins + ":" + secs;
-
-    // Time display with pulsing colon effect
-    let clockBg = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, Math.floor(180 * menuOpenAnim));
-    drawRect(panelX + panelW / 2 - 45, clockY, 90, 22, clockBg);
-
-    let clockCol = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, alpha);
-    let clockShadow = toColour(0, 0, 0, alpha);
-    drawText(timeStr, panelX + panelW / 2 - 35, clockY + 5, clockShadow, 14);
-    drawText(timeStr, panelX + panelW / 2 - 36, clockY + 4, clockCol, 14);
-
-    // Date
-    let dateCol = toColour(150, 150, 160, Math.floor(180 * menuOpenAnim));
-    let dateStr = (now.getMonth() + 1) + "/" + now.getDate() + "/" + now.getFullYear();
-    drawText(dateStr, panelX + 12, clockY + 6, dateCol, 9);
+    let timeStr = now.getHours().toString().padStart(2, '0') + ":" +
+                  now.getMinutes().toString().padStart(2, '0') + ":" +
+                  now.getSeconds().toString().padStart(2, '0');
+    let timeCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, alpha);
+    drawText(timeStr, panelX + panelW / 2 - 25, contentY, timeCol, 12);
 });
 
 // ============================================================================
-// ACTIVE TOGGLES INDICATOR - Shows active mods in corner
+// ACTIVE TOGGLES INDICATOR - Clean minimal design
 // ============================================================================
 addEventHandler("OnDrawnHUD", function(event) {
-    if (menuOpen) return; // Don't show when menu is open
+    if (menuOpen) return;
     if (!localPlayer) return;
+
+    let theme = getTheme();
 
     // Count active toggles
     let activeToggles = [];
@@ -3164,46 +3342,50 @@ addEventHandler("OnDrawnHUD", function(event) {
     if (toggleStates.invisible) activeToggles.push("INV");
     if (toggleStates.vehGodMode) activeToggles.push("VGOD");
     if (toggleStates.driftMode) activeToggles.push("DRFT");
-    if (toggleStates.rainbowCar) activeToggles.push("RGB");
     if (toggleStates.flyMode) activeToggles.push("FLY");
 
     if (activeToggles.length === 0) return;
 
     // Position in top-right corner
-    let indicatorX = 1680;
+    let indicatorX = 1700;
     let indicatorY = 20;
+    let bgWidth = 70;
+    let bgHeight = 18 + activeToggles.length * 14;
 
     // Background
-    let bgColor = toColour(0, 0, 0, 150);
-    let bgWidth = 80;
-    let bgHeight = 20 + activeToggles.length * 16;
+    let bgColor = toColour(UI.bgDark.r, UI.bgDark.g, UI.bgDark.b, 220);
     drawRect(indicatorX, indicatorY, bgWidth, bgHeight, bgColor);
 
     // Border
-    let borderColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, 180);
-    drawRect(indicatorX, indicatorY, bgWidth, 2, borderColor);
-    drawRect(indicatorX, indicatorY + bgHeight - 2, bgWidth, 2, borderColor);
-    drawRect(indicatorX, indicatorY, 2, bgHeight, borderColor);
-    drawRect(indicatorX + bgWidth - 2, indicatorY, 2, bgHeight, borderColor);
+    let borderColor = toColour(UI.border.r, UI.border.g, UI.border.b, 100);
+    drawRect(indicatorX, indicatorY, bgWidth, 1, borderColor);
+    drawRect(indicatorX, indicatorY + bgHeight - 1, bgWidth, 1, borderColor);
+    drawRect(indicatorX, indicatorY, 1, bgHeight, borderColor);
+    drawRect(indicatorX + bgWidth - 1, indicatorY, 1, bgHeight, borderColor);
+
+    // Accent line
+    let accentCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, 255);
+    drawRect(indicatorX, indicatorY, 2, bgHeight, accentCol);
 
     // Title
-    let titleColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, 255);
-    drawText("ACTIVE", indicatorX + 18, indicatorY + 4, titleColor, 9);
+    let titleColor = toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, 200);
+    drawText("ACTIVE", indicatorX + 12, indicatorY + 4, titleColor, 8);
 
     // List active toggles
-    let listY = indicatorY + 20;
+    let listY = indicatorY + 16;
     for (let i = 0; i < activeToggles.length; i++) {
-        let toggleColor = toColour(MDB.ItemHighlight.r, MDB.ItemHighlight.g, MDB.ItemHighlight.b, Math.floor(200 + Math.sin(animTime * 3 + i) * 55));
-        drawText(activeToggles[i], indicatorX + 8, listY + i * 16, toggleColor, 10);
+        let toggleColor = toColour(theme.accent.r, theme.accent.g, theme.accent.b, 255);
+        drawText(activeToggles[i], indicatorX + 12, listY + i * 14, toggleColor, 9);
     }
 });
 
 // ============================================================================
-// BOTTOM SCREEN BANNER - Shows when menu is open
+// BOTTOM SCREEN BANNER - Clean minimal design
 // ============================================================================
 addEventHandler("OnDrawnHUD", function(event) {
     if (menuOpenAnim <= 0) return;
 
+    let theme = getTheme();
     let screenWidth = 1920;
     let screenHeight = 1080;
     try {
@@ -3212,134 +3394,39 @@ addEventHandler("OnDrawnHUD", function(event) {
     } catch(e) {}
 
     let alpha = Math.floor(255 * menuOpenAnim);
-    let bannerH = 45;
+    let bannerH = 35;
     let bannerY = screenHeight - bannerH - 10;
 
     // Slide up animation
-    let slideOffset = (1 - menuOpenAnim) * 60;
+    let slideOffset = (1 - menuOpenAnim) * 40;
     bannerY += slideOffset;
 
     // Banner background
-    let bannerBg = toColour(0, 0, 0, Math.floor(180 * menuOpenAnim));
+    let bannerBg = toColour(UI.bgDark.r, UI.bgDark.g, UI.bgDark.b, Math.floor(220 * menuOpenAnim));
     drawRect(0, bannerY, screenWidth, bannerH, bannerBg);
 
-    // Top border with gradient
-    let borderL = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor((180 + borderGlow * 50) * menuOpenAnim));
-    let borderC = toColour(MDB.Steelblue.r, MDB.Steelblue.g, MDB.Steelblue.b, alpha);
-    drawRect(0, bannerY, screenWidth * 0.3, 2, borderL);
-    drawRect(screenWidth * 0.3, bannerY, screenWidth * 0.4, 2, borderC);
-    drawRect(screenWidth * 0.7, bannerY, screenWidth * 0.3, 2, borderL);
+    // Top accent line
+    let accentCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, alpha);
+    drawRect(0, bannerY, screenWidth, 1, accentCol);
 
     // Left logo
-    let logoShadow = toColour(0, 0, 0, alpha);
-    let logoGold = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, alpha);
-    let logoBlue = toColour(MDB.Steelblue.r + 40, MDB.Steelblue.g + 40, MDB.Steelblue.b + 40, alpha);
-    drawText("MD", 21, bannerY + 12, logoShadow, 18);
-    drawText("MD", 20, bannerY + 11, logoBlue, 18);
-    drawText("REVOLUTION", 58, bannerY + 15, logoShadow, 14);
-    drawText("REVOLUTION", 57, bannerY + 14, logoGold, 14);
+    let titleCol = toColour(UI.textPrimary.r, UI.textPrimary.g, UI.textPrimary.b, alpha);
+    let revCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, alpha);
+    drawText("MD", 20, bannerY + 10, titleCol, 14);
+    drawText("REVOLUTION", 50, bannerY + 12, revCol, 11);
 
-    // Center text - server info
+    // Center text
     let centerText = "GTA CONNECTED";
-    let centerX = screenWidth / 2 - centerText.length * 4;
-    let centerCol = toColour(MDB.SubHeader.r, MDB.SubHeader.g, MDB.SubHeader.b, alpha);
-    drawText(centerText, centerX + 1, bannerY + 16, logoShadow, 12);
-    drawText(centerText, centerX, bannerY + 15, centerCol, 12);
+    let centerX = screenWidth / 2 - centerText.length * 3;
+    let centerCol = toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, alpha);
+    drawText(centerText, centerX, bannerY + 12, centerCol, 10);
 
     // Right side - F5 hint
-    let hintCol = toColour(150, 150, 160, alpha);
-    let keyCol = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, alpha);
-    drawText("Press", screenWidth - 150, bannerY + 15, hintCol, 10);
-    drawText("[F5]", screenWidth - 115, bannerY + 15, keyCol, 10);
-    drawText("to close", screenWidth - 80, bannerY + 15, hintCol, 10);
-
-    // Animated bottom line
-    let lineAlpha = Math.floor((150 + Math.sin(footerPulse) * 60) * menuOpenAnim);
-    let lineCol = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, lineAlpha);
-    drawRect(0, bannerY + bannerH - 2, screenWidth, 2, lineCol);
-});
-
-// ============================================================================
-// MENU PARTICLE EFFECTS - Subtle floating particles
-// ============================================================================
-addEventHandler("OnDrawnHUD", function(event) {
-    if (menuOpenAnim <= 0.1) return;
-
-    let baseX = menu.x;
-    let baseY = menu.y;
-    let alpha = Math.floor(255 * menuOpenAnim);
-
-    // Generate particles around the menu
-    for (let i = 0; i < 8; i++) {
-        let angle = (animTime * 0.5 + i * 0.785) % (Math.PI * 2);
-        let radius = 180 + Math.sin(animTime + i) * 30;
-        let px = baseX + menu.width / 2 + Math.cos(angle) * radius;
-        let py = baseY + 250 + Math.sin(angle) * 100;
-
-        // Floating particle
-        let particleAlpha = Math.floor((40 + Math.sin(animTime * 2 + i) * 25) * menuOpenAnim);
-        let particleSize = 3 + Math.sin(animTime + i * 0.5) * 2;
-
-        // Gold particles
-        let pColor = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, particleAlpha);
-        drawRect(px, py, particleSize, particleSize, pColor);
-    }
-
-    // Subtle sparkle effects on corners
-    let sparkleTime = animTime * 3;
-    for (let i = 0; i < 4; i++) {
-        let sparkleAlpha = Math.floor(Math.max(0, Math.sin(sparkleTime + i * 1.57) * 80) * menuOpenAnim);
-        if (sparkleAlpha > 10) {
-            let sx, sy;
-            switch(i) {
-                case 0: sx = baseX - 5; sy = baseY - 5; break;
-                case 1: sx = baseX + menu.width + 2; sy = baseY - 5; break;
-                case 2: sx = baseX - 5; sy = baseY + 450; break;
-                case 3: sx = baseX + menu.width + 2; sy = baseY + 450; break;
-            }
-            let sparkleCol = toColour(255, 255, 200, sparkleAlpha);
-            drawRect(sx, sy, 4, 4, sparkleCol);
-            drawRect(sx - 1, sy + 1, 6, 2, sparkleCol);
-            drawRect(sx + 1, sy - 1, 2, 6, sparkleCol);
-        }
-    }
-});
-
-// ============================================================================
-// MENU TITLE BADGE (Above main menu)
-// ============================================================================
-addEventHandler("OnDrawnHUD", function(event) {
-    if (menuOpenAnim <= 0) return;
-
-    let alpha = Math.floor(255 * menuOpenAnim);
-    let slideOffset = (1 - menuOpenAnim) * 120;
-    let baseX = menu.x + slideOffset;
-    let baseY = menu.y - 50;
-
-    // Slide down animation
-    let slideDown = (1 - menuOpenAnim) * -30;
-    baseY += slideDown;
-
-    // Badge background
-    let badgeBg = toColour(MDB.DevilsRed.r, MDB.DevilsRed.g, MDB.DevilsRed.b, Math.floor(220 * menuOpenAnim));
-    drawRect(baseX + menu.width / 2 - 80, baseY, 160, 35, badgeBg);
-
-    // Border glow
-    let borderGlowCol = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor((100 + borderGlow * 80) * menuOpenAnim));
-    drawRect(baseX + menu.width / 2 - 82, baseY - 2, 164, 2, borderGlowCol);
-    drawRect(baseX + menu.width / 2 - 82, baseY + 35, 164, 2, borderGlowCol);
-    drawRect(baseX + menu.width / 2 - 82, baseY - 2, 2, 39, borderGlowCol);
-    drawRect(baseX + menu.width / 2 + 80, baseY - 2, 2, 39, borderGlowCol);
-
-    // Badge text
-    let badgeShadow = toColour(0, 0, 0, alpha);
-    let badgeText = toColour(255, 255, 255, alpha);
-    drawText("TRIDENT EDITION", baseX + menu.width / 2 - 60, baseY + 11, badgeShadow, 13);
-    drawText("TRIDENT EDITION", baseX + menu.width / 2 - 61, baseY + 10, badgeText, 13);
-
-    // Version number
-    let versionCol = toColour(MDB.Gold.r, MDB.Gold.g, MDB.Gold.b, Math.floor(FlashingGhost * menuOpenAnim));
-    drawText("v2.0", baseX + menu.width / 2 + 48, baseY + 12, versionCol, 10);
+    let hintCol = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, alpha);
+    let keyCol = toColour(theme.accent.r, theme.accent.g, theme.accent.b, alpha);
+    drawText("Press", screenWidth - 140, bannerY + 12, hintCol, 9);
+    drawText("[F5]", screenWidth - 105, bannerY + 12, keyCol, 9);
+    drawText("to close", screenWidth - 70, bannerY + 12, hintCol, 9);
 });
 
 // Draw rectangle using graphics API
@@ -3860,7 +3947,12 @@ addEventHandler("OnPedWeaponShoot", function(event, ped, weapon) {
 // ============================================================================
 
 // Apply a single handling value to the current vehicle
-// Uses verified GTA IV natives and GTA Connected OOP properties
+// Uses GTA Connected API from wiki documentation:
+// - vehicle.setSuspensionHeight(suspensionId, height) - suspension height
+// - physical.mass - vehicle mass (read/write)
+// - physical.turnVelocity - rotational velocity Vec3
+// - vehicle.strongGrip - grip on bikes (server only)
+// - natives.changeCarColour - color changes
 function applyHandlingValue(param, value) {
     if (!localPlayer || !localPlayer.vehicle) return;
 
@@ -3870,7 +3962,6 @@ function applyHandlingValue(param, value) {
         switch(param) {
             case "tractionCurveMax":
                 // SET_CAR_TRACTION - Verified GTA IV native
-                // Multiplies the vehicle's traction
                 try {
                     natives.setCarTraction(veh, value);
                 } catch(e) {
@@ -3888,7 +3979,6 @@ function applyHandlingValue(param, value) {
 
             case "tractionBias":
                 // Adjust traction based on front/rear distribution
-                // Lower values = more rear grip, higher = more front
                 try {
                     let adjustedTraction = handlingValues.tractionCurveMax * (0.5 + (value - 0.5) * 0.5);
                     natives.setCarTraction(veh, adjustedTraction);
@@ -3897,7 +3987,6 @@ function applyHandlingValue(param, value) {
 
             case "tractionLoss":
                 // Higher values = easier to lose traction
-                // Apply reduced traction based on loss value
                 try {
                     let lossTraction = handlingValues.tractionCurveMax / (1 + (value - 0.8));
                     natives.setCarTraction(veh, Math.max(0.3, lossTraction));
@@ -3905,13 +3994,24 @@ function applyHandlingValue(param, value) {
                 break;
 
             case "suspensionForce":
-                // Visual feedback - suspension stiffness affects bounce animation
-                suspensionOffset = (value - 2.0) * 0.02; // Stiffer = less bounce
+                // Suspension stiffness - affects bounce
+                suspensionOffset = (value - 2.0) * 0.02;
                 break;
 
             case "suspensionRaise":
-                // Visual suspension height offset
-                suspensionOffset = value;
+                // Use vehicle.setSuspensionHeight for all 4 wheels
+                // suspensionId: 0=FL, 1=FR, 2=RL, 3=RR
+                try {
+                    for (let wheelId = 0; wheelId < 4; wheelId++) {
+                        veh.setSuspensionHeight(wheelId, value);
+                    }
+                    suspensionOffset = value;
+                    console.log("[Handling] Suspension height set to: " + value);
+                } catch(e) {
+                    console.log("[Handling] setSuspensionHeight failed: " + e);
+                    // Visual fallback
+                    suspensionOffset = value;
+                }
                 break;
 
             case "suspensionCompDamp":
@@ -3921,7 +4021,6 @@ function applyHandlingValue(param, value) {
             case "driveForce":
                 // Engine power - affects acceleration multiplier
                 handlingMods.acceleration = value / 0.25;
-                // For actual speed boost, we'll apply this in the process loop
                 break;
 
             case "initialDriveMaxVel":
@@ -3935,14 +4034,14 @@ function applyHandlingValue(param, value) {
                 break;
 
             case "mass":
-                // SET_CAR_MASS or use OOP property
+                // Use physical.mass property (GTA Connected API)
                 try {
-                    // Try native first
-                    natives.setCarMass(veh, value);
+                    veh.mass = value;
+                    console.log("[Handling] Mass set to: " + value);
                 } catch(e1) {
-                    // Fallback to OOP property if available
+                    // Fallback to native
                     try {
-                        veh.mass = value;
+                        natives.setCarMass(veh, value);
                     } catch(e2) {
                         console.log("[Handling] mass set failed: " + e2);
                     }
@@ -3950,18 +4049,27 @@ function applyHandlingValue(param, value) {
                 break;
 
             case "centreOfMassZ":
-                // Try OOP property for center of mass
+                // Adjust turn velocity to simulate center of mass change
+                // Higher CoM = more likely to flip
                 try {
-                    if (veh.centerOfMass) {
-                        let com = veh.centerOfMass;
-                        veh.centerOfMass = new Vec3(com.x, com.y, value);
+                    // Use turnVelocity to apply subtle rotational adjustments
+                    let currentTurn = veh.turnVelocity;
+                    if (value > 0) {
+                        // Higher center = add slight instability
+                        let instability = value * 0.1;
+                        veh.turnVelocity = new Vec3(
+                            currentTurn.x * (1 + instability),
+                            currentTurn.y * (1 + instability),
+                            currentTurn.z
+                        );
                     }
-                } catch(e) {}
+                } catch(e) {
+                    console.log("[Handling] turnVelocity adjustment failed: " + e);
+                }
                 break;
 
             case "steeringLock":
                 // Steering angle - visual/stored only
-                // GTA IV doesn't have a runtime native for this
                 break;
         }
     } catch(e) {
@@ -3998,23 +4106,40 @@ function resetHandlingToDefault() {
     suspensionOffset = 0;
     selectedHandlingParam = "";
 
-    // Apply defaults to vehicle
+    // Apply defaults to vehicle using proper API
     if (localPlayer && localPlayer.vehicle) {
         let veh = localPlayer.vehicle;
+
         // Reset traction
         try {
             natives.setCarTraction(veh, 2.0);
         } catch(e) {
             console.log("[Handling] Reset traction failed: " + e);
         }
-        // Reset mass
+
+        // Reset mass using physical.mass property
         try {
-            natives.setCarMass(veh, 1500.0);
+            veh.mass = 1500.0;
         } catch(e1) {
             try {
-                veh.mass = 1500.0;
+                natives.setCarMass(veh, 1500.0);
             } catch(e2) {}
         }
+
+        // Reset suspension height using vehicle.setSuspensionHeight
+        try {
+            for (let wheelId = 0; wheelId < 4; wheelId++) {
+                veh.setSuspensionHeight(wheelId, 0.0);
+            }
+        } catch(e) {
+            console.log("[Handling] Reset suspension failed: " + e);
+        }
+
+        // Reset turn velocity
+        try {
+            veh.turnVelocity = new Vec3(0, 0, 0);
+        } catch(e) {}
+
         // Repair vehicle to reset any damage-based handling issues
         try {
             natives.fixCar(veh);
