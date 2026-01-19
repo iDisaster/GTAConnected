@@ -1038,31 +1038,8 @@ const menuData = {
     veh_colors: {
         title: "VEHICLE COLORS",
         items: [
-            { label: "--- Quick Colors ---", action: "none" },
-            { label: "Black", action: "veh_color", value: [0, 0] },
-            { label: "White", action: "veh_color", value: [18, 18] },
-            { label: "Dark Gray", action: "veh_color", value: [4, 4] },
-            { label: "Silver", action: "veh_color", value: [12, 12] },
-            { label: "Red", action: "veh_color", value: [27, 27] },
-            { label: "Candy Red", action: "veh_color", value: [30, 30] },
-            { label: "Orange", action: "veh_color", value: [36, 36] },
-            { label: "Yellow", action: "veh_color", value: [89, 89] },
-            { label: "Green", action: "veh_color", value: [50, 50] },
-            { label: "Lime Green", action: "veh_color", value: [55, 55] },
-            { label: "Blue", action: "veh_color", value: [62, 62] },
-            { label: "Light Blue", action: "veh_color", value: [73, 73] },
-            { label: "Purple", action: "veh_color", value: [99, 99] },
-            { label: "Pink", action: "veh_color", value: [100, 100] },
-            { label: "Gold", action: "veh_color", value: [37, 37] },
-            { label: "--- Color Editor (4 Slots) ---", action: "none" },
             { label: "Open Color Editor", action: "submenu", target: "vehColorEditor" },
-            { label: "--- Two Tone ---", action: "none" },
-            { label: "Black/Red", action: "veh_color", value: [0, 27] },
-            { label: "Black/White", action: "veh_color", value: [0, 18] },
-            { label: "Red/Black", action: "veh_color", value: [27, 0] },
-            { label: "Blue/White", action: "veh_color", value: [62, 18] },
-            { label: "Green/White", action: "veh_color", value: [50, 18] },
-            { label: "Random", action: "veh_color_random" }
+            { label: "Random Colors", action: "veh_color_random" }
         ]
     },
 
@@ -1075,14 +1052,7 @@ const menuData = {
             { label: "Color 1 (Primary)", action: "color_slot_edit", slot: 0 },
             { label: "Color 2 (Secondary)", action: "color_slot_edit", slot: 1 },
             { label: "Color 3 (Tertiary)", action: "color_slot_edit", slot: 2 },
-            { label: "Color 4 (Quaternary)", action: "color_slot_edit", slot: 3 },
-            { label: "--- Quick Presets ---", action: "none" },
-            { label: "All Black", action: "color_preset", values: [0, 0, 0, 0] },
-            { label: "All White", action: "color_preset", values: [18, 18, 18, 18] },
-            { label: "All Red", action: "color_preset", values: [27, 27, 27, 27] },
-            { label: "All Blue", action: "color_preset", values: [62, 62, 62, 62] },
-            { label: "Police Colors", action: "color_preset", values: [133, 18, 133, 18] },
-            { label: "Taxi Yellow", action: "color_preset", values: [90, 90, 0, 0] }
+            { label: "Color 4 (Quaternary)", action: "color_slot_edit", slot: 3 }
         ]
     },
 
@@ -3198,60 +3168,32 @@ addEventHandler("OnDrawnHUD", function(event) {
             drawText(">", arrowX, textY, arrowCol, textSize);
         }
 
-        // Color Editor Slot - show color preview box and left/right arrows with color ID
+        // Color Editor Slot - show left/right arrows with color ID and name
         if (item.action === "color_slot_edit") {
             let slot = item.slot;
             let colorId = colorEditorValues[slot];
             let colorInfo = getColorById(colorId);
 
-            // Color preview box (on the right side)
-            let boxX = baseX + menu.width - 145;
-            let boxY = itemY + 8;
-            let boxW = 28;
-            let boxH = 28;
-
-            // Color box shadow
-            let shadowCol = toColour(0, 0, 0, Math.floor(80 * menuOpenAnim));
-            drawRect(boxX + 2, boxY + 2, boxW, boxH, shadowCol);
-
-            // Color box background (the actual color)
-            let colorCol = toColour(colorInfo.r, colorInfo.g, colorInfo.b, animAlpha);
-            drawRect(boxX, boxY, boxW, boxH, colorCol);
-
-            // Color box border
-            let borderCol = isSelected ?
-                toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha) :
-                toColour(UI.border.r, UI.border.g, UI.border.b, animAlpha);
-            drawRect(boxX, boxY, boxW, 1, borderCol);
-            drawRect(boxX, boxY + boxH - 1, boxW, 1, borderCol);
-            drawRect(boxX, boxY, 1, boxH, borderCol);
-            drawRect(boxX + boxW - 1, boxY, 1, boxH, borderCol);
+            // Position for color info display (on the right side)
+            let displayX = baseX + menu.width - 145;
+            let displayY = itemY + 14;
 
             // Left arrow "<"
-            let leftArrowX = boxX - 22;
-            let arrowY = boxY + 6;
             let arrowCol = isSelected ?
                 toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha) :
                 toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, Math.floor(animAlpha * 0.5));
-            drawText("<", leftArrowX, arrowY, arrowCol, 14);
+            drawText("<", displayX, displayY, arrowCol, 14);
 
-            // Color ID number between arrows and box
-            let idTextX = boxX + boxW + 8;
+            // Color ID and name
             let idCol = isSelected ?
                 toColour(UI.textPrimary.r, UI.textPrimary.g, UI.textPrimary.b, animAlpha) :
                 toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, animAlpha);
-            drawText(String(colorId), idTextX, arrowY, idCol, 12);
+            let colorText = colorId + " - " + colorInfo.name;
+            drawText(colorText, displayX + 18, displayY, idCol, 10);
 
             // Right arrow ">"
-            let rightArrowX = idTextX + 28;
-            drawText(">", rightArrowX, arrowY, arrowCol, 14);
-
-            // Glow effect when selected
-            if (isSelected) {
-                let glowAlpha = Math.floor(40 * menuOpenAnim * selectionGlow);
-                let glowCol = toColour(colorInfo.r, colorInfo.g, colorInfo.b, glowAlpha);
-                drawRect(boxX - 4, boxY - 4, boxW + 8, boxH + 8, glowCol);
-            }
+            let rightArrowX = displayX + 115;
+            drawText(">", rightArrowX, displayY, arrowCol, 14);
         }
     }
 
@@ -3272,25 +3214,20 @@ addEventHandler("OnDrawnHUD", function(event) {
 
     // Show different hints for color editor
     if (currentMenu === "vehColorEditor") {
-        drawText("[", baseX + 10, hintY, hintCol, 10);
-        drawText("UP/DN", baseX + 17, hintY, keyCol, 10);
-        drawText("]", baseX + 52, hintY, hintCol, 10);
-        drawText("Slot", baseX + 60, hintY, hintCol, 10);
+        drawText("[", baseX + 15, hintY, hintCol, 10);
+        drawText("UP/DN", baseX + 22, hintY, keyCol, 10);
+        drawText("]", baseX + 57, hintY, hintCol, 10);
+        drawText("Slot", baseX + 67, hintY, hintCol, 10);
 
-        drawText("[", baseX + 95, hintY, hintCol, 10);
-        drawText("L/R", baseX + 102, hintY, keyCol, 10);
-        drawText("]", baseX + 125, hintY, hintCol, 10);
-        drawText("Color", baseX + 133, hintY, hintCol, 10);
+        drawText("[", baseX + 110, hintY, hintCol, 10);
+        drawText("L/R", baseX + 117, hintY, keyCol, 10);
+        drawText("]", baseX + 140, hintY, hintCol, 10);
+        drawText("Color", baseX + 150, hintY, hintCol, 10);
 
-        drawText("[", baseX + 175, hintY, hintCol, 10);
-        drawText("ENTER", baseX + 182, hintY, keyCol, 10);
-        drawText("]", baseX + 220, hintY, hintCol, 10);
-        drawText("Preset", baseX + 228, hintY, hintCol, 10);
-
-        drawText("[", baseX + 280, hintY, hintCol, 10);
-        drawText("BACK", baseX + 287, hintY, keyCol, 10);
-        drawText("]", baseX + 320, hintY, hintCol, 10);
-        drawText("Exit", baseX + 328, hintY, hintCol, 10);
+        drawText("[", baseX + 200, hintY, hintCol, 10);
+        drawText("BACK", baseX + 207, hintY, keyCol, 10);
+        drawText("]", baseX + 240, hintY, hintCol, 10);
+        drawText("Exit", baseX + 250, hintY, hintCol, 10);
     } else {
         drawText("[", baseX + 15, hintY, hintCol, 10);
         drawText("UP/DOWN", baseX + 22, hintY, keyCol, 10);
