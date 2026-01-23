@@ -284,7 +284,6 @@ const itemDescriptions = {
     "veh_god": "🛡️ Makes your current vehicle indestructible - no damage!",
     "veh_neverdirty": "🧼 Keeps your vehicle permanently clean and shiny!",
     "veh_nitro": "🚀 Gives your vehicle instant speed boost - hold accelerator!",
-    "veh_drift": "🏁 Enables drift mode - slide around corners like a pro!",
     "veh_rainbow": "🌈 Makes your vehicle cycle through rainbow colors!",
     "veh_neon": "💡 Adds neon underglow effects to your vehicle!",
     "veh_rpg": "💥 Shoots RPG rockets from your vehicle - explosive ammo!",
@@ -343,7 +342,6 @@ const itemDescriptions = {
     "vehGodMode": "🛡️ VEHICLE GOD MODE - Your car can't be destroyed!",
     "driveOnWater": "🌊 DRIVE ON WATER - Cars float and work on water!",
     "rainbowCar": "🌈 RAINBOW CAR - Vehicle cycles through all colors!",
-    "driftMode": "🏁 DRIFT MODE - Easy drifting and skidding!",
     "neonLights": "💡 NEON LIGHTS - Glowing underglow effects!",
     "flyMode": "✈️ FLY MODE - Move freely through the air!",
     "vehShootRPG": "💥 VEHICLE ROCKETS - Your car shoots explosive ammo!",
@@ -421,11 +419,6 @@ let handlingMods = {
 // This bypasses the need for real handling.dat editing which is not supported
 // ============================================================================
 let physicsEmulation = {
-    // Drift Mode State
-    driftActive: false,
-    driftIntensity: 0.0,       // 0-1 how much sideways slide
-    driftSteerBias: 0.0,       // Steering input tracking
-
     // Grip/Traction Assist State
     gripAssistEnabled: true,
     gripAssistStrength: 1.0,   // 0-2, higher = more correction
@@ -806,7 +799,6 @@ const menuData = {
             { label: "Nitro Boost", action: "veh_nitro" },
             { label: "Drive On Water", action: "toggle", target: "driveOnWater", state: false },
             { label: "Rainbow Color", action: "toggle", target: "rainbowCar", state: false },
-            { label: "Drift Mode", action: "toggle", target: "driftMode", state: false },
             { label: "Neon Lights", action: "submenu", target: "veh_neons" },
             { label: "Fly Mode", action: "toggle", target: "flyMode", state: false },
             { label: "Shoot RPG", action: "toggle", target: "vehShootRPG", state: false },
@@ -873,7 +865,6 @@ const menuData = {
             { label: "--- Presets ---", action: "none" },
             { label: "Reset to Default", action: "handling_reset" },
             { label: "Race Setup", action: "handling_preset", value: "race" },
-            { label: "Drift Setup", action: "handling_preset", value: "drift" },
             { label: "Off-Road Setup", action: "handling_preset", value: "offroad" },
             { label: "Low Rider", action: "handling_preset", value: "lowrider" },
             { label: "--- Traction & Grip ---", action: "none" },
@@ -943,7 +934,6 @@ const menuData = {
             { label: "Minimal (0.4)", action: "handling_set", param: "tractionLoss", value: 0.4 },
             { label: "Default (0.8)", action: "handling_set", param: "tractionLoss", value: 0.8 },
             { label: "Loose (1.2)", action: "handling_set", param: "tractionLoss", value: 1.2 },
-            { label: "Drifty (1.6)", action: "handling_set", param: "tractionLoss", value: 1.6 },
             { label: "Ice Mode (2.0)", action: "handling_set", param: "tractionLoss", value: 2.0 }
         ]
     },
@@ -1267,7 +1257,6 @@ let toggleStates = {
     vehGodMode: false,
     driveOnWater: false,
     rainbowCar: false,
-    driftMode: false,
     neonLights: false,
     flyMode: false,
     vehShootRPG: false,
@@ -3600,7 +3589,6 @@ addEventHandler("OnDrawnHUD", function(event) {
     if (toggleStates.neverWanted) activeToggles.push("NW");
     if (toggleStates.invisible) activeToggles.push("INV");
     if (toggleStates.vehGodMode) activeToggles.push("VGOD");
-    if (toggleStates.driftMode) activeToggles.push("DRFT");
     if (toggleStates.flyMode) activeToggles.push("FLY");
 
     if (activeToggles.length === 0) return;
@@ -3734,7 +3722,6 @@ let lastInvincible = false;
 let lastSuperRun = false;
 let lastNoRagdoll = false;
 let lastVehGodMode = false;
-let lastDriftMode = false;
 let lastInvisible = false;
 let processCounter = 0;
 
@@ -3979,44 +3966,8 @@ addEventHandler("OnProcess", function(event) {
             physicsEmulation.lastHeading = heading;
             physicsEmulation.lastVelocity = vel;
 
-            // ===== DRIFT MODE (Physics Emulation) =====
-            if (toggleStates.driftMode && speed > 5) {
-                // Calculate drift intensity based on speed and steering
-                let driftFactor = Math.min(1.0, speed / 25.0) * handlingValues.tractionLoss;
-
-                // When steering, bias velocity sideways for controlled slide
-                if (physicsEmulation.isSteering) {
-                    let slideAmount = driftFactor * physicsEmulation.steerDirection * 0.8;
-
-                    // Add lateral velocity component
-                    let newVelX = vel.x + rightX * slideAmount;
-                    let newVelY = vel.y + rightY * slideAmount;
-
-                    // Reduce forward correction (let the car slide)
-                    let forwardDamping = 0.98; // Less damping = more slide
-                    newVelX = newVelX * forwardDamping + forwardX * forwardSpeed * (1 - forwardDamping) * 0.5;
-                    newVelY = newVelY * forwardDamping + forwardY * forwardSpeed * (1 - forwardDamping) * 0.5;
-
-                    vel = new Vec3(newVelX, newVelY, vel.z);
-                }
-
-                // Counter-steer assistance - help prevent spinouts
-                if (Math.abs(sidewaysSpeed) > 3 && !physicsEmulation.isSteering) {
-                    // Gradually correct back toward forward direction
-                    let correction = -sidewaysSpeed * 0.03;
-                    vel = new Vec3(
-                        vel.x + rightX * correction,
-                        vel.y + rightY * correction,
-                        vel.z
-                    );
-                }
-
-                // Apply modified velocity
-                veh.velocity = vel;
-            }
-
             // ===== GRIP / TRACTION ASSIST =====
-            else if (physicsEmulation.gripAssistEnabled && !toggleStates.driftMode && speed > 2) {
+            if (physicsEmulation.gripAssistEnabled && speed > 2) {
                 // Calculate grip based on handling values
                 let gripFactor = (handlingValues.tractionCurveMax / 2.0) * physicsEmulation.gripAssistStrength;
                 gripFactor = Math.min(2.0, Math.max(0.1, gripFactor));
@@ -4121,17 +4072,6 @@ addEventHandler("OnProcess", function(event) {
             }
         } catch(e) {
             // Silent fail for physics processing
-        }
-
-        // Track drift mode state change
-        if (toggleStates.driftMode !== lastDriftMode) {
-            lastDriftMode = toggleStates.driftMode;
-            if (toggleStates.driftMode) {
-                // When entering drift mode, set physics emulation values
-                physicsEmulation.driftActive = true;
-            } else {
-                physicsEmulation.driftActive = false;
-            }
         }
 
         // Fly mode - WASD controls altitude
@@ -4373,15 +4313,14 @@ function applyHandlingValue(param, value) {
             case "tractionBias":
                 // Front/rear grip distribution - affects stability
                 // Lower value = more front grip = understeer
-                // Higher value = more rear grip = oversteer (easier to drift)
+                // Higher value = more rear grip = oversteer
                 physicsEmulation.stabilityStrength = 1.0 + (0.5 - value);
                 physicsEmulation.antiRollStrength = 0.5 + (0.5 - value) * 0.3;
                 console.log("[Handling] Stability adjusted for bias: " + value.toFixed(2));
                 break;
 
             case "tractionLoss":
-                // Higher = easier to lose traction = better drifting
-                // This directly affects drift mode intensity
+                // Higher = easier to lose traction
                 if (value > 1.0) {
                     physicsEmulation.gripAssistStrength *= (1.0 / value);
                 }
@@ -4508,8 +4447,6 @@ function resetHandlingToDefault() {
     selectedHandlingParam = "";
 
     // ===== RESET PHYSICS EMULATION TO DEFAULTS =====
-    physicsEmulation.driftActive = false;
-    physicsEmulation.driftIntensity = 0.0;
     physicsEmulation.gripAssistEnabled = true;
     physicsEmulation.gripAssistStrength = 1.0;
     physicsEmulation.accelBoostEnabled = false;
@@ -4587,26 +4524,6 @@ function applyHandlingPreset(preset) {
             physicsEmulation.stabilityStrength = 1.5;
             physicsEmulation.antiRollStrength = 0.7;
             physicsEmulation.maxSpeedLimit = 85.0; // ~300 km/h
-            break;
-
-        case "drift":
-            // DRIFT: Low grip, easy sliding, rear-biased
-            handlingValues.tractionCurveMax = 1.5;
-            handlingValues.tractionCurveMin = 1.0;
-            handlingValues.tractionLoss = 1.8;
-            handlingValues.tractionBias = 0.7; // Rear-biased
-            handlingValues.suspensionForce = 3.0;
-            handlingValues.driveForce = 0.40;
-            handlingValues.brakeForce = 1.0;
-            handlingValues.mass = 1400.0;
-            handlingValues.centreOfMassZ = 0.0;
-
-            // Physics Emulation: Low grip assist, allow sliding
-            physicsEmulation.gripAssistEnabled = true;
-            physicsEmulation.gripAssistStrength = 0.4; // Low grip = easy slide
-            physicsEmulation.stabilityStrength = 0.6;
-            physicsEmulation.antiRollStrength = 0.8; // Prevent flipping
-            physicsEmulation.maxSpeedLimit = 55.0;
             break;
 
         case "offroad":
@@ -4870,7 +4787,7 @@ addEventHandler("OnDrawnHUD", function(event) {
 
     drawText("Traction Loss:", tableX, tableY, labelCol, 10);
     drawText(handlingValues.tractionLoss.toFixed(2), tableX + 140, tableY, valueCol, 10);
-    let lossDesc = handlingValues.tractionLoss < 0.5 ? "Stable" : handlingValues.tractionLoss < 1.0 ? "Normal" : "Drifty";
+    let lossDesc = handlingValues.tractionLoss < 0.5 ? "Stable" : handlingValues.tractionLoss < 1.0 ? "Normal" : "Loose";
     drawText(lossDesc, tableX + 200, tableY, labelCol, 10);
     tableY += rowH;
 
