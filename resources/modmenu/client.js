@@ -393,9 +393,9 @@ const itemDescriptions = {
 let menuFont = null;
 let titleFont = null;
 
-// Menu dimensions in pixels - positioned center-right for premium look
+// Menu dimensions in pixels - positioned on the right side
 const menu = {
-    x: 480,
+    x: 920,
     y: 80,
     width: 420,
     headerHeight: 85,
@@ -413,6 +413,48 @@ let handlingMods = {
     acceleration: 1.0,
     topSpeed: 1.0,
     braking: 1.0
+};
+
+// ============================================================================
+// LAYER B: PHYSICS EMULATION SYSTEM
+// All handling effects are achieved through velocity/turnVelocity manipulation
+// This bypasses the need for real handling.dat editing which is not supported
+// ============================================================================
+let physicsEmulation = {
+    // Drift Mode State
+    driftActive: false,
+    driftIntensity: 0.0,       // 0-1 how much sideways slide
+    driftSteerBias: 0.0,       // Steering input tracking
+
+    // Grip/Traction Assist State
+    gripAssistEnabled: true,
+    gripAssistStrength: 1.0,   // 0-2, higher = more correction
+
+    // Acceleration Boost State
+    accelBoostEnabled: false,
+    accelBoostMultiplier: 1.0, // 1.0 = normal, 2.0 = double
+    maxSpeedLimit: 60.0,       // m/s (~216 km/h)
+
+    // Braking State
+    brakeAssistEnabled: true,
+    brakeMultiplier: 1.0,      // 1.0 = normal, 2.0 = stronger
+
+    // Stability/Anti-Roll State
+    stabilityEnabled: true,
+    stabilityStrength: 1.0,    // How much to dampen rotation
+    antiRollStrength: 0.5,     // How much to resist flipping
+
+    // Previous frame values for calculations
+    lastVelocity: null,
+    lastHeading: 0,
+    lastSpeed: 0,
+    lastSteerInput: 0,
+
+    // Input detection (estimated from velocity changes)
+    isAccelerating: false,
+    isBraking: false,
+    isSteering: false,
+    steerDirection: 0          // -1 left, 0 center, 1 right
 };
 
 // ============================================================================
@@ -1049,10 +1091,10 @@ const menuData = {
         title: "VEHICLE COLOR EDITOR",
         isColorEditor: true,
         items: [
-            { label: "Color 1 (Primary)", action: "color_slot_edit", slot: 0 },
-            { label: "Color 2 (Secondary)", action: "color_slot_edit", slot: 1 },
-            { label: "Color 3 (Tertiary)", action: "color_slot_edit", slot: 2 },
-            { label: "Color 4 (Quaternary)", action: "color_slot_edit", slot: 3 }
+            { label: "Color 1", action: "color_slot_edit", slot: 0 },
+            { label: "Color 2", action: "color_slot_edit", slot: 1 },
+            { label: "Color 3", action: "color_slot_edit", slot: 2 },
+            { label: "Color 4", action: "color_slot_edit", slot: 3 }
         ]
     },
 
@@ -1405,7 +1447,7 @@ function applyColorToVehicle(slot, colorId) {
                 veh.colour4 = colorId;
                 break;
         }
-        showNotification("Color " + (slot + 1) + ": " + colorInfo.name + " (" + colorId + ")");
+        showNotification("Color " + (slot + 1) + ": " + colorId);
     } catch(e) {
         // Fallback for older API
         try {
@@ -3168,14 +3210,14 @@ addEventHandler("OnDrawnHUD", function(event) {
             drawText(">", arrowX, textY, arrowCol, textSize);
         }
 
-        // Color Editor Slot - show left/right arrows with color ID and name
+        // Color Editor Slot - show left/right arrows with color ID only (no name)
         if (item.action === "color_slot_edit") {
             let slot = item.slot;
             let colorId = colorEditorValues[slot];
             let colorInfo = getColorById(colorId);
 
             // Position for color info display (on the right side)
-            let displayX = baseX + menu.width - 145;
+            let displayX = baseX + menu.width - 95;
             let displayY = itemY + 14;
 
             // Left arrow "<"
@@ -3184,15 +3226,18 @@ addEventHandler("OnDrawnHUD", function(event) {
                 toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, Math.floor(animAlpha * 0.5));
             drawText("<", displayX, displayY, arrowCol, 14);
 
-            // Color ID and name
+            // Color ID only (no name) - with color preview
             let idCol = isSelected ?
                 toColour(UI.textPrimary.r, UI.textPrimary.g, UI.textPrimary.b, animAlpha) :
                 toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, animAlpha);
-            let colorText = colorId + " - " + colorInfo.name;
-            drawText(colorText, displayX + 18, displayY, idCol, 10);
+            drawText(colorId.toString(), displayX + 22, displayY, idCol, 12);
+
+            // Color preview box
+            let previewCol = toColour(colorInfo.r, colorInfo.g, colorInfo.b, animAlpha);
+            drawRect(displayX + 45, displayY + 2, 16, 12, previewCol);
 
             // Right arrow ">"
-            let rightArrowX = displayX + 115;
+            let rightArrowX = displayX + 68;
             drawText(">", rightArrowX, displayY, arrowCol, 14);
         }
     }
@@ -3425,14 +3470,14 @@ addEventHandler("OnDrawnHUD", function(event) {
     let alpha = Math.floor(255 * menuOpenAnim);
     let theme = getTheme();
 
-    // Panel position (top-left of screen)
-    let panelX = 30;
+    // Panel position (top-right of screen, next to menu)
+    let panelX = 700;
     let panelY = 100;
     let panelW = 200;
     let panelH = 220;
 
-    // Slide in animation from left
-    let slideOffset = (1 - menuOpenAnim) * -60;
+    // Slide in animation from right
+    let slideOffset = (1 - menuOpenAnim) * 60;
     panelX += slideOffset;
 
     // Shadow
@@ -3560,8 +3605,8 @@ addEventHandler("OnDrawnHUD", function(event) {
 
     if (activeToggles.length === 0) return;
 
-    // Position in top-right corner
-    let indicatorX = 1700;
+    // Position in top-left corner (menu is now on right side)
+    let indicatorX = 30;
     let indicatorY = 20;
     let bgWidth = 70;
     let bgHeight = 18 + activeToggles.length * 14;
@@ -3870,86 +3915,223 @@ addEventHandler("OnProcess", function(event) {
             } catch(e) {}
         }
 
-        // Rainbow car color - cycle through colors
+        // Rainbow car color - change all 4 colors to random values
         if (toggleStates.rainbowCar && processCounter % 5 === 0) {
             try {
-                rainbowHue = (rainbowHue + 3) % 360;
-                let rgb = hsvToRgb(rainbowHue, 1, 1);
-                // Use closest GTA color (cycle through color indices)
-                let colorIndex = Math.floor(rainbowHue / 3) % 132;
-                natives.changeCarColour(veh, colorIndex, colorIndex);
-            } catch(e) {}
-        }
+                // Generate 4 random colors (0-133)
+                let c1 = Math.floor(Math.random() * 134);
+                let c2 = Math.floor(Math.random() * 134);
+                let c3 = Math.floor(Math.random() * 134);
+                let c4 = Math.floor(Math.random() * 134);
 
-        // Drift mode - reduce traction
-        if (toggleStates.driftMode !== lastDriftMode) {
-            try {
-                if (toggleStates.driftMode) {
-                    // Make car slide more
-                    natives.setCarCanBeVisiblyDamaged(veh, false);
-                }
-            } catch(e) {}
-            lastDriftMode = toggleStates.driftMode;
-        }
-        if (toggleStates.driftMode) {
-            // Apply sideways slip when turning
-            try {
-                let vel = veh.velocity;
-                let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
-                if (speed > 10) {
-                    // Add slight sideways force for drift effect
-                    let heading = veh.heading || 0;
-                    let slideX = Math.cos(heading) * 0.5;
-                    let slideY = -Math.sin(heading) * 0.5;
-                    veh.velocity = new Vec3(vel.x + slideX, vel.y + slideY, vel.z);
+                // Apply all 4 colors
+                try {
+                    veh.colour1 = c1;
+                    veh.colour2 = c2;
+                    veh.colour3 = c3;
+                    veh.colour4 = c4;
+                } catch(e1) {
+                    // Fallback: use natives for color 1 and 2
+                    natives.changeCarColour(veh, c1, c2);
                 }
             } catch(e) {}
         }
 
-        // ===== HANDLING EDITOR EFFECTS =====
-        // Apply acceleration boost when driveForce is modified
-        if (handlingMods.acceleration > 1.0) {
-            try {
-                let vel = veh.velocity;
-                let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
-                // Only boost when accelerating (moving forward)
-                if (speed > 1 && speed < 50) {
-                    let heading = veh.heading || 0;
-                    let boostFactor = (handlingMods.acceleration - 1.0) * 0.05;
-                    let boostX = Math.sin(heading) * -boostFactor * speed;
-                    let boostY = Math.cos(heading) * boostFactor * speed;
+        // ============================================================================
+        // LAYER B: PHYSICS EMULATION PROCESSING
+        // All handling effects achieved via velocity manipulation
+        // ============================================================================
+        try {
+            let vel = veh.velocity;
+            let turnVel = veh.turnVelocity;
+            let heading = veh.heading || 0;
+            let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+            let speedKmh = speed * 3.6;
+
+            // Calculate forward direction vector from heading
+            let forwardX = -Math.sin(heading);
+            let forwardY = Math.cos(heading);
+
+            // Calculate right direction vector (perpendicular to forward)
+            let rightX = Math.cos(heading);
+            let rightY = Math.sin(heading);
+
+            // Decompose velocity into forward and sideways components
+            let forwardSpeed = vel.x * forwardX + vel.y * forwardY;
+            let sidewaysSpeed = vel.x * rightX + vel.y * rightY;
+
+            // Detect steering input from turn velocity
+            let steerInput = turnVel.z || 0;
+            let isSteeringLeft = steerInput > 0.01;
+            let isSteeringRight = steerInput < -0.01;
+            physicsEmulation.isSteering = isSteeringLeft || isSteeringRight;
+            physicsEmulation.steerDirection = isSteeringLeft ? -1 : (isSteeringRight ? 1 : 0);
+
+            // Detect acceleration/braking from speed changes
+            if (physicsEmulation.lastSpeed !== null) {
+                let speedDelta = speed - physicsEmulation.lastSpeed;
+                physicsEmulation.isAccelerating = speedDelta > 0.1 && forwardSpeed > 0;
+                physicsEmulation.isBraking = speedDelta < -0.2 || forwardSpeed < -1;
+            }
+
+            // Save for next frame
+            physicsEmulation.lastSpeed = speed;
+            physicsEmulation.lastHeading = heading;
+            physicsEmulation.lastVelocity = vel;
+
+            // ===== DRIFT MODE (Physics Emulation) =====
+            if (toggleStates.driftMode && speed > 5) {
+                // Calculate drift intensity based on speed and steering
+                let driftFactor = Math.min(1.0, speed / 25.0) * handlingValues.tractionLoss;
+
+                // When steering, bias velocity sideways for controlled slide
+                if (physicsEmulation.isSteering) {
+                    let slideAmount = driftFactor * physicsEmulation.steerDirection * 0.8;
+
+                    // Add lateral velocity component
+                    let newVelX = vel.x + rightX * slideAmount;
+                    let newVelY = vel.y + rightY * slideAmount;
+
+                    // Reduce forward correction (let the car slide)
+                    let forwardDamping = 0.98; // Less damping = more slide
+                    newVelX = newVelX * forwardDamping + forwardX * forwardSpeed * (1 - forwardDamping) * 0.5;
+                    newVelY = newVelY * forwardDamping + forwardY * forwardSpeed * (1 - forwardDamping) * 0.5;
+
+                    vel = new Vec3(newVelX, newVelY, vel.z);
+                }
+
+                // Counter-steer assistance - help prevent spinouts
+                if (Math.abs(sidewaysSpeed) > 3 && !physicsEmulation.isSteering) {
+                    // Gradually correct back toward forward direction
+                    let correction = -sidewaysSpeed * 0.03;
+                    vel = new Vec3(
+                        vel.x + rightX * correction,
+                        vel.y + rightY * correction,
+                        vel.z
+                    );
+                }
+
+                // Apply modified velocity
+                veh.velocity = vel;
+            }
+
+            // ===== GRIP / TRACTION ASSIST =====
+            else if (physicsEmulation.gripAssistEnabled && !toggleStates.driftMode && speed > 2) {
+                // Calculate grip based on handling values
+                let gripFactor = (handlingValues.tractionCurveMax / 2.0) * physicsEmulation.gripAssistStrength;
+                gripFactor = Math.min(2.0, Math.max(0.1, gripFactor));
+
+                // Correct sideways velocity back toward forward direction
+                // Stronger at low speeds, weaker at high speeds (realism)
+                let speedFactor = Math.max(0.3, 1.0 - (speed / 40.0));
+                let correctionStrength = gripFactor * speedFactor * 0.15;
+
+                // Apply sideways velocity correction
+                if (Math.abs(sidewaysSpeed) > 0.5) {
+                    let correction = -sidewaysSpeed * correctionStrength;
+                    veh.velocity = new Vec3(
+                        vel.x + rightX * correction,
+                        vel.y + rightY * correction,
+                        vel.z
+                    );
+                }
+            }
+
+            // ===== ACCELERATION BOOST (Behavioral) =====
+            if (handlingMods.acceleration > 1.0 && physicsEmulation.isAccelerating && speed > 1) {
+                let maxSpeed = physicsEmulation.maxSpeedLimit * handlingMods.topSpeed;
+
+                // Only boost if below max speed
+                if (speed < maxSpeed) {
+                    let boostFactor = (handlingMods.acceleration - 1.0) * 0.08;
+                    // Add velocity along forward vector
+                    let boostX = forwardX * boostFactor * Math.min(speed, 20);
+                    let boostY = forwardY * boostFactor * Math.min(speed, 20);
+
                     veh.velocity = new Vec3(vel.x + boostX, vel.y + boostY, vel.z);
                 }
-            } catch(e) {}
+            }
+
+            // ===== TOP SPEED CONTROL =====
+            let maxSpeed = 35 * handlingMods.topSpeed; // Base ~35 m/s
+            if (speed > maxSpeed) {
+                // Smoothly reduce to max speed (not instant)
+                let factor = maxSpeed / speed;
+                factor = 0.95 + factor * 0.05; // Gradual approach
+                veh.velocity = new Vec3(vel.x * factor, vel.y * factor, vel.z);
+            }
+            // Speed boost when above normal threshold
+            else if (handlingMods.topSpeed > 1.0 && speed > 20 && speed < maxSpeed && physicsEmulation.isAccelerating) {
+                let pushFactor = (handlingMods.topSpeed - 1.0) * 0.015;
+                let pushX = forwardX * pushFactor * speed;
+                let pushY = forwardY * pushFactor * speed;
+                veh.velocity = new Vec3(vel.x + pushX, vel.y + pushY, vel.z);
+            }
+
+            // ===== BRAKING BEHAVIOR =====
+            if (physicsEmulation.isBraking && handlingMods.braking > 0 && speed > 1) {
+                // Smooth braking - reduce velocity magnitude
+                let brakeFactor = handlingMods.braking * 0.05;
+                let dampFactor = 1.0 - Math.min(0.15, brakeFactor);
+
+                // Preserve directional stability while braking
+                let newSpeed = speed * dampFactor;
+                if (newSpeed > 0.5) {
+                    let ratio = newSpeed / speed;
+                    veh.velocity = new Vec3(vel.x * ratio, vel.y * ratio, vel.z);
+                }
+            }
+
+            // ===== STABILITY / ANTI-ROLL =====
+            if (physicsEmulation.stabilityEnabled && speed > 5) {
+                // Get current turn velocity
+                let currentTurn = veh.turnVelocity;
+
+                // Dampen excessive rotation (X and Y axes = roll/pitch)
+                let stabilityFactor = physicsEmulation.stabilityStrength * 0.2;
+                let antiRollFactor = physicsEmulation.antiRollStrength * 0.3;
+
+                // Cap extreme rotational velocities to prevent flipping
+                let maxRoll = 1.5 - (antiRollFactor * 0.5);
+                let dampedX = currentTurn.x;
+                let dampedY = currentTurn.y;
+                let dampedZ = currentTurn.z;
+
+                // Anti-roll: prevent excessive X/Y rotation
+                if (Math.abs(dampedX) > maxRoll) {
+                    dampedX = dampedX * (1 - antiRollFactor * 0.5);
+                }
+                if (Math.abs(dampedY) > maxRoll) {
+                    dampedY = dampedY * (1 - antiRollFactor * 0.5);
+                }
+
+                // At high speed, dampen all rotations for stability
+                if (speed > 25) {
+                    let highSpeedDamp = 1 - (stabilityFactor * Math.min(1, (speed - 25) / 20));
+                    dampedX *= highSpeedDamp;
+                    dampedY *= highSpeedDamp;
+                    // Keep Z (yaw) mostly intact for steering feel
+                    dampedZ *= (1 - stabilityFactor * 0.3);
+                }
+
+                // Apply damped turn velocity
+                if (dampedX !== currentTurn.x || dampedY !== currentTurn.y || dampedZ !== currentTurn.z) {
+                    veh.turnVelocity = new Vec3(dampedX, dampedY, dampedZ);
+                }
+            }
+        } catch(e) {
+            // Silent fail for physics processing
         }
 
-        // Apply top speed limiting/boosting
-        if (handlingMods.topSpeed !== 1.0) {
-            try {
-                let vel = veh.velocity;
-                let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
-                let maxSpeed = 35 * handlingMods.topSpeed; // Base max ~35 m/s (~126 km/h)
-
-                // If going too fast for the setting, slow down
-                if (speed > maxSpeed && handlingMods.topSpeed < 1.0) {
-                    let factor = maxSpeed / speed;
-                    veh.velocity = new Vec3(vel.x * factor, vel.y * factor, vel.z);
-                }
-                // If speed boost is enabled and accelerating, add forward push
-                else if (handlingMods.topSpeed > 1.0 && speed > 20 && speed < maxSpeed) {
-                    let heading = veh.heading || 0;
-                    let pushFactor = (handlingMods.topSpeed - 1.0) * 0.02;
-                    let pushX = Math.sin(heading) * -pushFactor * speed;
-                    let pushY = Math.cos(heading) * pushFactor * speed;
-                    veh.velocity = new Vec3(vel.x + pushX, vel.y + pushY, vel.z);
-                }
-            } catch(e) {}
-        }
-
-        // Apply enhanced braking
-        if (handlingMods.braking > 1.0) {
-            // Braking effect is passive - applied when vehicle is slowing down
-            // This would need input detection to work properly
+        // Track drift mode state change
+        if (toggleStates.driftMode !== lastDriftMode) {
+            lastDriftMode = toggleStates.driftMode;
+            if (toggleStates.driftMode) {
+                // When entering drift mode, set physics emulation values
+                physicsEmulation.driftActive = true;
+            } else {
+                physicsEmulation.driftActive = false;
+            }
         }
 
         // Fly mode - WASD controls altitude
@@ -4161,12 +4343,9 @@ addEventHandler("OnPedWeaponShoot", function(event, ped, weapon) {
 // ============================================================================
 
 // Apply a single handling value to the current vehicle
-// Uses GTA Connected API from wiki documentation:
-// - vehicle.setSuspensionHeight(suspensionId, height) - suspension height
-// - physical.mass - vehicle mass (read/write)
-// - physical.turnVelocity - rotational velocity Vec3
-// - vehicle.strongGrip - grip on bikes (server only)
-// - natives.changeCarColour - color changes
+// LAYER B: All handling effects are achieved through Physics Emulation
+// This does NOT modify real handling.dat values - instead it configures
+// the physics emulation system to simulate the desired behavior
 function applyHandlingValue(param, value) {
     if (!localPlayer || !localPlayer.vehicle) return;
 
@@ -4174,116 +4353,124 @@ function applyHandlingValue(param, value) {
 
     try {
         switch(param) {
+            // ===== TRACTION & GRIP (Physics Emulation) =====
             case "tractionCurveMax":
-                // SET_CAR_TRACTION - Verified GTA IV native
-                try {
-                    natives.setCarTraction(veh, value);
-                } catch(e) {
-                    console.log("[Handling] setCarTraction failed: " + e);
-                }
+                // Controls grip assist strength in physics emulation
+                // Higher = more sideways velocity correction
+                physicsEmulation.gripAssistStrength = value / 2.0;
+                // Also try native if available (may work on some servers)
+                try { natives.setCarTraction(veh, value); } catch(e) {}
+                console.log("[Handling] Grip Assist Strength: " + physicsEmulation.gripAssistStrength.toFixed(2));
                 break;
 
             case "tractionCurveMin":
-                // Apply combined with max for overall grip feel
-                try {
-                    let combinedTraction = (handlingValues.tractionCurveMax + value) / 2;
-                    natives.setCarTraction(veh, combinedTraction);
-                } catch(e) {}
+                // Minimum grip affects how much the car slides at low speeds
+                let combinedGrip = (handlingValues.tractionCurveMax + value) / 4.0;
+                physicsEmulation.gripAssistStrength = combinedGrip;
+                try { natives.setCarTraction(veh, combinedGrip * 2); } catch(e) {}
                 break;
 
             case "tractionBias":
-                // Adjust traction based on front/rear distribution
-                try {
-                    let adjustedTraction = handlingValues.tractionCurveMax * (0.5 + (value - 0.5) * 0.5);
-                    natives.setCarTraction(veh, adjustedTraction);
-                } catch(e) {}
+                // Front/rear grip distribution - affects stability
+                // Lower value = more front grip = understeer
+                // Higher value = more rear grip = oversteer (easier to drift)
+                physicsEmulation.stabilityStrength = 1.0 + (0.5 - value);
+                physicsEmulation.antiRollStrength = 0.5 + (0.5 - value) * 0.3;
+                console.log("[Handling] Stability adjusted for bias: " + value.toFixed(2));
                 break;
 
             case "tractionLoss":
-                // Higher values = easier to lose traction
-                try {
-                    let lossTraction = handlingValues.tractionCurveMax / (1 + (value - 0.8));
-                    natives.setCarTraction(veh, Math.max(0.3, lossTraction));
-                } catch(e) {}
+                // Higher = easier to lose traction = better drifting
+                // This directly affects drift mode intensity
+                if (value > 1.0) {
+                    physicsEmulation.gripAssistStrength *= (1.0 / value);
+                }
+                console.log("[Handling] Traction Loss: " + value.toFixed(2) + " - Grip reduced to: " + physicsEmulation.gripAssistStrength.toFixed(2));
                 break;
 
+            // ===== SUSPENSION (Physics Emulation + Visual) =====
             case "suspensionForce":
-                // Suspension stiffness - affects bounce
+                // Stiffness affects stability - stiffer = more stable at speed
+                physicsEmulation.stabilityStrength = value / 2.0;
                 suspensionOffset = (value - 2.0) * 0.02;
+                console.log("[Handling] Suspension stiffness -> Stability: " + physicsEmulation.stabilityStrength.toFixed(2));
                 break;
 
             case "suspensionRaise":
-                // Use vehicle.setSuspensionHeight for all 4 wheels
-                // suspensionId: 0=FL, 1=FR, 2=RL, 3=RR
+                // Try API method, fallback to visual only
                 try {
                     for (let wheelId = 0; wheelId < 4; wheelId++) {
                         veh.setSuspensionHeight(wheelId, value);
                     }
-                    suspensionOffset = value;
-                    console.log("[Handling] Suspension height set to: " + value);
+                    console.log("[Handling] Suspension height set: " + value);
                 } catch(e) {
-                    console.log("[Handling] setSuspensionHeight failed: " + e);
-                    // Visual fallback
-                    suspensionOffset = value;
+                    // Visual feedback only
                 }
+                suspensionOffset = value;
+                // Higher ride height = less stable
+                physicsEmulation.antiRollStrength = Math.max(0.2, 0.5 - value);
                 break;
 
             case "suspensionCompDamp":
-                // Affects bounce feel - stored for visual animation
+                // Damping affects how quickly stability corrections happen
+                physicsEmulation.stabilityStrength *= (value / 1.0);
                 break;
 
+            // ===== ENGINE & SPEED (Physics Emulation) =====
             case "driveForce":
-                // Engine power - affects acceleration multiplier
+                // Engine power -> Acceleration boost multiplier
                 handlingMods.acceleration = value / 0.25;
+                physicsEmulation.accelBoostEnabled = (handlingMods.acceleration > 1.0);
+                physicsEmulation.accelBoostMultiplier = handlingMods.acceleration;
+                console.log("[Handling] Acceleration Boost: " + handlingMods.acceleration.toFixed(2) + "x");
                 break;
 
             case "initialDriveMaxVel":
-                // Top speed - store multiplier for speed limiting
+                // Top speed -> Speed limit in physics emulation
                 handlingMods.topSpeed = value / 200.0;
+                physicsEmulation.maxSpeedLimit = value / 3.6; // Convert to m/s
+                console.log("[Handling] Max Speed: " + value + " km/h (" + physicsEmulation.maxSpeedLimit.toFixed(1) + " m/s)");
                 break;
 
             case "brakeForce":
-                // Brake strength multiplier
+                // Brake strength -> Braking multiplier
                 handlingMods.braking = value / 0.8;
+                physicsEmulation.brakeMultiplier = handlingMods.braking;
+                physicsEmulation.brakeAssistEnabled = (handlingMods.braking > 0);
+                console.log("[Handling] Brake Multiplier: " + handlingMods.braking.toFixed(2) + "x");
                 break;
 
+            // ===== WEIGHT & BALANCE (Physics Emulation) =====
             case "mass":
-                // Use physical.mass property (GTA Connected API)
+                // Mass affects momentum and stability
+                // Try direct API first
                 try {
                     veh.mass = value;
-                    console.log("[Handling] Mass set to: " + value);
+                    console.log("[Handling] Mass set: " + value + " kg");
                 } catch(e1) {
-                    // Fallback to native
-                    try {
-                        natives.setCarMass(veh, value);
-                    } catch(e2) {
-                        console.log("[Handling] mass set failed: " + e2);
-                    }
+                    try { natives.setCarMass(veh, value); } catch(e2) {}
                 }
+                // Heavier = more stable, less responsive
+                let massFactor = value / 1500.0;
+                physicsEmulation.stabilityStrength *= massFactor;
+                physicsEmulation.gripAssistStrength *= (1 / Math.sqrt(massFactor));
                 break;
 
             case "centreOfMassZ":
-                // Adjust turn velocity to simulate center of mass change
-                // Higher CoM = more likely to flip
-                try {
-                    // Use turnVelocity to apply subtle rotational adjustments
-                    let currentTurn = veh.turnVelocity;
-                    if (value > 0) {
-                        // Higher center = add slight instability
-                        let instability = value * 0.1;
-                        veh.turnVelocity = new Vec3(
-                            currentTurn.x * (1 + instability),
-                            currentTurn.y * (1 + instability),
-                            currentTurn.z
-                        );
-                    }
-                } catch(e) {
-                    console.log("[Handling] turnVelocity adjustment failed: " + e);
+                // Center of mass height affects roll tendency
+                // Higher = less stable, more likely to flip
+                physicsEmulation.antiRollStrength = Math.max(0.2, 0.5 - value * 2);
+                // Simulate through turn velocity dampening
+                if (value > 0.1) {
+                    physicsEmulation.stabilityStrength *= (1 - value * 0.5);
                 }
+                console.log("[Handling] CoM Height: " + value + " -> Anti-Roll: " + physicsEmulation.antiRollStrength.toFixed(2));
                 break;
 
+            // ===== STEERING (Stored for reference) =====
             case "steeringLock":
-                // Steering angle - visual/stored only
+                // Steering angle is engine-controlled, store for display only
+                console.log("[Handling] Steering Lock: " + value + " degrees (visual only)");
                 break;
         }
     } catch(e) {
@@ -4320,47 +4507,53 @@ function resetHandlingToDefault() {
     suspensionOffset = 0;
     selectedHandlingParam = "";
 
+    // ===== RESET PHYSICS EMULATION TO DEFAULTS =====
+    physicsEmulation.driftActive = false;
+    physicsEmulation.driftIntensity = 0.0;
+    physicsEmulation.gripAssistEnabled = true;
+    physicsEmulation.gripAssistStrength = 1.0;
+    physicsEmulation.accelBoostEnabled = false;
+    physicsEmulation.accelBoostMultiplier = 1.0;
+    physicsEmulation.maxSpeedLimit = 60.0;
+    physicsEmulation.brakeAssistEnabled = true;
+    physicsEmulation.brakeMultiplier = 1.0;
+    physicsEmulation.stabilityEnabled = true;
+    physicsEmulation.stabilityStrength = 1.0;
+    physicsEmulation.antiRollStrength = 0.5;
+
     // Apply defaults to vehicle using proper API
     if (localPlayer && localPlayer.vehicle) {
         let veh = localPlayer.vehicle;
 
-        // Reset traction
+        // Reset traction (try native)
         try {
             natives.setCarTraction(veh, 2.0);
-        } catch(e) {
-            console.log("[Handling] Reset traction failed: " + e);
-        }
+        } catch(e) {}
 
         // Reset mass using physical.mass property
         try {
             veh.mass = 1500.0;
         } catch(e1) {
-            try {
-                natives.setCarMass(veh, 1500.0);
-            } catch(e2) {}
+            try { natives.setCarMass(veh, 1500.0); } catch(e2) {}
         }
 
-        // Reset suspension height using vehicle.setSuspensionHeight
+        // Reset suspension height
         try {
             for (let wheelId = 0; wheelId < 4; wheelId++) {
                 veh.setSuspensionHeight(wheelId, 0.0);
             }
-        } catch(e) {
-            console.log("[Handling] Reset suspension failed: " + e);
-        }
+        } catch(e) {}
 
         // Reset turn velocity
         try {
             veh.turnVelocity = new Vec3(0, 0, 0);
         } catch(e) {}
 
-        // Repair vehicle to reset any damage-based handling issues
-        try {
-            natives.fixCar(veh);
-        } catch(e) {}
+        // Repair vehicle
+        try { natives.fixCar(veh); } catch(e) {}
     }
 
-    // Reset handling mods (independent from drift mode toggle)
+    // Reset handling mods
     handlingMods = {
         grip: 1.0,
         acceleration: 1.0,
@@ -4368,15 +4561,17 @@ function resetHandlingToDefault() {
         braking: 1.0
     };
 
-    console.log("[Handling] Reset to defaults");
+    console.log("[Handling] Reset to defaults - Physics Emulation reset");
 }
 
-// Apply handling presets
+// Apply handling presets - Configures PHYSICS EMULATION for each setup
 function applyHandlingPreset(preset) {
     switch(preset) {
         case "race":
+            // RACE: High grip, fast acceleration, high top speed, strong brakes
             handlingValues.tractionCurveMax = 3.5;
             handlingValues.tractionCurveMin = 3.0;
+            handlingValues.tractionLoss = 0.5;
             handlingValues.suspensionForce = 4.0;
             handlingValues.suspensionCompDamp = 2.0;
             handlingValues.suspensionRaise = -0.05;
@@ -4384,41 +4579,95 @@ function applyHandlingPreset(preset) {
             handlingValues.initialDriveMaxVel = 300.0;
             handlingValues.brakeForce = 1.5;
             handlingValues.mass = 1200.0;
+            handlingValues.centreOfMassZ = -0.1;
+
+            // Physics Emulation: Maximum grip and stability
+            physicsEmulation.gripAssistEnabled = true;
+            physicsEmulation.gripAssistStrength = 1.8;
+            physicsEmulation.stabilityStrength = 1.5;
+            physicsEmulation.antiRollStrength = 0.7;
+            physicsEmulation.maxSpeedLimit = 85.0; // ~300 km/h
             break;
+
         case "drift":
+            // DRIFT: Low grip, easy sliding, rear-biased
             handlingValues.tractionCurveMax = 1.5;
             handlingValues.tractionCurveMin = 1.0;
             handlingValues.tractionLoss = 1.8;
-            handlingValues.tractionBias = 0.7;
+            handlingValues.tractionBias = 0.7; // Rear-biased
             handlingValues.suspensionForce = 3.0;
             handlingValues.driveForce = 0.40;
             handlingValues.brakeForce = 1.0;
-            // Low traction values create drift feeling without needing drift mode toggle
+            handlingValues.mass = 1400.0;
+            handlingValues.centreOfMassZ = 0.0;
+
+            // Physics Emulation: Low grip assist, allow sliding
+            physicsEmulation.gripAssistEnabled = true;
+            physicsEmulation.gripAssistStrength = 0.4; // Low grip = easy slide
+            physicsEmulation.stabilityStrength = 0.6;
+            physicsEmulation.antiRollStrength = 0.8; // Prevent flipping
+            physicsEmulation.maxSpeedLimit = 55.0;
             break;
+
         case "offroad":
+            // OFFROAD: Good grip, high suspension, heavy, stable
             handlingValues.tractionCurveMax = 2.5;
+            handlingValues.tractionCurveMin = 2.0;
+            handlingValues.tractionLoss = 0.6;
             handlingValues.suspensionForce = 1.5;
             handlingValues.suspensionCompDamp = 0.6;
             handlingValues.suspensionRaise = 0.12;
             handlingValues.driveForce = 0.35;
+            handlingValues.initialDriveMaxVel = 180.0;
+            handlingValues.brakeForce = 1.0;
             handlingValues.mass = 2000.0;
+            handlingValues.centreOfMassZ = 0.1;
+
+            // Physics Emulation: Good grip, soft response
+            physicsEmulation.gripAssistEnabled = true;
+            physicsEmulation.gripAssistStrength = 1.2;
+            physicsEmulation.stabilityStrength = 0.8;
+            physicsEmulation.antiRollStrength = 0.4; // More body roll allowed
+            physicsEmulation.maxSpeedLimit = 50.0;
             break;
+
         case "lowrider":
+            // LOWRIDER: Slow, bouncy, low, cruising style
+            handlingValues.tractionCurveMax = 2.0;
+            handlingValues.tractionCurveMin = 1.8;
+            handlingValues.tractionLoss = 0.8;
             handlingValues.suspensionForce = 0.8;
             handlingValues.suspensionCompDamp = 0.4;
             handlingValues.suspensionRaise = -0.12;
             handlingValues.driveForce = 0.20;
             handlingValues.initialDriveMaxVel = 150.0;
+            handlingValues.brakeForce = 0.6;
+            handlingValues.mass = 1800.0;
+            handlingValues.centreOfMassZ = -0.15;
+
+            // Physics Emulation: Smooth, stable, not fast
+            physicsEmulation.gripAssistEnabled = true;
+            physicsEmulation.gripAssistStrength = 1.0;
+            physicsEmulation.stabilityStrength = 1.2;
+            physicsEmulation.antiRollStrength = 0.6;
+            physicsEmulation.maxSpeedLimit = 42.0; // ~150 km/h
             break;
     }
 
-    // Apply all values
+    // Apply all values through physics emulation system
     for (let param in handlingValues) {
         applyHandlingValue(param, handlingValues[param]);
     }
 
+    // Update handling mods based on preset
+    handlingMods.acceleration = handlingValues.driveForce / 0.25;
+    handlingMods.topSpeed = handlingValues.initialDriveMaxVel / 200.0;
+    handlingMods.braking = handlingValues.brakeForce / 0.8;
+    handlingMods.grip = handlingValues.tractionCurveMax / 2.0;
+
     // Update visuals
     updateAllHandlingVisuals();
+    console.log("[Handling] Applied preset: " + preset + " (Physics Emulation configured)");
 }
 
 // Update visual feedback based on parameter
@@ -4491,14 +4740,14 @@ addEventHandler("OnDrawnHUD", function(event) {
     let theme = getTheme();
     let alpha = Math.floor(255 * handlingEditorAnim);
 
-    // Panel position (left side of screen)
-    let panelX = 40;
+    // Panel position (right side of screen, below status panel)
+    let panelX = 500;
     let panelY = 120;
     let panelW = 380;
     let panelH = 520;
 
-    // Slide in animation
-    let slideOffset = (1 - handlingEditorAnim) * -150;
+    // Slide in animation from right
+    let slideOffset = (1 - handlingEditorAnim) * 150;
     panelX += slideOffset;
 
     // ===== PANEL BACKGROUND =====
