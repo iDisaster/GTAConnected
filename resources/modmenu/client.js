@@ -78,6 +78,160 @@ let rainbowHue = 0;             // For rainbow car feature
 let matrixEffect = 0;           // For matrix mode feature
 
 // ============================================================================
+// GTA IV VEHICLE COLOR DATABASE (from carcols.dat)
+// Color ID 0-133 with names and RGB values
+// ============================================================================
+const GTA_IV_COLORS = [
+    { id: 0, name: "Black", r: 0, g: 0, b: 0 },
+    { id: 1, name: "Black 2", r: 1, g: 1, b: 1 },
+    { id: 2, name: "Graphite", r: 15, g: 15, b: 15 },
+    { id: 3, name: "Anthracite", r: 28, g: 28, b: 28 },
+    { id: 4, name: "Dark Gray", r: 38, g: 38, b: 38 },
+    { id: 5, name: "Charcoal", r: 45, g: 45, b: 45 },
+    { id: 6, name: "Stone Gray", r: 54, g: 54, b: 54 },
+    { id: 7, name: "Dolphin Gray", r: 71, g: 71, b: 71 },
+    { id: 8, name: "Light Gray", r: 90, g: 90, b: 90 },
+    { id: 9, name: "Aluminum", r: 100, g: 100, b: 100 },
+    { id: 10, name: "Smoke Gray", r: 116, g: 116, b: 116 },
+    { id: 11, name: "Ash Gray", r: 128, g: 128, b: 128 },
+    { id: 12, name: "Silver", r: 140, g: 140, b: 140 },
+    { id: 13, name: "Pearl Silver", r: 155, g: 155, b: 155 },
+    { id: 14, name: "Light Silver", r: 170, g: 170, b: 170 },
+    { id: 15, name: "Platinum", r: 185, g: 185, b: 185 },
+    { id: 16, name: "Bright Silver", r: 200, g: 200, b: 200 },
+    { id: 17, name: "Off White", r: 220, g: 220, b: 220 },
+    { id: 18, name: "White", r: 255, g: 255, b: 255 },
+    { id: 19, name: "Frost White", r: 245, g: 245, b: 245 },
+    { id: 20, name: "Cream", r: 255, g: 253, b: 245 },
+    { id: 21, name: "Ivory", r: 255, g: 255, b: 240 },
+    { id: 22, name: "Pearl White", r: 240, g: 240, b: 235 },
+    { id: 23, name: "Champagne", r: 230, g: 220, b: 200 },
+    { id: 24, name: "Desert Sand", r: 210, g: 195, b: 170 },
+    { id: 25, name: "Tan", r: 190, g: 170, b: 140 },
+    { id: 26, name: "Dark Tan", r: 160, g: 140, b: 110 },
+    { id: 27, name: "Red", r: 255, g: 0, b: 0 },
+    { id: 28, name: "Dark Red", r: 180, g: 0, b: 0 },
+    { id: 29, name: "Wine Red", r: 140, g: 20, b: 35 },
+    { id: 30, name: "Candy Red", r: 255, g: 50, b: 50 },
+    { id: 31, name: "Torch Red", r: 230, g: 25, b: 25 },
+    { id: 32, name: "Garnet Red", r: 165, g: 30, b: 45 },
+    { id: 33, name: "Maroon", r: 100, g: 20, b: 30 },
+    { id: 34, name: "Burgundy", r: 90, g: 10, b: 25 },
+    { id: 35, name: "Cherry Red", r: 200, g: 10, b: 35 },
+    { id: 36, name: "Orange", r: 255, g: 130, b: 0 },
+    { id: 37, name: "Gold", r: 255, g: 190, b: 0 },
+    { id: 38, name: "Bronze", r: 180, g: 130, b: 70 },
+    { id: 39, name: "Copper", r: 200, g: 120, b: 80 },
+    { id: 40, name: "Sunset Orange", r: 255, g: 100, b: 50 },
+    { id: 41, name: "Tangerine", r: 255, g: 150, b: 50 },
+    { id: 42, name: "Peach", r: 255, g: 200, b: 150 },
+    { id: 43, name: "Light Tan", r: 220, g: 190, b: 160 },
+    { id: 44, name: "Beige", r: 195, g: 175, b: 145 },
+    { id: 45, name: "Brown", r: 110, g: 70, b: 40 },
+    { id: 46, name: "Dark Brown", r: 75, g: 45, b: 25 },
+    { id: 47, name: "Chocolate", r: 65, g: 35, b: 20 },
+    { id: 48, name: "Saddle Brown", r: 130, g: 85, b: 50 },
+    { id: 49, name: "Mocha", r: 95, g: 60, b: 35 },
+    { id: 50, name: "Green", r: 0, g: 180, b: 0 },
+    { id: 51, name: "Racing Green", r: 0, g: 100, b: 50 },
+    { id: 52, name: "Dark Green", r: 0, g: 80, b: 40 },
+    { id: 53, name: "Forest Green", r: 35, g: 90, b: 45 },
+    { id: 54, name: "Hunter Green", r: 25, g: 70, b: 35 },
+    { id: 55, name: "Lime Green", r: 130, g: 255, b: 0 },
+    { id: 56, name: "Seafoam", r: 100, g: 200, b: 150 },
+    { id: 57, name: "Teal", r: 0, g: 130, b: 130 },
+    { id: 58, name: "Turquoise", r: 70, g: 200, b: 180 },
+    { id: 59, name: "Aqua", r: 0, g: 255, b: 200 },
+    { id: 60, name: "Mint Green", r: 150, g: 255, b: 180 },
+    { id: 61, name: "Army Green", r: 80, g: 95, b: 50 },
+    { id: 62, name: "Blue", r: 0, g: 100, b: 255 },
+    { id: 63, name: "Dark Navy", r: 0, g: 20, b: 60 },
+    { id: 64, name: "Dark Blue", r: 0, g: 40, b: 100 },
+    { id: 65, name: "Navy Blue", r: 20, g: 50, b: 120 },
+    { id: 66, name: "Midnight Blue", r: 25, g: 35, b: 80 },
+    { id: 67, name: "Cobalt Blue", r: 0, g: 70, b: 170 },
+    { id: 68, name: "Royal Blue", r: 30, g: 80, b: 180 },
+    { id: 69, name: "Sapphire Blue", r: 15, g: 80, b: 200 },
+    { id: 70, name: "Ocean Blue", r: 50, g: 120, b: 190 },
+    { id: 71, name: "Steel Blue", r: 70, g: 130, b: 180 },
+    { id: 72, name: "Slate Blue", r: 90, g: 110, b: 160 },
+    { id: 73, name: "Light Blue", r: 100, g: 180, b: 255 },
+    { id: 74, name: "Sky Blue", r: 135, g: 200, b: 250 },
+    { id: 75, name: "Baby Blue", r: 175, g: 220, b: 255 },
+    { id: 76, name: "Ice Blue", r: 200, g: 230, b: 255 },
+    { id: 77, name: "Powder Blue", r: 180, g: 210, b: 240 },
+    { id: 78, name: "Cyan", r: 0, g: 255, b: 255 },
+    { id: 79, name: "Electric Blue", r: 0, g: 150, b: 255 },
+    { id: 80, name: "Surf Blue", r: 50, g: 180, b: 220 },
+    { id: 81, name: "Marine Blue", r: 30, g: 90, b: 150 },
+    { id: 82, name: "Bright Blue", r: 0, g: 130, b: 255 },
+    { id: 83, name: "Ultra Blue", r: 30, g: 60, b: 200 },
+    { id: 84, name: "Racing Blue", r: 0, g: 90, b: 200 },
+    { id: 85, name: "Harbor Blue", r: 60, g: 100, b: 140 },
+    { id: 86, name: "Denim Blue", r: 80, g: 100, b: 130 },
+    { id: 87, name: "Petrol Blue", r: 40, g: 70, b: 90 },
+    { id: 88, name: "Galaxy Blue", r: 10, g: 30, b: 80 },
+    { id: 89, name: "Yellow", r: 255, g: 255, b: 0 },
+    { id: 90, name: "Taxi Yellow", r: 250, g: 210, b: 0 },
+    { id: 91, name: "Bright Yellow", r: 255, g: 240, b: 0 },
+    { id: 92, name: "Canary Yellow", r: 255, g: 230, b: 100 },
+    { id: 93, name: "Lemon Yellow", r: 255, g: 250, b: 140 },
+    { id: 94, name: "Flax Yellow", r: 230, g: 220, b: 100 },
+    { id: 95, name: "Mustard", r: 200, g: 170, b: 50 },
+    { id: 96, name: "Dark Yellow", r: 180, g: 160, b: 30 },
+    { id: 97, name: "Sand Yellow", r: 210, g: 200, b: 140 },
+    { id: 98, name: "Olive", r: 120, g: 120, b: 50 },
+    { id: 99, name: "Purple", r: 150, g: 0, b: 200 },
+    { id: 100, name: "Pink", r: 255, g: 150, b: 200 },
+    { id: 101, name: "Hot Pink", r: 255, g: 50, b: 150 },
+    { id: 102, name: "Magenta", r: 255, g: 0, b: 150 },
+    { id: 103, name: "Fuchsia", r: 230, g: 50, b: 130 },
+    { id: 104, name: "Violet", r: 130, g: 50, b: 180 },
+    { id: 105, name: "Plum", r: 100, g: 30, b: 100 },
+    { id: 106, name: "Dark Purple", r: 70, g: 20, b: 90 },
+    { id: 107, name: "Grape", r: 90, g: 40, b: 120 },
+    { id: 108, name: "Lavender", r: 200, g: 180, b: 220 },
+    { id: 109, name: "Lilac", r: 210, g: 175, b: 210 },
+    { id: 110, name: "Orchid", r: 180, g: 130, b: 200 },
+    { id: 111, name: "Mauve", r: 160, g: 130, b: 160 },
+    { id: 112, name: "Salmon", r: 255, g: 150, b: 130 },
+    { id: 113, name: "Coral", r: 255, g: 130, b: 100 },
+    { id: 114, name: "Rose", r: 255, g: 180, b: 180 },
+    { id: 115, name: "Blush", r: 255, g: 200, b: 200 },
+    { id: 116, name: "Light Pink", r: 255, g: 220, b: 230 },
+    { id: 117, name: "Crimson", r: 200, g: 20, b: 60 },
+    { id: 118, name: "Scarlet", r: 230, g: 40, b: 40 },
+    { id: 119, name: "Fire Red", r: 255, g: 65, b: 0 },
+    { id: 120, name: "Vermillion", r: 230, g: 75, b: 50 },
+    { id: 121, name: "Rust", r: 150, g: 70, b: 40 },
+    { id: 122, name: "Terracotta", r: 180, g: 90, b: 60 },
+    { id: 123, name: "Auburn", r: 130, g: 60, b: 50 },
+    { id: 124, name: "Sienna", r: 140, g: 80, b: 55 },
+    { id: 125, name: "Metallic Black", r: 20, g: 25, b: 30 },
+    { id: 126, name: "Metallic Silver", r: 170, g: 175, b: 180 },
+    { id: 127, name: "Metallic Red", r: 200, g: 50, b: 60 },
+    { id: 128, name: "Metallic Blue", r: 50, g: 100, b: 200 },
+    { id: 129, name: "Metallic Green", r: 50, g: 150, b: 80 },
+    { id: 130, name: "Metallic Gold", r: 200, g: 170, b: 80 },
+    { id: 131, name: "Metallic Orange", r: 230, g: 130, b: 50 },
+    { id: 132, name: "Metallic Purple", r: 130, g: 70, b: 170 },
+    { id: 133, name: "Police Blue", r: 40, g: 60, b: 120 }
+];
+
+// Vehicle Color Editor State
+let colorEditorActive = false;
+let colorEditorSlot = 0; // 0-3 for Color 1-4
+let colorEditorValues = [0, 0, 0, 0]; // Current color ID for each slot
+
+// Get color info by ID
+function getColorById(id) {
+    if (id >= 0 && id < GTA_IV_COLORS.length) {
+        return GTA_IV_COLORS[id];
+    }
+    return GTA_IV_COLORS[0]; // Default to black
+}
+
+// ============================================================================
 // THEME SYSTEM - Clean Modern Themes
 // ============================================================================
 let currentTheme = "midnight"; // Default theme - Clean dark
@@ -207,6 +361,8 @@ const itemDescriptions = {
     "veh_color_2": "🎨 SECONDARY COLOR - Accent/trim color of the vehicle!",
     "veh_color_3": "🎨 TERTIARY COLOR - Additional color detail!",
     "veh_color_4": "🎨 QUATERNARY COLOR - Extra color option!",
+    "color_slot_edit": "🎨 Use LEFT/RIGHT arrows to change color (0-133 from GTA IV carcols.dat)",
+    "color_preset": "🎨 Apply preset colors to all 4 vehicle color slots instantly!",
 
     // Vehicle Upgrade descriptions
     "veh_upgrade_add": "🔧 Add upgrade - Enhance your vehicle with this mod!",
@@ -237,9 +393,9 @@ const itemDescriptions = {
 let menuFont = null;
 let titleFont = null;
 
-// Menu dimensions in pixels - positioned center-right for premium look
+// Menu dimensions in pixels - positioned on the right side
 const menu = {
-    x: 480,
+    x: 920,
     y: 80,
     width: 420,
     headerHeight: 85,
@@ -257,6 +413,48 @@ let handlingMods = {
     acceleration: 1.0,
     topSpeed: 1.0,
     braking: 1.0
+};
+
+// ============================================================================
+// LAYER B: PHYSICS EMULATION SYSTEM
+// All handling effects are achieved through velocity/turnVelocity manipulation
+// This bypasses the need for real handling.dat editing which is not supported
+// ============================================================================
+let physicsEmulation = {
+    // Drift Mode State
+    driftActive: false,
+    driftIntensity: 0.0,       // 0-1 how much sideways slide
+    driftSteerBias: 0.0,       // Steering input tracking
+
+    // Grip/Traction Assist State
+    gripAssistEnabled: true,
+    gripAssistStrength: 1.0,   // 0-2, higher = more correction
+
+    // Acceleration Boost State
+    accelBoostEnabled: false,
+    accelBoostMultiplier: 1.0, // 1.0 = normal, 2.0 = double
+    maxSpeedLimit: 60.0,       // m/s (~216 km/h)
+
+    // Braking State
+    brakeAssistEnabled: true,
+    brakeMultiplier: 1.0,      // 1.0 = normal, 2.0 = stronger
+
+    // Stability/Anti-Roll State
+    stabilityEnabled: true,
+    stabilityStrength: 1.0,    // How much to dampen rotation
+    antiRollStrength: 0.5,     // How much to resist flipping
+
+    // Previous frame values for calculations
+    lastVelocity: null,
+    lastHeading: 0,
+    lastSpeed: 0,
+    lastSteerInput: 0,
+
+    // Input detection (estimated from velocity changes)
+    isAccelerating: false,
+    isBraking: false,
+    isSteering: false,
+    steerDirection: 0          // -1 left, 0 center, 1 right
 };
 
 // ============================================================================
@@ -882,154 +1080,21 @@ const menuData = {
     veh_colors: {
         title: "VEHICLE COLORS",
         items: [
-            { label: "--- Quick Colors ---", action: "none" },
-            { label: "Black", action: "veh_color", value: [0, 0] },
-            { label: "White", action: "veh_color", value: [18, 18] },
-            { label: "Dark Gray", action: "veh_color", value: [4, 4] },
-            { label: "Silver", action: "veh_color", value: [12, 12] },
-            { label: "Red", action: "veh_color", value: [27, 27] },
-            { label: "Candy Red", action: "veh_color", value: [30, 30] },
-            { label: "Orange", action: "veh_color", value: [36, 36] },
-            { label: "Yellow", action: "veh_color", value: [89, 89] },
-            { label: "Green", action: "veh_color", value: [50, 50] },
-            { label: "Lime Green", action: "veh_color", value: [55, 55] },
-            { label: "Blue", action: "veh_color", value: [62, 62] },
-            { label: "Light Blue", action: "veh_color", value: [73, 73] },
-            { label: "Purple", action: "veh_color", value: [99, 99] },
-            { label: "Pink", action: "veh_color", value: [100, 100] },
-            { label: "Gold", action: "veh_color", value: [37, 37] },
-            { label: "--- Custom Color Slots ---", action: "none" },
-            { label: "Color 1 (Primary)", action: "submenu", target: "veh_color_1" },
-            { label: "Color 2 (Secondary)", action: "submenu", target: "veh_color_2" },
-            { label: "Color 3 (Tertiary)", action: "submenu", target: "veh_color_3" },
-            { label: "Color 4 (Quaternary)", action: "submenu", target: "veh_color_4" },
-            { label: "--- Two Tone ---", action: "none" },
-            { label: "Black/Red", action: "veh_color", value: [0, 27] },
-            { label: "Black/White", action: "veh_color", value: [0, 18] },
-            { label: "Red/Black", action: "veh_color", value: [27, 0] },
-            { label: "Blue/White", action: "veh_color", value: [62, 18] },
-            { label: "Green/White", action: "veh_color", value: [50, 18] },
-            { label: "Random", action: "veh_color_random" }
+            { label: "Open Color Editor", action: "submenu", target: "vehColorEditor" },
+            { label: "Random Colors", action: "veh_color_random" }
         ]
     },
 
-    veh_color_1: {
-        title: "COLOR 1 (PRIMARY)",
+    // Vehicle Color Editor - special menu with horizontal scrolling
+    // Use LEFT/RIGHT arrows to change color ID, UP/DOWN to select slot
+    vehColorEditor: {
+        title: "VEHICLE COLOR EDITOR",
+        isColorEditor: true,
         items: [
-            { label: "Black (0)", action: "veh_color_slot", slot: 1, value: 0 },
-            { label: "White (18)", action: "veh_color_slot", slot: 1, value: 18 },
-            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 1, value: 4 },
-            { label: "Light Gray (8)", action: "veh_color_slot", slot: 1, value: 8 },
-            { label: "Silver (12)", action: "veh_color_slot", slot: 1, value: 12 },
-            { label: "Red (27)", action: "veh_color_slot", slot: 1, value: 27 },
-            { label: "Dark Red (28)", action: "veh_color_slot", slot: 1, value: 28 },
-            { label: "Candy Red (30)", action: "veh_color_slot", slot: 1, value: 30 },
-            { label: "Orange (36)", action: "veh_color_slot", slot: 1, value: 36 },
-            { label: "Yellow (89)", action: "veh_color_slot", slot: 1, value: 89 },
-            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 1, value: 91 },
-            { label: "Green (50)", action: "veh_color_slot", slot: 1, value: 50 },
-            { label: "Dark Green (52)", action: "veh_color_slot", slot: 1, value: 52 },
-            { label: "Lime Green (55)", action: "veh_color_slot", slot: 1, value: 55 },
-            { label: "Blue (62)", action: "veh_color_slot", slot: 1, value: 62 },
-            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 1, value: 64 },
-            { label: "Light Blue (73)", action: "veh_color_slot", slot: 1, value: 73 },
-            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 1, value: 82 },
-            { label: "Purple (99)", action: "veh_color_slot", slot: 1, value: 99 },
-            { label: "Pink (100)", action: "veh_color_slot", slot: 1, value: 100 },
-            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 1, value: 101 },
-            { label: "Brown (45)", action: "veh_color_slot", slot: 1, value: 45 },
-            { label: "Beige (44)", action: "veh_color_slot", slot: 1, value: 44 },
-            { label: "Gold (37)", action: "veh_color_slot", slot: 1, value: 37 }
-        ]
-    },
-
-    veh_color_2: {
-        title: "COLOR 2 (SECONDARY)",
-        items: [
-            { label: "Black (0)", action: "veh_color_slot", slot: 2, value: 0 },
-            { label: "White (18)", action: "veh_color_slot", slot: 2, value: 18 },
-            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 2, value: 4 },
-            { label: "Light Gray (8)", action: "veh_color_slot", slot: 2, value: 8 },
-            { label: "Silver (12)", action: "veh_color_slot", slot: 2, value: 12 },
-            { label: "Red (27)", action: "veh_color_slot", slot: 2, value: 27 },
-            { label: "Dark Red (28)", action: "veh_color_slot", slot: 2, value: 28 },
-            { label: "Candy Red (30)", action: "veh_color_slot", slot: 2, value: 30 },
-            { label: "Orange (36)", action: "veh_color_slot", slot: 2, value: 36 },
-            { label: "Yellow (89)", action: "veh_color_slot", slot: 2, value: 89 },
-            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 2, value: 91 },
-            { label: "Green (50)", action: "veh_color_slot", slot: 2, value: 50 },
-            { label: "Dark Green (52)", action: "veh_color_slot", slot: 2, value: 52 },
-            { label: "Lime Green (55)", action: "veh_color_slot", slot: 2, value: 55 },
-            { label: "Blue (62)", action: "veh_color_slot", slot: 2, value: 62 },
-            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 2, value: 64 },
-            { label: "Light Blue (73)", action: "veh_color_slot", slot: 2, value: 73 },
-            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 2, value: 82 },
-            { label: "Purple (99)", action: "veh_color_slot", slot: 2, value: 99 },
-            { label: "Pink (100)", action: "veh_color_slot", slot: 2, value: 100 },
-            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 2, value: 101 },
-            { label: "Brown (45)", action: "veh_color_slot", slot: 2, value: 45 },
-            { label: "Beige (44)", action: "veh_color_slot", slot: 2, value: 44 },
-            { label: "Gold (37)", action: "veh_color_slot", slot: 2, value: 37 }
-        ]
-    },
-
-    veh_color_3: {
-        title: "COLOR 3 (TERTIARY)",
-        items: [
-            { label: "Black (0)", action: "veh_color_slot", slot: 3, value: 0 },
-            { label: "White (18)", action: "veh_color_slot", slot: 3, value: 18 },
-            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 3, value: 4 },
-            { label: "Light Gray (8)", action: "veh_color_slot", slot: 3, value: 8 },
-            { label: "Silver (12)", action: "veh_color_slot", slot: 3, value: 12 },
-            { label: "Red (27)", action: "veh_color_slot", slot: 3, value: 27 },
-            { label: "Dark Red (28)", action: "veh_color_slot", slot: 3, value: 28 },
-            { label: "Candy Red (30)", action: "veh_color_slot", slot: 3, value: 30 },
-            { label: "Orange (36)", action: "veh_color_slot", slot: 3, value: 36 },
-            { label: "Yellow (89)", action: "veh_color_slot", slot: 3, value: 89 },
-            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 3, value: 91 },
-            { label: "Green (50)", action: "veh_color_slot", slot: 3, value: 50 },
-            { label: "Dark Green (52)", action: "veh_color_slot", slot: 3, value: 52 },
-            { label: "Lime Green (55)", action: "veh_color_slot", slot: 3, value: 55 },
-            { label: "Blue (62)", action: "veh_color_slot", slot: 3, value: 62 },
-            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 3, value: 64 },
-            { label: "Light Blue (73)", action: "veh_color_slot", slot: 3, value: 73 },
-            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 3, value: 82 },
-            { label: "Purple (99)", action: "veh_color_slot", slot: 3, value: 99 },
-            { label: "Pink (100)", action: "veh_color_slot", slot: 3, value: 100 },
-            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 3, value: 101 },
-            { label: "Brown (45)", action: "veh_color_slot", slot: 3, value: 45 },
-            { label: "Beige (44)", action: "veh_color_slot", slot: 3, value: 44 },
-            { label: "Gold (37)", action: "veh_color_slot", slot: 3, value: 37 }
-        ]
-    },
-
-    veh_color_4: {
-        title: "COLOR 4 (QUATERNARY)",
-        items: [
-            { label: "Black (0)", action: "veh_color_slot", slot: 4, value: 0 },
-            { label: "White (18)", action: "veh_color_slot", slot: 4, value: 18 },
-            { label: "Dark Gray (4)", action: "veh_color_slot", slot: 4, value: 4 },
-            { label: "Light Gray (8)", action: "veh_color_slot", slot: 4, value: 8 },
-            { label: "Silver (12)", action: "veh_color_slot", slot: 4, value: 12 },
-            { label: "Red (27)", action: "veh_color_slot", slot: 4, value: 27 },
-            { label: "Dark Red (28)", action: "veh_color_slot", slot: 4, value: 28 },
-            { label: "Candy Red (30)", action: "veh_color_slot", slot: 4, value: 30 },
-            { label: "Orange (36)", action: "veh_color_slot", slot: 4, value: 36 },
-            { label: "Yellow (89)", action: "veh_color_slot", slot: 4, value: 89 },
-            { label: "Bright Yellow (91)", action: "veh_color_slot", slot: 4, value: 91 },
-            { label: "Green (50)", action: "veh_color_slot", slot: 4, value: 50 },
-            { label: "Dark Green (52)", action: "veh_color_slot", slot: 4, value: 52 },
-            { label: "Lime Green (55)", action: "veh_color_slot", slot: 4, value: 55 },
-            { label: "Blue (62)", action: "veh_color_slot", slot: 4, value: 62 },
-            { label: "Dark Blue (64)", action: "veh_color_slot", slot: 4, value: 64 },
-            { label: "Light Blue (73)", action: "veh_color_slot", slot: 4, value: 73 },
-            { label: "Bright Blue (82)", action: "veh_color_slot", slot: 4, value: 82 },
-            { label: "Purple (99)", action: "veh_color_slot", slot: 4, value: 99 },
-            { label: "Pink (100)", action: "veh_color_slot", slot: 4, value: 100 },
-            { label: "Hot Pink (101)", action: "veh_color_slot", slot: 4, value: 101 },
-            { label: "Brown (45)", action: "veh_color_slot", slot: 4, value: 45 },
-            { label: "Beige (44)", action: "veh_color_slot", slot: 4, value: 44 },
-            { label: "Gold (37)", action: "veh_color_slot", slot: 4, value: 37 }
+            { label: "Color 1", action: "color_slot_edit", slot: 0 },
+            { label: "Color 2", action: "color_slot_edit", slot: 1 },
+            { label: "Color 3", action: "color_slot_edit", slot: 2 },
+            { label: "Color 4", action: "color_slot_edit", slot: 3 }
         ]
     },
 
@@ -1310,12 +1375,109 @@ addEventHandler("OnKeyUp", function(event, key, scanCode, mods) {
         navigateUp();
     } else if (key === SDLK_DOWN) {
         navigateDown();
+    } else if (key === SDLK_LEFT) {
+        // Left arrow - decrease color value in color editor
+        handleColorEditorLeft();
+    } else if (key === SDLK_RIGHT) {
+        // Right arrow - increase color value in color editor
+        handleColorEditorRight();
     } else if (key === SDLK_RETURN || key === SDLK_KP_ENTER) {
         selectItem();
     } else if (key === SDLK_BACKSPACE || key === SDLK_ESCAPE) {
         goBack();
     }
 });
+
+// Handle left arrow in color editor
+function handleColorEditorLeft() {
+    if (currentMenu !== "vehColorEditor") return;
+
+    let items = getCurrentMenuItems();
+    let item = items[selectedIndex];
+
+    if (item && item.action === "color_slot_edit") {
+        let slot = item.slot;
+        colorEditorValues[slot]--;
+        if (colorEditorValues[slot] < 0) {
+            colorEditorValues[slot] = GTA_IV_COLORS.length - 1;
+        }
+        applyColorToVehicle(slot, colorEditorValues[slot]);
+    }
+}
+
+// Handle right arrow in color editor
+function handleColorEditorRight() {
+    if (currentMenu !== "vehColorEditor") return;
+
+    let items = getCurrentMenuItems();
+    let item = items[selectedIndex];
+
+    if (item && item.action === "color_slot_edit") {
+        let slot = item.slot;
+        colorEditorValues[slot]++;
+        if (colorEditorValues[slot] >= GTA_IV_COLORS.length) {
+            colorEditorValues[slot] = 0;
+        }
+        applyColorToVehicle(slot, colorEditorValues[slot]);
+    }
+}
+
+// Apply color to vehicle slot
+function applyColorToVehicle(slot, colorId) {
+    if (!localPlayer || !localPlayer.vehicle) {
+        showNotification("Not in vehicle!");
+        return;
+    }
+
+    let veh = localPlayer.vehicle;
+    let colorInfo = getColorById(colorId);
+
+    try {
+        switch(slot) {
+            case 0:
+                veh.colour1 = colorId;
+                break;
+            case 1:
+                veh.colour2 = colorId;
+                break;
+            case 2:
+                veh.colour3 = colorId;
+                break;
+            case 3:
+                veh.colour4 = colorId;
+                break;
+        }
+        showNotification("Color " + (slot + 1) + ": " + colorId);
+    } catch(e) {
+        // Fallback for older API
+        try {
+            if (slot === 0 || slot === 1) {
+                let col1 = slot === 0 ? colorId : colorEditorValues[0];
+                let col2 = slot === 1 ? colorId : colorEditorValues[1];
+                natives.changeCarColour(veh, col1, col2);
+                showNotification("Color " + (slot + 1) + ": " + colorInfo.name);
+            }
+        } catch(e2) {
+            console.log("[ColorEditor] Failed: " + e2);
+        }
+    }
+}
+
+// Load current vehicle colors into editor
+function loadVehicleColorsToEditor() {
+    if (!localPlayer || !localPlayer.vehicle) return;
+
+    let veh = localPlayer.vehicle;
+    try {
+        colorEditorValues[0] = veh.colour1 || 0;
+        colorEditorValues[1] = veh.colour2 || 0;
+        colorEditorValues[2] = veh.colour3 || 0;
+        colorEditorValues[3] = veh.colour4 || 0;
+    } catch(e) {
+        // Default to black if can't read
+        colorEditorValues = [0, 0, 0, 0];
+    }
+}
 
 function navigateUp() {
     let items = getCurrentMenuItems();
@@ -1348,6 +1510,17 @@ function updateScroll(items) {
 }
 
 function goBack() {
+    // Deactivate color editor when leaving
+    if (currentMenu === "vehColorEditor") {
+        colorEditorActive = false;
+    }
+
+    // Deactivate handling editor when leaving handling menus
+    if (currentMenu === "handlingEditor" || currentMenu.startsWith("handling_")) {
+        handlingEditorActive = false;
+        selectedHandlingParam = "";
+    }
+
     if (menuStack.length > 0) {
         let prev = menuStack.pop();
         currentMenu = prev.menu;
@@ -1443,6 +1616,12 @@ function selectItem() {
                 // Auto-refresh player list when entering network menu
                 if (item.target === "network") {
                     refreshPlayerList();
+                }
+
+                // Load vehicle colors when entering color editor
+                if (item.target === "vehColorEditor") {
+                    loadVehicleColorsToEditor();
+                    colorEditorActive = true;
                 }
 
                 // Activate handling editor visualization when entering handling menus
@@ -1667,6 +1846,37 @@ function selectItem() {
                         console.log("[Color] Failed to set color slot: " + e2);
                     }
                 }
+            }
+            break;
+
+        case "color_slot_edit":
+            // Color editor slot - pressing Enter does nothing, use LEFT/RIGHT
+            showNotification("Use LEFT/RIGHT arrows to change color");
+            break;
+
+        case "color_preset":
+            // Apply preset colors to all 4 slots
+            if (localPlayer && localPlayer.vehicle) {
+                let veh = localPlayer.vehicle;
+                let vals = item.values;
+                try {
+                    veh.colour1 = vals[0];
+                    veh.colour2 = vals[1];
+                    veh.colour3 = vals[2];
+                    veh.colour4 = vals[3];
+                    colorEditorValues = [vals[0], vals[1], vals[2], vals[3]];
+                    showNotification("Preset applied: " + item.label);
+                } catch(e) {
+                    try {
+                        natives.changeCarColour(veh, vals[0], vals[1]);
+                        colorEditorValues = [vals[0], vals[1], 0, 0];
+                        showNotification("Preset applied (2 colors)");
+                    } catch(e2) {
+                        console.log("[ColorEditor] Preset failed: " + e2);
+                    }
+                }
+            } else {
+                showNotification("Not in vehicle!");
             }
             break;
 
@@ -2999,6 +3209,37 @@ addEventHandler("OnDrawnHUD", function(event) {
                 toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, animAlpha);
             drawText(">", arrowX, textY, arrowCol, textSize);
         }
+
+        // Color Editor Slot - show left/right arrows with color ID only (no name)
+        if (item.action === "color_slot_edit") {
+            let slot = item.slot;
+            let colorId = colorEditorValues[slot];
+            let colorInfo = getColorById(colorId);
+
+            // Position for color info display (on the right side)
+            let displayX = baseX + menu.width - 95;
+            let displayY = itemY + 14;
+
+            // Left arrow "<"
+            let arrowCol = isSelected ?
+                toColour(theme.accent.r, theme.accent.g, theme.accent.b, animAlpha) :
+                toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, Math.floor(animAlpha * 0.5));
+            drawText("<", displayX, displayY, arrowCol, 14);
+
+            // Color ID only (no name) - with color preview
+            let idCol = isSelected ?
+                toColour(UI.textPrimary.r, UI.textPrimary.g, UI.textPrimary.b, animAlpha) :
+                toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, animAlpha);
+            drawText(colorId.toString(), displayX + 22, displayY, idCol, 12);
+
+            // Color preview box
+            let previewCol = toColour(colorInfo.r, colorInfo.g, colorInfo.b, animAlpha);
+            drawRect(displayX + 45, displayY + 2, 16, 12, previewCol);
+
+            // Right arrow ">"
+            let rightArrowX = displayX + 68;
+            drawText(">", rightArrowX, displayY, arrowCol, 14);
+        }
     }
 
     // ===== FOOTER =====
@@ -3016,20 +3257,38 @@ addEventHandler("OnDrawnHUD", function(event) {
     let hintCol = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, animAlpha);
     let keyCol = toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, animAlpha);
 
-    drawText("[", baseX + 15, hintY, hintCol, 10);
-    drawText("UP/DOWN", baseX + 22, hintY, keyCol, 10);
-    drawText("]", baseX + 72, hintY, hintCol, 10);
-    drawText("Navigate", baseX + 82, hintY, hintCol, 10);
+    // Show different hints for color editor
+    if (currentMenu === "vehColorEditor") {
+        drawText("[", baseX + 15, hintY, hintCol, 10);
+        drawText("UP/DN", baseX + 22, hintY, keyCol, 10);
+        drawText("]", baseX + 57, hintY, hintCol, 10);
+        drawText("Slot", baseX + 67, hintY, hintCol, 10);
 
-    drawText("[", baseX + 145, hintY, hintCol, 10);
-    drawText("ENTER", baseX + 152, hintY, keyCol, 10);
-    drawText("]", baseX + 190, hintY, hintCol, 10);
-    drawText("Select", baseX + 200, hintY, hintCol, 10);
+        drawText("[", baseX + 110, hintY, hintCol, 10);
+        drawText("L/R", baseX + 117, hintY, keyCol, 10);
+        drawText("]", baseX + 140, hintY, hintCol, 10);
+        drawText("Color", baseX + 150, hintY, hintCol, 10);
 
-    drawText("[", baseX + 255, hintY, hintCol, 10);
-    drawText("BACK", baseX + 262, hintY, keyCol, 10);
-    drawText("]", baseX + 295, hintY, hintCol, 10);
-    drawText("Return", baseX + 305, hintY, hintCol, 10);
+        drawText("[", baseX + 200, hintY, hintCol, 10);
+        drawText("BACK", baseX + 207, hintY, keyCol, 10);
+        drawText("]", baseX + 240, hintY, hintCol, 10);
+        drawText("Exit", baseX + 250, hintY, hintCol, 10);
+    } else {
+        drawText("[", baseX + 15, hintY, hintCol, 10);
+        drawText("UP/DOWN", baseX + 22, hintY, keyCol, 10);
+        drawText("]", baseX + 72, hintY, hintCol, 10);
+        drawText("Navigate", baseX + 82, hintY, hintCol, 10);
+
+        drawText("[", baseX + 145, hintY, hintCol, 10);
+        drawText("ENTER", baseX + 152, hintY, keyCol, 10);
+        drawText("]", baseX + 190, hintY, hintCol, 10);
+        drawText("Select", baseX + 200, hintY, hintCol, 10);
+
+        drawText("[", baseX + 255, hintY, hintCol, 10);
+        drawText("BACK", baseX + 262, hintY, keyCol, 10);
+        drawText("]", baseX + 295, hintY, hintCol, 10);
+        drawText("Return", baseX + 305, hintY, hintCol, 10);
+    }
 
     // ===== GLOWING SCROLLBAR =====
     if (items.length > menu.maxVisibleItems) {
@@ -3211,14 +3470,14 @@ addEventHandler("OnDrawnHUD", function(event) {
     let alpha = Math.floor(255 * menuOpenAnim);
     let theme = getTheme();
 
-    // Panel position (top-left of screen)
-    let panelX = 30;
+    // Panel position (top-right of screen, next to menu)
+    let panelX = 700;
     let panelY = 100;
     let panelW = 200;
     let panelH = 220;
 
-    // Slide in animation from left
-    let slideOffset = (1 - menuOpenAnim) * -60;
+    // Slide in animation from right
+    let slideOffset = (1 - menuOpenAnim) * 60;
     panelX += slideOffset;
 
     // Shadow
@@ -3346,8 +3605,8 @@ addEventHandler("OnDrawnHUD", function(event) {
 
     if (activeToggles.length === 0) return;
 
-    // Position in top-right corner
-    let indicatorX = 1700;
+    // Position in top-left corner (menu is now on right side)
+    let indicatorX = 30;
     let indicatorY = 20;
     let bgWidth = 70;
     let bgHeight = 18 + activeToggles.length * 14;
@@ -3656,86 +3915,223 @@ addEventHandler("OnProcess", function(event) {
             } catch(e) {}
         }
 
-        // Rainbow car color - cycle through colors
+        // Rainbow car color - change all 4 colors to random values
         if (toggleStates.rainbowCar && processCounter % 5 === 0) {
             try {
-                rainbowHue = (rainbowHue + 3) % 360;
-                let rgb = hsvToRgb(rainbowHue, 1, 1);
-                // Use closest GTA color (cycle through color indices)
-                let colorIndex = Math.floor(rainbowHue / 3) % 132;
-                natives.changeCarColour(veh, colorIndex, colorIndex);
-            } catch(e) {}
-        }
+                // Generate 4 random colors (0-133)
+                let c1 = Math.floor(Math.random() * 134);
+                let c2 = Math.floor(Math.random() * 134);
+                let c3 = Math.floor(Math.random() * 134);
+                let c4 = Math.floor(Math.random() * 134);
 
-        // Drift mode - reduce traction
-        if (toggleStates.driftMode !== lastDriftMode) {
-            try {
-                if (toggleStates.driftMode) {
-                    // Make car slide more
-                    natives.setCarCanBeVisiblyDamaged(veh, false);
-                }
-            } catch(e) {}
-            lastDriftMode = toggleStates.driftMode;
-        }
-        if (toggleStates.driftMode) {
-            // Apply sideways slip when turning
-            try {
-                let vel = veh.velocity;
-                let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
-                if (speed > 10) {
-                    // Add slight sideways force for drift effect
-                    let heading = veh.heading || 0;
-                    let slideX = Math.cos(heading) * 0.5;
-                    let slideY = -Math.sin(heading) * 0.5;
-                    veh.velocity = new Vec3(vel.x + slideX, vel.y + slideY, vel.z);
+                // Apply all 4 colors
+                try {
+                    veh.colour1 = c1;
+                    veh.colour2 = c2;
+                    veh.colour3 = c3;
+                    veh.colour4 = c4;
+                } catch(e1) {
+                    // Fallback: use natives for color 1 and 2
+                    natives.changeCarColour(veh, c1, c2);
                 }
             } catch(e) {}
         }
 
-        // ===== HANDLING EDITOR EFFECTS =====
-        // Apply acceleration boost when driveForce is modified
-        if (handlingMods.acceleration > 1.0) {
-            try {
-                let vel = veh.velocity;
-                let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
-                // Only boost when accelerating (moving forward)
-                if (speed > 1 && speed < 50) {
-                    let heading = veh.heading || 0;
-                    let boostFactor = (handlingMods.acceleration - 1.0) * 0.05;
-                    let boostX = Math.sin(heading) * -boostFactor * speed;
-                    let boostY = Math.cos(heading) * boostFactor * speed;
+        // ============================================================================
+        // LAYER B: PHYSICS EMULATION PROCESSING
+        // All handling effects achieved via velocity manipulation
+        // ============================================================================
+        try {
+            let vel = veh.velocity;
+            let turnVel = veh.turnVelocity;
+            let heading = veh.heading || 0;
+            let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+            let speedKmh = speed * 3.6;
+
+            // Calculate forward direction vector from heading
+            let forwardX = -Math.sin(heading);
+            let forwardY = Math.cos(heading);
+
+            // Calculate right direction vector (perpendicular to forward)
+            let rightX = Math.cos(heading);
+            let rightY = Math.sin(heading);
+
+            // Decompose velocity into forward and sideways components
+            let forwardSpeed = vel.x * forwardX + vel.y * forwardY;
+            let sidewaysSpeed = vel.x * rightX + vel.y * rightY;
+
+            // Detect steering input from turn velocity
+            let steerInput = turnVel.z || 0;
+            let isSteeringLeft = steerInput > 0.01;
+            let isSteeringRight = steerInput < -0.01;
+            physicsEmulation.isSteering = isSteeringLeft || isSteeringRight;
+            physicsEmulation.steerDirection = isSteeringLeft ? -1 : (isSteeringRight ? 1 : 0);
+
+            // Detect acceleration/braking from speed changes
+            if (physicsEmulation.lastSpeed !== null) {
+                let speedDelta = speed - physicsEmulation.lastSpeed;
+                physicsEmulation.isAccelerating = speedDelta > 0.1 && forwardSpeed > 0;
+                physicsEmulation.isBraking = speedDelta < -0.2 || forwardSpeed < -1;
+            }
+
+            // Save for next frame
+            physicsEmulation.lastSpeed = speed;
+            physicsEmulation.lastHeading = heading;
+            physicsEmulation.lastVelocity = vel;
+
+            // ===== DRIFT MODE (Physics Emulation) =====
+            if (toggleStates.driftMode && speed > 5) {
+                // Calculate drift intensity based on speed and steering
+                let driftFactor = Math.min(1.0, speed / 25.0) * handlingValues.tractionLoss;
+
+                // When steering, bias velocity sideways for controlled slide
+                if (physicsEmulation.isSteering) {
+                    let slideAmount = driftFactor * physicsEmulation.steerDirection * 0.8;
+
+                    // Add lateral velocity component
+                    let newVelX = vel.x + rightX * slideAmount;
+                    let newVelY = vel.y + rightY * slideAmount;
+
+                    // Reduce forward correction (let the car slide)
+                    let forwardDamping = 0.98; // Less damping = more slide
+                    newVelX = newVelX * forwardDamping + forwardX * forwardSpeed * (1 - forwardDamping) * 0.5;
+                    newVelY = newVelY * forwardDamping + forwardY * forwardSpeed * (1 - forwardDamping) * 0.5;
+
+                    vel = new Vec3(newVelX, newVelY, vel.z);
+                }
+
+                // Counter-steer assistance - help prevent spinouts
+                if (Math.abs(sidewaysSpeed) > 3 && !physicsEmulation.isSteering) {
+                    // Gradually correct back toward forward direction
+                    let correction = -sidewaysSpeed * 0.03;
+                    vel = new Vec3(
+                        vel.x + rightX * correction,
+                        vel.y + rightY * correction,
+                        vel.z
+                    );
+                }
+
+                // Apply modified velocity
+                veh.velocity = vel;
+            }
+
+            // ===== GRIP / TRACTION ASSIST =====
+            else if (physicsEmulation.gripAssistEnabled && !toggleStates.driftMode && speed > 2) {
+                // Calculate grip based on handling values
+                let gripFactor = (handlingValues.tractionCurveMax / 2.0) * physicsEmulation.gripAssistStrength;
+                gripFactor = Math.min(2.0, Math.max(0.1, gripFactor));
+
+                // Correct sideways velocity back toward forward direction
+                // Stronger at low speeds, weaker at high speeds (realism)
+                let speedFactor = Math.max(0.3, 1.0 - (speed / 40.0));
+                let correctionStrength = gripFactor * speedFactor * 0.15;
+
+                // Apply sideways velocity correction
+                if (Math.abs(sidewaysSpeed) > 0.5) {
+                    let correction = -sidewaysSpeed * correctionStrength;
+                    veh.velocity = new Vec3(
+                        vel.x + rightX * correction,
+                        vel.y + rightY * correction,
+                        vel.z
+                    );
+                }
+            }
+
+            // ===== ACCELERATION BOOST (Behavioral) =====
+            if (handlingMods.acceleration > 1.0 && physicsEmulation.isAccelerating && speed > 1) {
+                let maxSpeed = physicsEmulation.maxSpeedLimit * handlingMods.topSpeed;
+
+                // Only boost if below max speed
+                if (speed < maxSpeed) {
+                    let boostFactor = (handlingMods.acceleration - 1.0) * 0.08;
+                    // Add velocity along forward vector
+                    let boostX = forwardX * boostFactor * Math.min(speed, 20);
+                    let boostY = forwardY * boostFactor * Math.min(speed, 20);
+
                     veh.velocity = new Vec3(vel.x + boostX, vel.y + boostY, vel.z);
                 }
-            } catch(e) {}
+            }
+
+            // ===== TOP SPEED CONTROL =====
+            let maxSpeed = 35 * handlingMods.topSpeed; // Base ~35 m/s
+            if (speed > maxSpeed) {
+                // Smoothly reduce to max speed (not instant)
+                let factor = maxSpeed / speed;
+                factor = 0.95 + factor * 0.05; // Gradual approach
+                veh.velocity = new Vec3(vel.x * factor, vel.y * factor, vel.z);
+            }
+            // Speed boost when above normal threshold
+            else if (handlingMods.topSpeed > 1.0 && speed > 20 && speed < maxSpeed && physicsEmulation.isAccelerating) {
+                let pushFactor = (handlingMods.topSpeed - 1.0) * 0.015;
+                let pushX = forwardX * pushFactor * speed;
+                let pushY = forwardY * pushFactor * speed;
+                veh.velocity = new Vec3(vel.x + pushX, vel.y + pushY, vel.z);
+            }
+
+            // ===== BRAKING BEHAVIOR =====
+            if (physicsEmulation.isBraking && handlingMods.braking > 0 && speed > 1) {
+                // Smooth braking - reduce velocity magnitude
+                let brakeFactor = handlingMods.braking * 0.05;
+                let dampFactor = 1.0 - Math.min(0.15, brakeFactor);
+
+                // Preserve directional stability while braking
+                let newSpeed = speed * dampFactor;
+                if (newSpeed > 0.5) {
+                    let ratio = newSpeed / speed;
+                    veh.velocity = new Vec3(vel.x * ratio, vel.y * ratio, vel.z);
+                }
+            }
+
+            // ===== STABILITY / ANTI-ROLL =====
+            if (physicsEmulation.stabilityEnabled && speed > 5) {
+                // Get current turn velocity
+                let currentTurn = veh.turnVelocity;
+
+                // Dampen excessive rotation (X and Y axes = roll/pitch)
+                let stabilityFactor = physicsEmulation.stabilityStrength * 0.2;
+                let antiRollFactor = physicsEmulation.antiRollStrength * 0.3;
+
+                // Cap extreme rotational velocities to prevent flipping
+                let maxRoll = 1.5 - (antiRollFactor * 0.5);
+                let dampedX = currentTurn.x;
+                let dampedY = currentTurn.y;
+                let dampedZ = currentTurn.z;
+
+                // Anti-roll: prevent excessive X/Y rotation
+                if (Math.abs(dampedX) > maxRoll) {
+                    dampedX = dampedX * (1 - antiRollFactor * 0.5);
+                }
+                if (Math.abs(dampedY) > maxRoll) {
+                    dampedY = dampedY * (1 - antiRollFactor * 0.5);
+                }
+
+                // At high speed, dampen all rotations for stability
+                if (speed > 25) {
+                    let highSpeedDamp = 1 - (stabilityFactor * Math.min(1, (speed - 25) / 20));
+                    dampedX *= highSpeedDamp;
+                    dampedY *= highSpeedDamp;
+                    // Keep Z (yaw) mostly intact for steering feel
+                    dampedZ *= (1 - stabilityFactor * 0.3);
+                }
+
+                // Apply damped turn velocity
+                if (dampedX !== currentTurn.x || dampedY !== currentTurn.y || dampedZ !== currentTurn.z) {
+                    veh.turnVelocity = new Vec3(dampedX, dampedY, dampedZ);
+                }
+            }
+        } catch(e) {
+            // Silent fail for physics processing
         }
 
-        // Apply top speed limiting/boosting
-        if (handlingMods.topSpeed !== 1.0) {
-            try {
-                let vel = veh.velocity;
-                let speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
-                let maxSpeed = 35 * handlingMods.topSpeed; // Base max ~35 m/s (~126 km/h)
-
-                // If going too fast for the setting, slow down
-                if (speed > maxSpeed && handlingMods.topSpeed < 1.0) {
-                    let factor = maxSpeed / speed;
-                    veh.velocity = new Vec3(vel.x * factor, vel.y * factor, vel.z);
-                }
-                // If speed boost is enabled and accelerating, add forward push
-                else if (handlingMods.topSpeed > 1.0 && speed > 20 && speed < maxSpeed) {
-                    let heading = veh.heading || 0;
-                    let pushFactor = (handlingMods.topSpeed - 1.0) * 0.02;
-                    let pushX = Math.sin(heading) * -pushFactor * speed;
-                    let pushY = Math.cos(heading) * pushFactor * speed;
-                    veh.velocity = new Vec3(vel.x + pushX, vel.y + pushY, vel.z);
-                }
-            } catch(e) {}
-        }
-
-        // Apply enhanced braking
-        if (handlingMods.braking > 1.0) {
-            // Braking effect is passive - applied when vehicle is slowing down
-            // This would need input detection to work properly
+        // Track drift mode state change
+        if (toggleStates.driftMode !== lastDriftMode) {
+            lastDriftMode = toggleStates.driftMode;
+            if (toggleStates.driftMode) {
+                // When entering drift mode, set physics emulation values
+                physicsEmulation.driftActive = true;
+            } else {
+                physicsEmulation.driftActive = false;
+            }
         }
 
         // Fly mode - WASD controls altitude
@@ -3947,12 +4343,9 @@ addEventHandler("OnPedWeaponShoot", function(event, ped, weapon) {
 // ============================================================================
 
 // Apply a single handling value to the current vehicle
-// Uses GTA Connected API from wiki documentation:
-// - vehicle.setSuspensionHeight(suspensionId, height) - suspension height
-// - physical.mass - vehicle mass (read/write)
-// - physical.turnVelocity - rotational velocity Vec3
-// - vehicle.strongGrip - grip on bikes (server only)
-// - natives.changeCarColour - color changes
+// LAYER B: All handling effects are achieved through Physics Emulation
+// This does NOT modify real handling.dat values - instead it configures
+// the physics emulation system to simulate the desired behavior
 function applyHandlingValue(param, value) {
     if (!localPlayer || !localPlayer.vehicle) return;
 
@@ -3960,116 +4353,124 @@ function applyHandlingValue(param, value) {
 
     try {
         switch(param) {
+            // ===== TRACTION & GRIP (Physics Emulation) =====
             case "tractionCurveMax":
-                // SET_CAR_TRACTION - Verified GTA IV native
-                try {
-                    natives.setCarTraction(veh, value);
-                } catch(e) {
-                    console.log("[Handling] setCarTraction failed: " + e);
-                }
+                // Controls grip assist strength in physics emulation
+                // Higher = more sideways velocity correction
+                physicsEmulation.gripAssistStrength = value / 2.0;
+                // Also try native if available (may work on some servers)
+                try { natives.setCarTraction(veh, value); } catch(e) {}
+                console.log("[Handling] Grip Assist Strength: " + physicsEmulation.gripAssistStrength.toFixed(2));
                 break;
 
             case "tractionCurveMin":
-                // Apply combined with max for overall grip feel
-                try {
-                    let combinedTraction = (handlingValues.tractionCurveMax + value) / 2;
-                    natives.setCarTraction(veh, combinedTraction);
-                } catch(e) {}
+                // Minimum grip affects how much the car slides at low speeds
+                let combinedGrip = (handlingValues.tractionCurveMax + value) / 4.0;
+                physicsEmulation.gripAssistStrength = combinedGrip;
+                try { natives.setCarTraction(veh, combinedGrip * 2); } catch(e) {}
                 break;
 
             case "tractionBias":
-                // Adjust traction based on front/rear distribution
-                try {
-                    let adjustedTraction = handlingValues.tractionCurveMax * (0.5 + (value - 0.5) * 0.5);
-                    natives.setCarTraction(veh, adjustedTraction);
-                } catch(e) {}
+                // Front/rear grip distribution - affects stability
+                // Lower value = more front grip = understeer
+                // Higher value = more rear grip = oversteer (easier to drift)
+                physicsEmulation.stabilityStrength = 1.0 + (0.5 - value);
+                physicsEmulation.antiRollStrength = 0.5 + (0.5 - value) * 0.3;
+                console.log("[Handling] Stability adjusted for bias: " + value.toFixed(2));
                 break;
 
             case "tractionLoss":
-                // Higher values = easier to lose traction
-                try {
-                    let lossTraction = handlingValues.tractionCurveMax / (1 + (value - 0.8));
-                    natives.setCarTraction(veh, Math.max(0.3, lossTraction));
-                } catch(e) {}
+                // Higher = easier to lose traction = better drifting
+                // This directly affects drift mode intensity
+                if (value > 1.0) {
+                    physicsEmulation.gripAssistStrength *= (1.0 / value);
+                }
+                console.log("[Handling] Traction Loss: " + value.toFixed(2) + " - Grip reduced to: " + physicsEmulation.gripAssistStrength.toFixed(2));
                 break;
 
+            // ===== SUSPENSION (Physics Emulation + Visual) =====
             case "suspensionForce":
-                // Suspension stiffness - affects bounce
+                // Stiffness affects stability - stiffer = more stable at speed
+                physicsEmulation.stabilityStrength = value / 2.0;
                 suspensionOffset = (value - 2.0) * 0.02;
+                console.log("[Handling] Suspension stiffness -> Stability: " + physicsEmulation.stabilityStrength.toFixed(2));
                 break;
 
             case "suspensionRaise":
-                // Use vehicle.setSuspensionHeight for all 4 wheels
-                // suspensionId: 0=FL, 1=FR, 2=RL, 3=RR
+                // Try API method, fallback to visual only
                 try {
                     for (let wheelId = 0; wheelId < 4; wheelId++) {
                         veh.setSuspensionHeight(wheelId, value);
                     }
-                    suspensionOffset = value;
-                    console.log("[Handling] Suspension height set to: " + value);
+                    console.log("[Handling] Suspension height set: " + value);
                 } catch(e) {
-                    console.log("[Handling] setSuspensionHeight failed: " + e);
-                    // Visual fallback
-                    suspensionOffset = value;
+                    // Visual feedback only
                 }
+                suspensionOffset = value;
+                // Higher ride height = less stable
+                physicsEmulation.antiRollStrength = Math.max(0.2, 0.5 - value);
                 break;
 
             case "suspensionCompDamp":
-                // Affects bounce feel - stored for visual animation
+                // Damping affects how quickly stability corrections happen
+                physicsEmulation.stabilityStrength *= (value / 1.0);
                 break;
 
+            // ===== ENGINE & SPEED (Physics Emulation) =====
             case "driveForce":
-                // Engine power - affects acceleration multiplier
+                // Engine power -> Acceleration boost multiplier
                 handlingMods.acceleration = value / 0.25;
+                physicsEmulation.accelBoostEnabled = (handlingMods.acceleration > 1.0);
+                physicsEmulation.accelBoostMultiplier = handlingMods.acceleration;
+                console.log("[Handling] Acceleration Boost: " + handlingMods.acceleration.toFixed(2) + "x");
                 break;
 
             case "initialDriveMaxVel":
-                // Top speed - store multiplier for speed limiting
+                // Top speed -> Speed limit in physics emulation
                 handlingMods.topSpeed = value / 200.0;
+                physicsEmulation.maxSpeedLimit = value / 3.6; // Convert to m/s
+                console.log("[Handling] Max Speed: " + value + " km/h (" + physicsEmulation.maxSpeedLimit.toFixed(1) + " m/s)");
                 break;
 
             case "brakeForce":
-                // Brake strength multiplier
+                // Brake strength -> Braking multiplier
                 handlingMods.braking = value / 0.8;
+                physicsEmulation.brakeMultiplier = handlingMods.braking;
+                physicsEmulation.brakeAssistEnabled = (handlingMods.braking > 0);
+                console.log("[Handling] Brake Multiplier: " + handlingMods.braking.toFixed(2) + "x");
                 break;
 
+            // ===== WEIGHT & BALANCE (Physics Emulation) =====
             case "mass":
-                // Use physical.mass property (GTA Connected API)
+                // Mass affects momentum and stability
+                // Try direct API first
                 try {
                     veh.mass = value;
-                    console.log("[Handling] Mass set to: " + value);
+                    console.log("[Handling] Mass set: " + value + " kg");
                 } catch(e1) {
-                    // Fallback to native
-                    try {
-                        natives.setCarMass(veh, value);
-                    } catch(e2) {
-                        console.log("[Handling] mass set failed: " + e2);
-                    }
+                    try { natives.setCarMass(veh, value); } catch(e2) {}
                 }
+                // Heavier = more stable, less responsive
+                let massFactor = value / 1500.0;
+                physicsEmulation.stabilityStrength *= massFactor;
+                physicsEmulation.gripAssistStrength *= (1 / Math.sqrt(massFactor));
                 break;
 
             case "centreOfMassZ":
-                // Adjust turn velocity to simulate center of mass change
-                // Higher CoM = more likely to flip
-                try {
-                    // Use turnVelocity to apply subtle rotational adjustments
-                    let currentTurn = veh.turnVelocity;
-                    if (value > 0) {
-                        // Higher center = add slight instability
-                        let instability = value * 0.1;
-                        veh.turnVelocity = new Vec3(
-                            currentTurn.x * (1 + instability),
-                            currentTurn.y * (1 + instability),
-                            currentTurn.z
-                        );
-                    }
-                } catch(e) {
-                    console.log("[Handling] turnVelocity adjustment failed: " + e);
+                // Center of mass height affects roll tendency
+                // Higher = less stable, more likely to flip
+                physicsEmulation.antiRollStrength = Math.max(0.2, 0.5 - value * 2);
+                // Simulate through turn velocity dampening
+                if (value > 0.1) {
+                    physicsEmulation.stabilityStrength *= (1 - value * 0.5);
                 }
+                console.log("[Handling] CoM Height: " + value + " -> Anti-Roll: " + physicsEmulation.antiRollStrength.toFixed(2));
                 break;
 
+            // ===== STEERING (Stored for reference) =====
             case "steeringLock":
-                // Steering angle - visual/stored only
+                // Steering angle is engine-controlled, store for display only
+                console.log("[Handling] Steering Lock: " + value + " degrees (visual only)");
                 break;
         }
     } catch(e) {
@@ -4106,47 +4507,53 @@ function resetHandlingToDefault() {
     suspensionOffset = 0;
     selectedHandlingParam = "";
 
+    // ===== RESET PHYSICS EMULATION TO DEFAULTS =====
+    physicsEmulation.driftActive = false;
+    physicsEmulation.driftIntensity = 0.0;
+    physicsEmulation.gripAssistEnabled = true;
+    physicsEmulation.gripAssistStrength = 1.0;
+    physicsEmulation.accelBoostEnabled = false;
+    physicsEmulation.accelBoostMultiplier = 1.0;
+    physicsEmulation.maxSpeedLimit = 60.0;
+    physicsEmulation.brakeAssistEnabled = true;
+    physicsEmulation.brakeMultiplier = 1.0;
+    physicsEmulation.stabilityEnabled = true;
+    physicsEmulation.stabilityStrength = 1.0;
+    physicsEmulation.antiRollStrength = 0.5;
+
     // Apply defaults to vehicle using proper API
     if (localPlayer && localPlayer.vehicle) {
         let veh = localPlayer.vehicle;
 
-        // Reset traction
+        // Reset traction (try native)
         try {
             natives.setCarTraction(veh, 2.0);
-        } catch(e) {
-            console.log("[Handling] Reset traction failed: " + e);
-        }
+        } catch(e) {}
 
         // Reset mass using physical.mass property
         try {
             veh.mass = 1500.0;
         } catch(e1) {
-            try {
-                natives.setCarMass(veh, 1500.0);
-            } catch(e2) {}
+            try { natives.setCarMass(veh, 1500.0); } catch(e2) {}
         }
 
-        // Reset suspension height using vehicle.setSuspensionHeight
+        // Reset suspension height
         try {
             for (let wheelId = 0; wheelId < 4; wheelId++) {
                 veh.setSuspensionHeight(wheelId, 0.0);
             }
-        } catch(e) {
-            console.log("[Handling] Reset suspension failed: " + e);
-        }
+        } catch(e) {}
 
         // Reset turn velocity
         try {
             veh.turnVelocity = new Vec3(0, 0, 0);
         } catch(e) {}
 
-        // Repair vehicle to reset any damage-based handling issues
-        try {
-            natives.fixCar(veh);
-        } catch(e) {}
+        // Repair vehicle
+        try { natives.fixCar(veh); } catch(e) {}
     }
 
-    // Reset handling mods (independent from drift mode toggle)
+    // Reset handling mods
     handlingMods = {
         grip: 1.0,
         acceleration: 1.0,
@@ -4154,15 +4561,17 @@ function resetHandlingToDefault() {
         braking: 1.0
     };
 
-    console.log("[Handling] Reset to defaults");
+    console.log("[Handling] Reset to defaults - Physics Emulation reset");
 }
 
-// Apply handling presets
+// Apply handling presets - Configures PHYSICS EMULATION for each setup
 function applyHandlingPreset(preset) {
     switch(preset) {
         case "race":
+            // RACE: High grip, fast acceleration, high top speed, strong brakes
             handlingValues.tractionCurveMax = 3.5;
             handlingValues.tractionCurveMin = 3.0;
+            handlingValues.tractionLoss = 0.5;
             handlingValues.suspensionForce = 4.0;
             handlingValues.suspensionCompDamp = 2.0;
             handlingValues.suspensionRaise = -0.05;
@@ -4170,41 +4579,95 @@ function applyHandlingPreset(preset) {
             handlingValues.initialDriveMaxVel = 300.0;
             handlingValues.brakeForce = 1.5;
             handlingValues.mass = 1200.0;
+            handlingValues.centreOfMassZ = -0.1;
+
+            // Physics Emulation: Maximum grip and stability
+            physicsEmulation.gripAssistEnabled = true;
+            physicsEmulation.gripAssistStrength = 1.8;
+            physicsEmulation.stabilityStrength = 1.5;
+            physicsEmulation.antiRollStrength = 0.7;
+            physicsEmulation.maxSpeedLimit = 85.0; // ~300 km/h
             break;
+
         case "drift":
+            // DRIFT: Low grip, easy sliding, rear-biased
             handlingValues.tractionCurveMax = 1.5;
             handlingValues.tractionCurveMin = 1.0;
             handlingValues.tractionLoss = 1.8;
-            handlingValues.tractionBias = 0.7;
+            handlingValues.tractionBias = 0.7; // Rear-biased
             handlingValues.suspensionForce = 3.0;
             handlingValues.driveForce = 0.40;
             handlingValues.brakeForce = 1.0;
-            // Low traction values create drift feeling without needing drift mode toggle
+            handlingValues.mass = 1400.0;
+            handlingValues.centreOfMassZ = 0.0;
+
+            // Physics Emulation: Low grip assist, allow sliding
+            physicsEmulation.gripAssistEnabled = true;
+            physicsEmulation.gripAssistStrength = 0.4; // Low grip = easy slide
+            physicsEmulation.stabilityStrength = 0.6;
+            physicsEmulation.antiRollStrength = 0.8; // Prevent flipping
+            physicsEmulation.maxSpeedLimit = 55.0;
             break;
+
         case "offroad":
+            // OFFROAD: Good grip, high suspension, heavy, stable
             handlingValues.tractionCurveMax = 2.5;
+            handlingValues.tractionCurveMin = 2.0;
+            handlingValues.tractionLoss = 0.6;
             handlingValues.suspensionForce = 1.5;
             handlingValues.suspensionCompDamp = 0.6;
             handlingValues.suspensionRaise = 0.12;
             handlingValues.driveForce = 0.35;
+            handlingValues.initialDriveMaxVel = 180.0;
+            handlingValues.brakeForce = 1.0;
             handlingValues.mass = 2000.0;
+            handlingValues.centreOfMassZ = 0.1;
+
+            // Physics Emulation: Good grip, soft response
+            physicsEmulation.gripAssistEnabled = true;
+            physicsEmulation.gripAssistStrength = 1.2;
+            physicsEmulation.stabilityStrength = 0.8;
+            physicsEmulation.antiRollStrength = 0.4; // More body roll allowed
+            physicsEmulation.maxSpeedLimit = 50.0;
             break;
+
         case "lowrider":
+            // LOWRIDER: Slow, bouncy, low, cruising style
+            handlingValues.tractionCurveMax = 2.0;
+            handlingValues.tractionCurveMin = 1.8;
+            handlingValues.tractionLoss = 0.8;
             handlingValues.suspensionForce = 0.8;
             handlingValues.suspensionCompDamp = 0.4;
             handlingValues.suspensionRaise = -0.12;
             handlingValues.driveForce = 0.20;
             handlingValues.initialDriveMaxVel = 150.0;
+            handlingValues.brakeForce = 0.6;
+            handlingValues.mass = 1800.0;
+            handlingValues.centreOfMassZ = -0.15;
+
+            // Physics Emulation: Smooth, stable, not fast
+            physicsEmulation.gripAssistEnabled = true;
+            physicsEmulation.gripAssistStrength = 1.0;
+            physicsEmulation.stabilityStrength = 1.2;
+            physicsEmulation.antiRollStrength = 0.6;
+            physicsEmulation.maxSpeedLimit = 42.0; // ~150 km/h
             break;
     }
 
-    // Apply all values
+    // Apply all values through physics emulation system
     for (let param in handlingValues) {
         applyHandlingValue(param, handlingValues[param]);
     }
 
+    // Update handling mods based on preset
+    handlingMods.acceleration = handlingValues.driveForce / 0.25;
+    handlingMods.topSpeed = handlingValues.initialDriveMaxVel / 200.0;
+    handlingMods.braking = handlingValues.brakeForce / 0.8;
+    handlingMods.grip = handlingValues.tractionCurveMax / 2.0;
+
     // Update visuals
     updateAllHandlingVisuals();
+    console.log("[Handling] Applied preset: " + preset + " (Physics Emulation configured)");
 }
 
 // Update visual feedback based on parameter
@@ -4277,14 +4740,14 @@ addEventHandler("OnDrawnHUD", function(event) {
     let theme = getTheme();
     let alpha = Math.floor(255 * handlingEditorAnim);
 
-    // Panel position (left side of screen)
-    let panelX = 40;
+    // Panel position (right side of screen, below status panel)
+    let panelX = 500;
     let panelY = 120;
     let panelW = 380;
     let panelH = 520;
 
-    // Slide in animation
-    let slideOffset = (1 - handlingEditorAnim) * -150;
+    // Slide in animation from right
+    let slideOffset = (1 - handlingEditorAnim) * 150;
     panelX += slideOffset;
 
     // ===== PANEL BACKGROUND =====
