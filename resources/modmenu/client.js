@@ -1096,15 +1096,155 @@ const menuData = {
         ]
     },
 
+    // MD Essentials - Teleport System
+    // MD Series ; Version 12, March 2016
+    // Copyright (C) 2016 DEVILSDESIGN
     teleport: {
         title: "TELEPORT LOCATIONS",
         items: [
-            { label: "Star Junction", action: "teleport", value: { x: -252.0, y: 947.0, z: 15.0 } },
-            { label: "Middle Park", action: "teleport", value: { x: -365.0, y: 1163.0, z: 14.0 } },
-            { label: "Airport", action: "teleport", value: { x: 2140.0, y: 465.0, z: 6.0 } },
-            { label: "Broker Bridge", action: "teleport", value: { x: 932.0, y: -495.0, z: 15.0 } },
-            { label: "Alderney City", action: "teleport", value: { x: -1149.0, y: 380.0, z: 21.0 } },
-            { label: "Happiness Island", action: "teleport", value: { x: -722.0, y: -17.0, z: 3.0 } }
+            { label: "Helipads", action: "submenu", target: "teleport_helipads" },
+            { label: "Airport", action: "submenu", target: "teleport_airport" },
+            { label: "Broker", action: "submenu", target: "teleport_broker" },
+            { label: "Dukes", action: "submenu", target: "teleport_dukes" },
+            { label: "Algonquin", action: "submenu", target: "teleport_algonquin" },
+            { label: "Alderney", action: "submenu", target: "teleport_alderney" },
+            { label: "Bohan", action: "submenu", target: "teleport_bohan" },
+            { label: "Happiness Island", action: "submenu", target: "teleport_happiness" },
+            { label: "Special Places", action: "submenu", target: "teleport_special" },
+            { label: "Police Stations", action: "submenu", target: "teleport_police" }
+        ]
+    },
+
+    teleport_helipads: {
+        title: "HELIPADS",
+        items: [
+            { label: "Airport Helipad", action: "teleport", value: { x: 2219.8132, y: 745.6130, z: 5.830 } },
+            { label: "Sheriffs Helipad", action: "teleport", value: { x: 2132.2297, y: 441.9621, z: 23.4956 } },
+            { label: "City Helipad", action: "teleport", value: { x: -707.6221, y: 365.6933, z: 3.8330 } },
+            { label: "Heli Tours", action: "teleport", value: { x: 380.0672, y: -714.4636, z: 4.4611 } },
+            { label: "Fire Department Helipad", action: "teleport", value: { x: -2125.2920, y: 142.8950, z: 18.4270 } },
+            { label: "City 2 Helipad", action: "teleport", value: { x: -826.3179, y: 781.8586, z: 6.3370 } }
+        ]
+    },
+
+    teleport_airport: {
+        title: "AIRPORT",
+        items: [
+            { label: "Helipads", action: "teleport", value: { x: 2219.8132, y: 745.6130, z: 5.830 } },
+            { label: "Hangar 1 (Top)", action: "teleport", value: { x: 2168.1106, y: 765.7915, z: 28.9740 } },
+            { label: "Hangar 1 (Inside)", action: "teleport", value: { x: 2168.1106, y: 765.7915, z: 5.5784 } },
+            { label: "Hangar 2 (Top)", action: "teleport", value: { x: 2255.2063, y: 643.0560, z: 28.8072 } },
+            { label: "Hangar 2 (Inside)", action: "teleport", value: { x: 2255.2063, y: 643.0560, z: 5.5784 } },
+            { label: "Tower (Top)", action: "teleport", value: { x: 2622.3501, y: 408.0522, z: 79.2688 } },
+            { label: "Tower (Level 2)", action: "teleport", value: { x: 2624.6602, y: 405.3479, z: 41.5520 } },
+            { label: "Tower (Level 1)", action: "teleport", value: { x: 2631.9465, y: 403.1338, z: 17.7790 } },
+            { label: "Tower (Inside)", action: "teleport", value: { x: 2633.4407, y: 415.1447, z: 5.3555 } },
+            { label: "Radar Tower (Top)", action: "teleport", value: { x: 2311.6799, y: 26.2974, z: 82.4870 } },
+            { label: "Radar Tower (Inside)", action: "teleport", value: { x: 2320.0469, y: 30.7563, z: 5.4215 } },
+            { label: "Sheriffs Building (Top)", action: "teleport", value: { x: 2132.2297, y: 441.9621, z: 23.4956 } },
+            { label: "Sheriffs Building (Inside)", action: "teleport", value: { x: 2138.7852, y: 433.7174, z: 5.8495 } },
+            { label: "Sniper Lookout (Top)", action: "teleport", value: { x: 2494.9207, y: 267.1155, z: 20.1800 } },
+            { label: "Sniper Lookout (Inside)", action: "teleport", value: { x: 2502.8150, y: 276.0000, z: 5.5750 } },
+            { label: "Bazooka Lookout (Top)", action: "teleport", value: { x: 2496.3533, y: 515.8263, z: 20.1800 } },
+            { label: "Bazooka Lookout (Inside)", action: "teleport", value: { x: 2496.9800, y: 503.9500, z: 5.5750 } },
+            { label: "Big Building (Inside)", action: "teleport", value: { x: 2425.5264, y: 389.2336, z: 5.8487 } }
+        ]
+    },
+
+    teleport_broker: {
+        title: "BROKER",
+        items: [
+            { label: "Crackhouse", action: "teleport", value: { x: 1375.8765, y: 197.4544, z: 47.8063 } }
+        ]
+    },
+
+    teleport_dukes: {
+        title: "DUKES",
+        items: [
+            { label: "Barge Basement", action: "teleport", value: { x: 704.5024, y: -270.7895, z: 5.1121 } },
+            { label: "Hove Beach", action: "teleport", value: { x: 1100.5000, y: -747.0000, z: 7.3972 } },
+            { label: "Brucies Garage", action: "teleport", value: { x: 875.9251, y: -119.5862, z: 6.0054 } },
+            { label: "Porn Shop", action: "teleport", value: { x: 796.0092, y: -540.5947, z: 7.5266 } }
+        ]
+    },
+
+    teleport_algonquin: {
+        title: "ALGONQUIN",
+        items: [
+            { label: "Hockey Team Office", action: "teleport", value: { x: -245.9398, y: 222.9828, z: 205.9805 } },
+            { label: "Majestic Hotel", action: "teleport", value: { x: -178.2, y: 582.6, z: 127.8500 } },
+            { label: "Playboy X's Pad", action: "teleport", value: { x: -416.3491, y: 1461.9805, z: 38.9715 } },
+            { label: "Rotterdam Tower", action: "teleport", value: { x: -279.5515, y: -101.2410, z: 386.7909 } },
+            { label: "Westminster Towers", action: "teleport", value: { x: -532.6810, y: 1273.3307, z: 106.6500 } },
+            { label: "Underground Parking", action: "teleport", value: { x: 55.3537, y: 1125.3387, z: 3.4527 } },
+            { label: "Safe House", action: "teleport", value: { x: 103.5343, y: 857.4968, z: 43.6211 } },
+            { label: "Scrapyard", action: "teleport", value: { x: -473.0454, y: 1746.8669, z: 8.3762 } },
+            { label: "Construction Site", action: "teleport", value: { x: 237.5457, y: -805.6555, z: 14.7000 } },
+            { label: "Subway", action: "teleport", value: { x: -7.6952, y: 356.7396, z: -2.9570 } },
+            { label: "Skydive", action: "teleport", value: { x: -2476.0000, y: 942.7000, z: 1101.0000 } },
+            { label: "Fight Club (TBOGT ONLY)", action: "teleport", value: { x: -385.3183, y: 1493.0056, z: 11.7148 } },
+            { label: "Lawyer's Office", action: "teleport", value: { x: 123.6929, y: -671.5339, z: 15.8061 } },
+            { label: "Projects Tower", action: "teleport", value: { x: -120.6184, y: 1502.8611, z: 98.7829 } }
+        ]
+    },
+
+    teleport_alderney: {
+        title: "ALDERNEY",
+        items: [
+            { label: "Sultan House", action: "teleport", value: { x: -992.8975, y: 1870.2732, z: 23.3234 } },
+            { label: "Sultan Spawn", action: "teleport", value: { x: -968.4757, y: 1908.7188, z: 22.3870 } },
+            { label: "Cognoscenti Garage", action: "teleport", value: { x: -1409.1864, y: 1461.8617, z: 25.5280 } },
+            { label: "Sprunk Factory", action: "teleport", value: { x: -1539.8414, y: 163.2967, z: 10.9000 } },
+            { label: "Strip Club", action: "teleport", value: { x: -1577.2926, y: 18.9291, z: 11.0153 } },
+            { label: "Prison Cage", action: "teleport", value: { x: -1079.8000, y: -469.7000, z: 3.6200 } },
+            { label: "Building Cant Jump Off", action: "teleport", value: { x: -2072.8728, y: 25.4543, z: 96.2373 } }
+        ]
+    },
+
+    teleport_bohan: {
+        title: "BOHAN",
+        items: [
+            { label: "Strip Club", action: "teleport", value: { x: 1186.0593, y: 1697.5045, z: 17.7532 } },
+            { label: "Bohan Safe House", action: "teleport", value: { x: 603.3540, y: 1409.7708, z: 18.4847 } },
+            { label: "Baseball Park", action: "teleport", value: { x: 711.0583, y: 1911.1498, z: 27.1642 } },
+            { label: "Near the Bridge 1", action: "teleport", value: { x: 1462.0757, y: 1563.3900, z: 4.0576 } },
+            { label: "Near the Bridge 2", action: "teleport", value: { x: 549.9749, y: 1278.2107, z: 21.8234 } }
+        ]
+    },
+
+    teleport_happiness: {
+        title: "HAPPINESS ISLAND",
+        items: [
+            { label: "Building (Top)", action: "teleport", value: { x: -607.6907, y: -767.8975, z: 20.6426 } },
+            { label: "Building (Level 1)", action: "teleport", value: { x: -608.9211, y: -779.1715, z: 17.5085 } },
+            { label: "Building (Inside)", action: "teleport", value: { x: -608.0413, y: -768.1970, z: 9.8789 } },
+            { label: "Statue Head", action: "teleport", value: { x: -609.5771, y: -753.4142, z: 85.7500 } },
+            { label: "Statue Cup", action: "teleport", value: { x: -605.3948, y: -749.7060, z: 94.9000 } },
+            { label: "Statue Heart", action: "teleport", value: { x: -608.8611, y: -755.9594, z: 65.9950 } },
+            { label: "Plaza", action: "teleport", value: { x: -600.1514, y: -961.0953, z: 4.8429 } },
+            { label: "Pier", action: "teleport", value: { x: -409.8473, y: -976.8823, z: 3.6314 } }
+        ]
+    },
+
+    teleport_special: {
+        title: "SPECIAL PLACES",
+        items: [
+            { label: "Underwater Hideout", action: "teleport", value: { x: 1626.7833, y: 1319.8804, z: -47.1266 } },
+            { label: "Secret Prison (Lockup)", action: "teleport", value: { x: -1079.8553, y: -362.9944, z: 7.4039 } },
+            { label: "Building Cant Jump Off", action: "teleport", value: { x: -2072.8728, y: 25.4543, z: 96.2373 } },
+            { label: "Prison Cage", action: "teleport", value: { x: -1079.8000, y: -469.7000, z: 3.6200 } }
+        ]
+    },
+
+    teleport_police: {
+        title: "POLICE STATIONS",
+        items: [
+            { label: "Mohawk Ave", action: "teleport", value: { x: 903.4626, y: -363.2110, z: 16.9067 } },
+            { label: "Bunker Hill Ave", action: "teleport", value: { x: 1245.5483, y: 583.3440, z: 38.0665 } },
+            { label: "Kunzite St", action: "teleport", value: { x: -421.5369, y: 286.9949, z: 10.8285 } },
+            { label: "San Juan Rd", action: "teleport", value: { x: 88.1274, y: 1224.2035, z: 15.5327 } },
+            { label: "Bridger St", action: "teleport", value: { x: -921.2032, y: 1316.4619, z: 24.0243 } },
+            { label: "Albany Ave", action: "teleport", value: { x: 158.4689, y: -203.2467, z: 14.3076 } }
         ]
     },
 
