@@ -1,8 +1,6 @@
 
 // ============================================================================
 // MD REVOLUTION MOD MENU - Client Side
-// MADE BY - DEVILSDESIGN & IIV_NATHAN_VII & SHOCKixiXixiWAVE (Original Template)
-// Clean Modern Dark Theme - Glassmorphism Style
 // Press F5 to open/close menu, Arrow keys to navigate, Enter to select
 // ============================================================================
 
