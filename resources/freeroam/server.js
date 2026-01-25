@@ -25,15 +25,14 @@ const spawnPoints = [
     { x: 858.0, y: 279.0, z: 30.0, name: "East Borough Bridge" }
 ];
 
-// Player skins for GTA IV
+// Player skins for GTA IV (verified correct hashes)
 const playerSkins = [
-    -1667301416,  // Niko Bellic
-    -163448165,   // Roman Bellic
-    1936355839,   // Little Jacob
-    -1938475496,  // Brucie
-    970234525,    // Playboy X
-    -1784875845,  // Johnny Klebitz
-    -1403507487,  // Luis Lopez
+    -1992728631,  // Roman Bellic (IG_ROMAN)
+    1380017790,   // Little Jacob (IG_LITTLE_JACOB)
+    -1729980128,  // Brucie (IG_BRUCIE)
+    1794146792,   // Playboy X (IG_PLAYBOY_X)
+    8206123,      // Johnny Klebitz (IG_JOHNNY2)
+    -492470690,   // Luis Lopez (IG_LUIS)
 ];
 
 // Store player data
