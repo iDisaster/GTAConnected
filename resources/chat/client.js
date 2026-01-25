@@ -70,7 +70,7 @@ let notificationDuration = 5000; // 5 seconds
 // Chat dimensions
 const chat = {
     x: 25,
-    y: 200,
+    y: 50,
     width: 550,
     messageHeight: 22,
     maxVisibleMessages: 12,
@@ -85,10 +85,18 @@ const chat = {
 addEventHandler("OnResourceStart", function(event, resource) {
     if (resource == thisResource) {
         try {
-            chatFont = lucasFont;
-            console.log("[Chat] Custom chat UI initialized");
+            // Create font using lucasFont.createDefaultFont() like the mod menu does
+            chatFont = lucasFont.createDefaultFont(16.0, "Arial", "Regular");
+            console.log("[Chat] Custom chat UI initialized with font");
         } catch(e) {
             console.log("[Chat] Font load error: " + e);
+            try {
+                // Fallback to Tahoma
+                chatFont = lucasFont.createDefaultFont(16.0, "Tahoma");
+                console.log("[Chat] Using fallback font Tahoma");
+            } catch(e2) {
+                console.log("[Chat] Fallback font also failed: " + e2);
+            }
         }
     }
 });
@@ -460,47 +468,84 @@ function padZero(num) {
 }
 
 // ============================================================================
-// INPUT HANDLING
+// KEY CODE CONSTANTS (in case they're not predefined)
+// SDL key codes use ASCII values for letters (lowercase)
 // ============================================================================
-addEventHandler("OnKeyUp", function(event, key, scancode, mods) {
-    // T key to open chat
-    if (key === SDLK_t && !chatInputActive) {
-        chatInputActive = true;
-        chatInputText = "";
-        gui.showCursor(true, true);
-        event.preventDefault();
-        return;
-    }
+const KEY_T = typeof SDLK_t !== 'undefined' ? SDLK_t : 116;           // 't' = ASCII 116
+const KEY_RETURN = typeof SDLK_RETURN !== 'undefined' ? SDLK_RETURN : 13;
+const KEY_ESCAPE = typeof SDLK_ESCAPE !== 'undefined' ? SDLK_ESCAPE : 27;
+const KEY_BACKSPACE = typeof SDLK_BACKSPACE !== 'undefined' ? SDLK_BACKSPACE : 8;
+const KEY_PAGEUP = typeof SDLK_PAGEUP !== 'undefined' ? SDLK_PAGEUP : 1073741899;
+const KEY_PAGEDOWN = typeof SDLK_PAGEDOWN !== 'undefined' ? SDLK_PAGEDOWN : 1073741902;
 
+// ============================================================================
+// INPUT HANDLING - Using bindKey for more reliable input capture
+// ============================================================================
+
+// Bind T key to open chat
+bindKey(KEY_T, KEYSTATE_UP, function(event) {
+    if (!chatInputActive) {
+        openChatInput();
+    }
+});
+
+// Function to open chat input
+function openChatInput() {
+    chatInputActive = true;
+    chatInputText = "";
+    chatFadeAlpha = 1.0;
+    lastMessageTime = Date.now();
+    try {
+        gui.showCursor(true);
+    } catch(e) {
+        console.log("[Chat] Could not show cursor: " + e);
+    }
+    console.log("[Chat] Chat input opened");
+}
+
+// Function to close chat input
+function closeChatInput() {
+    chatInputActive = false;
+    chatInputText = "";
+    try {
+        gui.showCursor(false);
+    } catch(e) {
+        console.log("[Chat] Could not hide cursor: " + e);
+    }
+    console.log("[Chat] Chat input closed");
+}
+
+// Function to send chat message
+function sendChatMessage() {
+    if (chatInputText.length > 0) {
+        triggerNetworkEvent("chatSendMessage", chatInputText);
+        console.log("[Chat] Sent message: " + chatInputText);
+    }
+    closeChatInput();
+}
+
+addEventHandler("OnKeyUp", function(event, key, scancode, mods) {
     // Escape to close chat
-    if (key === SDLK_ESCAPE && chatInputActive) {
-        chatInputActive = false;
-        chatInputText = "";
-        gui.showCursor(false, false);
+    if ((key === KEY_ESCAPE || key === SDLK_ESCAPE) && chatInputActive) {
+        closeChatInput();
         event.preventDefault();
         return;
     }
 
     // Enter to send message
-    if (key === SDLK_RETURN && chatInputActive) {
-        if (chatInputText.length > 0) {
-            // Send message to server
-            triggerNetworkEvent("chatSendMessage", chatInputText);
-        }
-        chatInputActive = false;
-        chatInputText = "";
-        gui.showCursor(false, false);
+    if ((key === KEY_RETURN || key === SDLK_RETURN) && chatInputActive) {
+        sendChatMessage();
         event.preventDefault();
         return;
     }
 
     // Page up/down for scrolling
-    if (key === SDLK_PAGEUP && chatMessages.length > chat.maxVisibleMessages) {
+    if ((key === KEY_PAGEUP || key === SDLK_PAGEUP) && chatMessages.length > chat.maxVisibleMessages) {
         chatScrollOffset = Math.min(chatScrollOffset + 3, chatMessages.length - chat.maxVisibleMessages);
         chatFadeAlpha = 1.0;
         lastMessageTime = Date.now();
     }
-    if (key === SDLK_PAGEDOWN) {
+    if (key === KEY_PAGEDOWN || key === SDLK_PAGEDOWN) {
         chatScrollOffset = Math.max(0, chatScrollOffset - 3);
         chatFadeAlpha = 1.0;
         lastMessageTime = Date.now();
@@ -510,7 +555,10 @@ addEventHandler("OnKeyUp", function(event, key, scancode, mods) {
 // Handle text input
 addEventHandler("OnCharacter", function(event, character) {
     if (chatInputActive) {
-        chatInputText += character;
+        // Filter out control characters
+        if (character.charCodeAt(0) >= 32) {
+            chatInputText += character;
+        }
         event.preventDefault();
     }
 });
@@ -519,10 +567,13 @@ addEventHandler("OnKeyDown", function(event, key, scancode, mods) {
     if (!chatInputActive) return;
 
     // Backspace
-    if (key === SDLK_BACKSPACE && chatInputText.length > 0) {
+    if ((key === KEY_BACKSPACE || key === SDLK_BACKSPACE) && chatInputText.length > 0) {
         chatInputText = chatInputText.slice(0, -1);
         event.preventDefault();
     }
+
+    // Block other keys from reaching the game while typing
+    event.preventDefault();
 });
 
 // ============================================================================
@@ -550,29 +601,34 @@ addEventHandler("OnMouseWheel", function(event, x, y) {
 });
 
 // ============================================================================
-// PROCESS - Animation updates
+// PROCESS - Keep native chat disabled
 // ============================================================================
 addEventHandler("OnProcess", function(event) {
-    // Block game input while typing
-    if (chatInputActive) {
-        // Disable native chat
-        try {
-            chatInputEnabled = false;
-        } catch(e) {}
-    }
+    // Keep native chat disabled while our custom chat is active
+    try {
+        if (typeof setChatWindowEnabled === 'function') {
+            setChatWindowEnabled(false);
+        }
+    } catch(e) {}
 });
 
 // ============================================================================
-// DISABLE DEFAULT CHAT
+// DISABLE DEFAULT CHAT ON RESOURCE START
 // ============================================================================
 addEventHandler("OnResourceReady", function(event, resource) {
     if (resource == thisResource) {
         try {
             // Disable default chat window
-            setChatWindowEnabled(false);
+            if (typeof setChatWindowEnabled === 'function') {
+                setChatWindowEnabled(false);
+            }
+            console.log("[Chat] Native chat disabled");
         } catch(e) {
             console.log("[Chat] Could not disable default chat: " + e);
         }
+
+        // Add a test message to verify the chat is working
+        addChatMessage("Custom chat loaded! Press T to type.", "system");
     }
 });
 
