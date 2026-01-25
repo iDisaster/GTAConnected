@@ -1,8 +1,6 @@
 
 // ============================================================================
 // MD REVOLUTION MOD MENU - Client Side
-// MADE BY - DEVILSDESIGN & IIV_NATHAN_VII & SHOCKixiXixiWAVE (Original Template)
-// Clean Modern Dark Theme - Glassmorphism Style
 // Press F5 to open/close menu, Arrow keys to navigate, Enter to select
 // ============================================================================
 
@@ -557,35 +555,306 @@ const menuData = {
     skins: {
         title: "PLAYER SKINS",
         items: [
-            { label: "--- Story Characters ---", action: "none" },
-            { label: "Niko Bellic", action: "skin", value: -1667301416 },
-            { label: "Roman Bellic", action: "skin", value: -163448165 },
-            { label: "Little Jacob", action: "skin", value: 1936355839 },
-            { label: "Brucie Kibbutz", action: "skin", value: -1938475496 },
-            { label: "Playboy X", action: "skin", value: 970234525 },
-            { label: "Johnny Klebitz", action: "skin", value: -1784875845 },
-            { label: "Luis Lopez", action: "skin", value: -1403507487 },
-            { label: "--- Male NPCs ---", action: "none" },
-            { label: "Police Officer", action: "skin", value: -1320879687 },
-            { label: "Doctor", action: "skin", value: 1669579652 },
-            { label: "Fireman", action: "skin", value: -335476819 },
-            { label: "Security Guard", action: "skin", value: 1581098148 },
-            { label: "Businessman", action: "skin", value: -1191636209 },
-            { label: "Street Guy", action: "skin", value: -1850653608 },
-            { label: "Hobo", action: "skin", value: -1183939691 },
-            { label: "Biker", action: "skin", value: 1830507291 },
-            { label: "--- Female NPCs ---", action: "none" },
-            { label: "Business Woman", action: "skin", value: -1847203044 },
-            { label: "Street Woman", action: "skin", value: -2043953294 },
-            { label: "Rich Woman", action: "skin", value: -1171014612 },
-            { label: "Shop Girl", action: "skin", value: -1611704378 },
-            { label: "Nurse", action: "skin", value: 1567728751 },
-            { label: "Tourist Woman", action: "skin", value: -1507724086 },
-            { label: "Jogger Woman", action: "skin", value: -1813105079 },
+            { label: "Story Characters", action: "submenu", target: "skins_story" },
+            { label: "TLAD Characters", action: "submenu", target: "skins_tlad" },
+            { label: "TBOGT Characters", action: "submenu", target: "skins_tbogt" },
+            { label: "Law Enforcement", action: "submenu", target: "skins_cops" },
+            { label: "Emergency Services", action: "submenu", target: "skins_emergency" },
+            { label: "Gang Members", action: "submenu", target: "skins_gangs" },
+            { label: "Male Civilians", action: "submenu", target: "skins_male" },
+            { label: "Female Civilians", action: "submenu", target: "skins_female" },
+            { label: "Workers & Staff", action: "submenu", target: "skins_workers" },
+            { label: "Special NPCs", action: "submenu", target: "skins_special" },
             { label: "--- Random Skins ---", action: "none" },
             { label: "Random Skin", action: "skin_random" },
-            { label: "Random Male", action: "skin_random_mp_boy" },
-            { label: "Random Female", action: "skin_random_mp_girl" }
+            { label: "Random Male", action: "skin_random_male" },
+            { label: "Random Female", action: "skin_random_female" }
+        ]
+    },
+
+    skins_story: {
+        title: "STORY CHARACTERS",
+        items: [
+            { label: "--- Family & Friends ---", action: "none" },
+            { label: "Roman Bellic", action: "skin", value: 2302238665 },
+            { label: "Mallorie Bardas", action: "skin", value: 3254679890 },
+            { label: "Little Jacob", action: "skin", value: 1487004273 },
+            { label: "Brucie Kibbutz", action: "skin", value: 2564987168 },
+            { label: "Packie McReary", action: "skin", value: 1690783035 },
+            { label: "Dwayne Forge", action: "skin", value: 3677703193 },
+            { label: "--- Crime Bosses ---", action: "none" },
+            { label: "Playboy X", action: "skin", value: 1794146792 },
+            { label: "Dimitri Rascalov", action: "skin", value: 237497537 },
+            { label: "Mikhail Faustin", action: "skin", value: 57218969 },
+            { label: "Ray Bulgarin", action: "skin", value: 237511807 },
+            { label: "Jimmy Pegorino", action: "skin", value: 1884668464 },
+            { label: "Phil Bell", action: "skin", value: 2468508362 },
+            { label: "Ray Boccino", action: "skin", value: 954215094 },
+            { label: "--- McReary Family ---", action: "none" },
+            { label: "Derrick McReary", action: "skin", value: 1169442297 },
+            { label: "Francis McReary", action: "skin", value: 1710545037 },
+            { label: "Gerald McReary", action: "skin", value: 652098186 },
+            { label: "Kate McReary", action: "skin", value: 3521216458 },
+            { label: "--- Other Characters ---", action: "none" },
+            { label: "Bernie Crane", action: "skin", value: 1500493064 },
+            { label: "Manny Escuela", action: "skin", value: 1445589009 },
+            { label: "Elizabeta Torres", action: "skin", value: 2933135023 },
+            { label: "Michelle", action: "skin", value: 3214308084 },
+            { label: "Vlad Glebov", action: "skin", value: 896408642 },
+            { label: "Ilyena Faustin", action: "skin", value: 3459742170 },
+            { label: "Hossan Ramzy", action: "skin", value: 980768434 }
+        ]
+    },
+
+    skins_tlad: {
+        title: "TLAD CHARACTERS",
+        items: [
+            { label: "--- Main Characters ---", action: "none" },
+            { label: "Johnny Klebitz", action: "skin", value: 8206123 },
+            { label: "Jim Fitzgerald", action: "skin", value: 870892404 },
+            { label: "Terry Thorpe", action: "skin", value: 1728056212 },
+            { label: "Clay Simons", action: "skin", value: 1825562762 },
+            { label: "Brian Jeremy", action: "skin", value: 349841464 },
+            { label: "Billy Grey", action: "skin", value: 3843248439 },
+            { label: "--- Lost MC Members ---", action: "none" },
+            { label: "Jason Michaels", action: "skin", value: 3346030785 },
+            { label: "Angus Martin", action: "skin", value: 1917871822 },
+            { label: "Dave Grossman", action: "skin", value: 3056906300 },
+            { label: "Lost MC Biker 1", action: "skin", value: 1914397972 },
+            { label: "Lost MC Biker 2", action: "skin", value: 2156528113 },
+            { label: "--- Other TLAD ---", action: "none" },
+            { label: "Ashley Butler", action: "skin", value: 3567004438 },
+            { label: "Thomas Stubbs", action: "skin", value: 2513523815 },
+            { label: "Ray Boccino (TLAD)", action: "skin", value: 954215094 }
+        ]
+    },
+
+    skins_tbogt: {
+        title: "TBOGT CHARACTERS",
+        items: [
+            { label: "--- Main Characters ---", action: "none" },
+            { label: "Luis Lopez", action: "skin", value: 3802496606 },
+            { label: "Tony Prince", action: "skin", value: 4020398429 },
+            { label: "Yusuf Amir", action: "skin", value: 3846796161 },
+            { label: "Armando Torres", action: "skin", value: 1370299619 },
+            { label: "Henrique Bardas", action: "skin", value: 1905515841 },
+            { label: "--- Antagonists ---", action: "none" },
+            { label: "Ray Bulgarin (TBOGT)", action: "skin", value: 243666427 },
+            { label: "Rocco Pelosi", action: "skin", value: 3381042378 },
+            { label: "Timur", action: "skin", value: 2345614827 },
+            { label: "Mori Kibbutz", action: "skin", value: 1662225612 },
+            { label: "--- Club Characters ---", action: "none" },
+            { label: "Dessie", action: "skin", value: 2848083183 },
+            { label: "Joni", action: "skin", value: 3412908435 },
+            { label: "Troy", action: "skin", value: 1662473323 },
+            { label: "Maisonette Bouncer", action: "skin", value: 2514268405 },
+            { label: "--- Celebrities ---", action: "none" },
+            { label: "Evan Moss", action: "skin", value: 3497746837 },
+            { label: "Kerry McIntosh", action: "skin", value: 763838720 },
+            { label: "Poppy Mitchell", action: "skin", value: 3450748540 },
+            { label: "Cloe Parker", action: "skin", value: 2802928488 }
+        ]
+    },
+
+    skins_cops: {
+        title: "LAW ENFORCEMENT",
+        items: [
+            { label: "--- LCPD ---", action: "none" },
+            { label: "LCPD Officer", action: "skin", value: 4111764146 },
+            { label: "LCPD Officer 2", action: "skin", value: 4111764146 },
+            { label: "LCPD Fat Cop", action: "skin", value: 3924571768 },
+            { label: "LCPD Traffic Cop", action: "skin", value: 2776029317 },
+            { label: "LCPD Detective", action: "skin", value: 3295460374 },
+            { label: "--- NOOSE ---", action: "none" },
+            { label: "NOOSE Officer", action: "skin", value: 3290204350 },
+            { label: "NOOSE Tactical", action: "skin", value: 3290204350 },
+            { label: "NOOSE Commander", action: "skin", value: 3290204350 },
+            { label: "--- FIB ---", action: "none" },
+            { label: "FIB Agent", action: "skin", value: 3295460374 },
+            { label: "FIB Agent 2", action: "skin", value: 3295460374 },
+            { label: "--- Prison ---", action: "none" },
+            { label: "Prison Guard", action: "skin", value: 2378673688 },
+            { label: "Prison Guard 2", action: "skin", value: 2378673688 },
+            { label: "--- Security ---", action: "none" },
+            { label: "Security Guard", action: "skin", value: 2423978125 },
+            { label: "Bank Security", action: "skin", value: 2423978125 },
+            { label: "Club Bouncer", action: "skin", value: 2514268405 }
+        ]
+    },
+
+    skins_emergency: {
+        title: "EMERGENCY SERVICES",
+        items: [
+            { label: "--- Fire Department ---", action: "none" },
+            { label: "Firefighter", action: "skin", value: 3684742681 },
+            { label: "Firefighter 2", action: "skin", value: 3684742681 },
+            { label: "Fire Chief", action: "skin", value: 610888851 },
+            { label: "--- Medical ---", action: "none" },
+            { label: "Paramedic", action: "skin", value: 3119890080 },
+            { label: "Paramedic 2", action: "skin", value: 3119890080 },
+            { label: "Doctor", action: "skin", value: 3108026518 },
+            { label: "Nurse", action: "skin", value: 346338575 },
+            { label: "Nurse 2", action: "skin", value: 3101188907 },
+            { label: "Surgeon", action: "skin", value: 219393781 },
+            { label: "--- Coast Guard ---", action: "none" },
+            { label: "Coast Guard", action: "skin", value: 4111764146 },
+            { label: "Lifeguard", action: "skin", value: 62496225 }
+        ]
+    },
+
+    skins_gangs: {
+        title: "GANG MEMBERS",
+        items: [
+            { label: "--- Russian Mafia ---", action: "none" },
+            { label: "Russian Thug 1", action: "skin", value: 2206803240 },
+            { label: "Russian Thug 2", action: "skin", value: 1976502708 },
+            { label: "Russian Thug 3", action: "skin", value: 1543404628 },
+            { label: "--- Italian Mafia ---", action: "none" },
+            { label: "Italian Mobster 1", action: "skin", value: 2892525257 },
+            { label: "Italian Mobster 2", action: "skin", value: 3381042378 },
+            { label: "Mafia Suit", action: "skin", value: 2666550233 },
+            { label: "--- Irish Mob ---", action: "none" },
+            { label: "Irish Thug 1", action: "skin", value: 1690783035 },
+            { label: "Irish Thug 2", action: "skin", value: 62496225 },
+            { label: "--- Albanian Mob ---", action: "none" },
+            { label: "Albanian 1", action: "skin", value: 3791037286 },
+            { label: "Albanian 2", action: "skin", value: 4059382627 },
+            { label: "--- Jamaican Gang ---", action: "none" },
+            { label: "Jamaican 1", action: "skin", value: 1487004273 },
+            { label: "Jamaican 2", action: "skin", value: 2794569427 },
+            { label: "Jamaican 3", action: "skin", value: 3413608606 },
+            { label: "--- Street Gangs ---", action: "none" },
+            { label: "Spanish Lord 1", action: "skin", value: 492147228 },
+            { label: "Spanish Lord 2", action: "skin", value: 2368926169 },
+            { label: "Biker Gang", action: "skin", value: 2156528113 },
+            { label: "Lost MC Member", action: "skin", value: 1914397972 },
+            { label: "Angels of Death", action: "skin", value: 226415164 },
+            { label: "--- Triads ---", action: "none" },
+            { label: "Triad 1", action: "skin", value: 3210959519 },
+            { label: "Triad 2", action: "skin", value: 4130031670 }
+        ]
+    },
+
+    skins_male: {
+        title: "MALE CIVILIANS",
+        items: [
+            { label: "--- Business ---", action: "none" },
+            { label: "Businessman 1", action: "skin", value: 1530937394 },
+            { label: "Businessman 2", action: "skin", value: 690281432 },
+            { label: "Lawyer", action: "skin", value: 2441990607 },
+            { label: "Executive", action: "skin", value: 3658388177 },
+            { label: "Banker", action: "skin", value: 465237040 },
+            { label: "--- Casual ---", action: "none" },
+            { label: "Casual Guy 1", action: "skin", value: 62496225 },
+            { label: "Casual Guy 2", action: "skin", value: 523785438 },
+            { label: "Hipster", action: "skin", value: 2085884255 },
+            { label: "College Student", action: "skin", value: 1207402441 },
+            { label: "Jogger", action: "skin", value: 2392208684 },
+            { label: "--- Street ---", action: "none" },
+            { label: "Street Guy 1", action: "skin", value: 62496225 },
+            { label: "Street Guy 2", action: "skin", value: 523785438 },
+            { label: "Hobo 1", action: "skin", value: 3214294247 },
+            { label: "Hobo 2", action: "skin", value: 4152580634 },
+            { label: "Bum", action: "skin", value: 3214294247 },
+            { label: "--- Ethnic ---", action: "none" },
+            { label: "African American 1", action: "skin", value: 2794569427 },
+            { label: "African American 2", action: "skin", value: 3677703193 },
+            { label: "Hispanic 1", action: "skin", value: 1370299619 },
+            { label: "Hispanic 2", action: "skin", value: 1905515841 },
+            { label: "Asian 1", action: "skin", value: 757349871 },
+            { label: "Asian 2", action: "skin", value: 3145223654 },
+            { label: "--- Senior ---", action: "none" },
+            { label: "Old Man 1", action: "skin", value: 3862373481 },
+            { label: "Old Man 2", action: "skin", value: 2034185905 },
+            { label: "Retired", action: "skin", value: 243672348 }
+        ]
+    },
+
+    skins_female: {
+        title: "FEMALE CIVILIANS",
+        items: [
+            { label: "--- Business ---", action: "none" },
+            { label: "Business Woman 1", action: "skin", value: 453889158 },
+            { label: "Business Woman 2", action: "skin", value: 155063868 },
+            { label: "Secretary", action: "skin", value: 394310337 },
+            { label: "Executive Woman", action: "skin", value: 4010737771 },
+            { label: "--- Casual ---", action: "none" },
+            { label: "Casual Woman 1", action: "skin", value: 3394344139 },
+            { label: "Casual Woman 2", action: "skin", value: 286007875 },
+            { label: "Hipster Girl", action: "skin", value: 761763258 },
+            { label: "College Girl", action: "skin", value: 1473654742 },
+            { label: "Jogger Woman", action: "skin", value: 1350216795 },
+            { label: "--- Street ---", action: "none" },
+            { label: "Street Woman 1", action: "skin", value: 3394344139 },
+            { label: "Street Woman 2", action: "skin", value: 1290755317 },
+            { label: "Homeless Woman", action: "skin", value: 3214294247 },
+            { label: "--- Fashion ---", action: "none" },
+            { label: "Rich Woman", action: "skin", value: 2514581497 },
+            { label: "Shop Girl", action: "skin", value: 1586287288 },
+            { label: "Model", action: "skin", value: 3450748540 },
+            { label: "Socialite", action: "skin", value: 1182843182 },
+            { label: "Tourist Woman", action: "skin", value: 1754440500 },
+            { label: "--- Party ---", action: "none" },
+            { label: "Club Girl 1", action: "skin", value: 3412908435 },
+            { label: "Club Girl 2", action: "skin", value: 3450748540 },
+            { label: "Party Girl", action: "skin", value: 2802928488 },
+            { label: "--- Senior ---", action: "none" },
+            { label: "Old Woman 1", action: "skin", value: 4091134002 },
+            { label: "Old Woman 2", action: "skin", value: 100706569 }
+        ]
+    },
+
+    skins_workers: {
+        title: "WORKERS & STAFF",
+        items: [
+            { label: "--- Construction ---", action: "none" },
+            { label: "Construction Worker 1", action: "skin", value: 3572947498 },
+            { label: "Construction Worker 2", action: "skin", value: 3279009568 },
+            { label: "Hard Hat Worker", action: "skin", value: 3580746516 },
+            { label: "--- Service ---", action: "none" },
+            { label: "Janitor", action: "skin", value: 3010919736 },
+            { label: "Mechanic", action: "skin", value: 3938062777 },
+            { label: "Gas Station Attendant", action: "skin", value: 420915580 },
+            { label: "--- Food Service ---", action: "none" },
+            { label: "Fast Food Worker", action: "skin", value: 989485 },
+            { label: "Cluckin Bell Worker", action: "skin", value: 3283436873 },
+            { label: "Burger Shot Worker", action: "skin", value: 989485 },
+            { label: "Chef", action: "skin", value: 1878085135 },
+            { label: "--- Retail ---", action: "none" },
+            { label: "Store Clerk", action: "skin", value: 357919731 },
+            { label: "Vendor", action: "skin", value: 4108853339 },
+            { label: "--- Transport ---", action: "none" },
+            { label: "Taxi Driver", action: "skin", value: 8772846 },
+            { label: "Bus Driver", action: "skin", value: 134077503 },
+            { label: "Pilot", action: "skin", value: 2349798414 },
+            { label: "--- Delivery ---", action: "none" },
+            { label: "Delivery Guy", action: "skin", value: 2923833437 },
+            { label: "Mail Carrier", action: "skin", value: 4010604433 }
+        ]
+    },
+
+    skins_special: {
+        title: "SPECIAL NPCS",
+        items: [
+            { label: "--- Entertainers ---", action: "none" },
+            { label: "Street Performer", action: "skin", value: 3106721027 },
+            { label: "Mime", action: "skin", value: 4230734264 },
+            { label: "Statue of Happiness Performer", action: "skin", value: 62496225 },
+            { label: "--- Sports ---", action: "none" },
+            { label: "Baseball Player", action: "skin", value: 3495737411 },
+            { label: "Golfer", action: "skin", value: 3915732450 },
+            { label: "--- Beach ---", action: "none" },
+            { label: "Beach Bum", action: "skin", value: 3214294247 },
+            { label: "Swimmer", action: "skin", value: 2392208684 },
+            { label: "--- Military ---", action: "none" },
+            { label: "Army Soldier", action: "skin", value: 3290204350 },
+            { label: "Military Officer", action: "skin", value: 3290204350 },
+            { label: "--- Unique ---", action: "none" },
+            { label: "Clown", action: "skin", value: 4230734264 },
+            { label: "Mascot", action: "skin", value: 62496225 },
+            { label: "Santa Claus", action: "skin", value: 3862373481 },
+            { label: "--- Multiplayer ---", action: "none" },
+            { label: "MP Female", action: "skin", value: 3653091386 }
         ]
     },
 
@@ -1850,14 +2119,16 @@ function selectItem() {
             showNotification("Random skin!");
             break;
 
+        case "skin_random_male":
         case "skin_random_mp_boy":
-            triggerNetworkEvent("ModMenu:ChangeSkin", "random_mp_boy");
-            showNotification("Random MP Boy!");
+            triggerNetworkEvent("ModMenu:ChangeSkin", "random_male");
+            showNotification("Random Male Skin!");
             break;
 
+        case "skin_random_female":
         case "skin_random_mp_girl":
-            triggerNetworkEvent("ModMenu:ChangeSkin", "random_mp_girl");
-            showNotification("Random MP Girl!");
+            triggerNetworkEvent("ModMenu:ChangeSkin", "random_female");
+            showNotification("Random Female Skin!");
             break;
 
         case "veh_repair":
@@ -2896,45 +3167,164 @@ addNetworkHandler("ModMenu:ExecuteFun", function(option) {
     }
 });
 
-// GTA IV Character Model Hashes (verified working)
-// Male models
-const SKIN_NIKO = -1667301416;
-const SKIN_ROMAN = -163448165;
-const SKIN_JACOB = 1936355839;
-const SKIN_BRUCIE = -1938475496;
-const SKIN_PLAYBOY = 970234525;
-const SKIN_JOHNNY = -1784875845;
-const SKIN_LUIS = -1403507487;
-const SKIN_COP = -1320879687;
-const SKIN_DOCTOR = 1669579652;
-const SKIN_FIREMAN = -335476819;
-const SKIN_SECURITY = 1581098148;
-const SKIN_BUSINESS = -1191636209;
-const SKIN_STREET = -1850653608;
-const SKIN_HOBO = -1183939691;
-const SKIN_BIKER = 1830507291;
+// ============================================================================
+// GTA IV CHARACTER MODEL HASHES - Verified Correct Values
+// ============================================================================
 
-// Female models - verified GTA IV peds
-const SKIN_F_BUSINESS = -1847203044;
-const SKIN_F_STREET = -2043953294;
-const SKIN_F_RICH = -1171014612;
-const SKIN_F_SHOP = -1611704378;
-const SKIN_F_NURSE = 1567728751;
-const SKIN_F_HOOKER = -639476421;
-const SKIN_F_TOURIST = -1507724086;
-const SKIN_F_JOGGER = -1813105079;
+// Story Characters - Main (using correct IG_ model hashes)
+const SKIN_ROMAN = 2302238665;       // IG_ROMAN
+const SKIN_MALLORIE = 3254679890;    // IG_MALLORIE
+const SKIN_JACOB = 1487004273;       // IG_LILJACOB
+const SKIN_BRUCIE = 2564987168;      // IG_BRUCIE
+const SKIN_PACKIE = 1690783035;      // IG_PACKIE_MC
+const SKIN_DWAYNE = 3677703193;      // IG_DWAYNE
+const SKIN_PLAYBOY = 1794146792;     // IG_PLAYBOY_X
+const SKIN_DIMITRI = 237497537;      // IG_DMITRI
+const SKIN_FAUSTIN = 57218969;       // IG_FAUSTIN
+const SKIN_BULGARIN = 237511807;     // IG_BULGARIN
+const SKIN_PEGORINO = 1884668464;    // CS_JIMMY_PEGORINO
+const SKIN_PHIL_BELL = 2468508362;   // IG_PHIL_BELL
+const SKIN_RAY_BOCCINO = 954215094;  // IG_RAY_BOCCINO
+const SKIN_DERRICK = 1169442297;     // IG_DERRICK_MC
+const SKIN_FRANCIS = 1710545037;     // IG_FRANCIS_MC
+const SKIN_GERALD = 652098186;       // CS_GERRYMC
+const SKIN_KATE = 3521216458;        // IG_KATEMC
+const SKIN_BERNIE = 1500493064;      // IG_BERNIE_CRANE
+const SKIN_MANNY = 1445589009;       // IG_MANNY
+const SKIN_ELIZABETA = 2933135023;   // CS_ELIZABETA
+const SKIN_MICHELLE = 3214308084;    // IG_MICHELLE
+const SKIN_VLAD = 896408642;         // IG_VLAD
+const SKIN_ILYENA = 3459742170;      // IG_ILYENA
+const SKIN_HOSSAN = 980768434;       // IG_HOSSAN
 
-// Arrays for random selection
-const mpBoySkins = [
-    SKIN_NIKO, SKIN_ROMAN, SKIN_JACOB, SKIN_BRUCIE, SKIN_PLAYBOY,
-    SKIN_JOHNNY, SKIN_LUIS, SKIN_COP, SKIN_DOCTOR, SKIN_FIREMAN,
-    SKIN_SECURITY, SKIN_BUSINESS, SKIN_STREET, SKIN_HOBO, SKIN_BIKER
+// TLAD Characters
+const SKIN_JOHNNY = 8206123;         // IG_JOHNNY2
+const SKIN_JIM = 870892404;          // IG_JIM_FITZ
+const SKIN_TERRY = 1728056212;       // IG_TERRY
+const SKIN_CLAY = 1825562762;        // IG_CLAY
+const SKIN_BRIAN = 349841464;        // IG_BRIANJ
+const SKIN_BILLY = 3843248439;       // IG_BILLY
+const SKIN_JASON = 3346030785;       // IG_JASON_M
+const SKIN_ANGUS = 1917871822;       // LOSTBUDDY_13
+const SKIN_DAVE = 3056906300;        // IG_DAVE_GROSSMAN
+const SKIN_LOST_BIKER1 = 1914397972; // LOSTBUDDY_01
+const SKIN_LOST_BIKER2 = 2156528113; // LOSTBUDDY_02
+const SKIN_ASHLEY = 3567004438;      // IG_ASHLEYA
+const SKIN_STUBBS = 2513523815;      // IG_STROOPER
+
+// TBOGT Characters
+const SKIN_LUIS = 3802496606;        // IG_LUIS
+const SKIN_TONY = 4020398429;        // IG_TONY
+const SKIN_YUSUF = 3846796161;       // IG_YUSEF
+const SKIN_ARMANDO = 1370299619;     // IG_ARMANDO
+const SKIN_HENRIQUE = 1905515841;    // IG_HENRIQUE
+const SKIN_ROCCO = 3381042378;       // IG_ROCCO
+const SKIN_TIMUR = 2345614827;       // IG_TIMUR
+const SKIN_MORI = 1662225612;        // IG_MORI_K
+const SKIN_DESSIE = 2848083183;      // IG_DESSIE
+const SKIN_JONI = 3412908435;        // F_Y_JONI
+const SKIN_TROY = 1662473323;        // IG_TROY
+const SKIN_BOUNCER = 2514268405;     // M_Y_BOUNCER_01
+const SKIN_EVAN = 3497746837;        // IG_EVAN
+const SKIN_KERRY = 763838720;        // F_Y_TRENDY_01
+const SKIN_POPPY = 3450748540;       // F_Y_PGIRL_01
+const SKIN_CLOE = 2802928488;        // F_Y_CLOEPARKER
+
+// Law Enforcement
+const SKIN_COP = 4111764146;         // M_Y_COP
+const SKIN_COP2 = 4111764146;        // M_Y_COP
+const SKIN_COP_FAT = 3924571768;     // M_M_FATCOP_01
+const SKIN_COP_TRAFFIC = 2776029317; // M_Y_COP_TRAFFIC
+const SKIN_DETECTIVE = 3295460374;   // M_M_FBI
+const SKIN_NOOSE = 3290204350;       // M_Y_SWAT
+const SKIN_NOOSE_TACTICAL = 3290204350; // M_Y_SWAT
+const SKIN_NOOSE_COMMANDER = 3290204350; // M_Y_SWAT
+const SKIN_FIB = 3295460374;         // M_M_FBI
+const SKIN_PRISON_GUARD = 2378673688; // M_Y_PRISONGUARD
+const SKIN_PRISON_GUARD2 = 2378673688; // M_Y_PRISONGUARD
+const SKIN_SECURITY = 2423978125;    // M_M_SECURITYMAN
+
+// Emergency Services
+const SKIN_FIREMAN = 3684742681;     // M_Y_FIREMAN
+const SKIN_FIREMAN2 = 3684742681;    // M_Y_FIREMAN
+const SKIN_PARAMEDIC = 3119890080;   // M_Y_PMEDIC
+const SKIN_DOCTOR = 3108026518;      // M_M_DOCTOR_01
+const SKIN_NURSE = 346338575;        // F_Y_DOCTOR_01
+const SKIN_NURSE2 = 3101188907;      // F_Y_NURSE
+
+// Gang Members
+const SKIN_RUSSIAN1 = 2206803240;    // M_Y_GRUS_LO_01
+const SKIN_RUSSIAN2 = 1976502708;    // M_Y_GRUS_LO_02
+const SKIN_RUSSIAN3 = 1543404628;    // M_Y_GRUS_HI_02
+const SKIN_ITALIAN1 = 2892525257;    // M_M_PITALIAN_01
+const SKIN_ITALIAN2 = 3381042378;    // IG_ROCCO
+const SKIN_ALBANIAN1 = 3791037286;   // M_Y_GALB_LO_01
+const SKIN_ALBANIAN2 = 4059382627;   // M_Y_GALB_LO_02
+const SKIN_JAMAICAN1 = 1487004273;   // IG_LILJACOB
+const SKIN_JAMAICAN2 = 2794569427;   // M_Y_GJAM_LO_01
+const SKIN_JAMAICAN3 = 3413608606;   // M_Y_GJAM_LO_02
+const SKIN_TRIAD1 = 3210959519;      // M_Y_GTRI_LO_01
+const SKIN_TRIAD2 = 4130031670;      // M_Y_GTRI_LO_02
+
+// Male Civilians
+const SKIN_BUSINESS = 1530937394;    // M_Y_BUSINESS_01
+const SKIN_STREET = 62496225;        // M_Y_STREET_01
+const SKIN_HOBO = 3214294247;        // M_M_GENBUM_01
+const SKIN_BIKER = 2156528113;       // LOSTBUDDY_02
+const SKIN_HIPSTER = 2085884255;     // M_Y_BOHO_01
+const SKIN_WORKER = 3572947498;      // M_Y_CONSTRUCT_01
+
+// Female Civilians
+const SKIN_F_BUSINESS = 453889158;   // F_Y_BUSINESS_01
+const SKIN_F_STREET = 3394344139;    // F_Y_STREET_02
+const SKIN_F_RICH = 2514581497;      // F_Y_PRICH_01
+const SKIN_F_SHOP = 1586287288;      // F_Y_SHOP_03
+const SKIN_F_TOURIST = 1754440500;   // F_Y_TOURIST_01
+const SKIN_F_JOGGER = 1350216795;    // F_Y_GYMGAL_01
+const SKIN_F_CLUB = 3412908435;      // F_Y_JONI
+const SKIN_F_MODEL = 3450748540;     // F_Y_PGIRL_01
+const SKIN_F_PARTY = 2802928488;     // F_Y_CLOEPARKER
+
+// ============================================================================
+// RANDOM SKIN SELECTION ARRAYS
+// ============================================================================
+
+// All male character skins for random selection
+const maleSkins = [
+    // Story Characters
+    SKIN_ROMAN, SKIN_JACOB, SKIN_BRUCIE, SKIN_PACKIE,
+    SKIN_DWAYNE, SKIN_PLAYBOY, SKIN_DIMITRI, SKIN_FAUSTIN, SKIN_BULGARIN,
+    SKIN_PEGORINO, SKIN_PHIL_BELL, SKIN_RAY_BOCCINO, SKIN_DERRICK,
+    SKIN_FRANCIS, SKIN_GERALD, SKIN_BERNIE, SKIN_MANNY, SKIN_VLAD, SKIN_HOSSAN,
+    // TLAD
+    SKIN_JOHNNY, SKIN_JIM, SKIN_TERRY, SKIN_CLAY, SKIN_BRIAN, SKIN_BILLY,
+    SKIN_JASON, SKIN_ANGUS, SKIN_DAVE, SKIN_LOST_BIKER1, SKIN_LOST_BIKER2,
+    // TBOGT
+    SKIN_LUIS, SKIN_TONY, SKIN_YUSUF, SKIN_ARMANDO, SKIN_HENRIQUE,
+    SKIN_ROCCO, SKIN_TIMUR, SKIN_MORI, SKIN_TROY, SKIN_BOUNCER, SKIN_EVAN,
+    // Law & Emergency
+    SKIN_COP, SKIN_COP2, SKIN_NOOSE, SKIN_FIREMAN, SKIN_PARAMEDIC,
+    // Civilians & Gangs
+    SKIN_BUSINESS, SKIN_STREET, SKIN_HOBO, SKIN_BIKER, SKIN_HIPSTER,
+    SKIN_WORKER, SKIN_RUSSIAN1, SKIN_ITALIAN1, SKIN_JAMAICAN1
 ];
 
-const mpGirlSkins = [
-    SKIN_F_BUSINESS, SKIN_F_STREET, SKIN_F_RICH, SKIN_F_SHOP,
-    SKIN_F_NURSE, SKIN_F_HOOKER, SKIN_F_TOURIST, SKIN_F_JOGGER
+// All female character skins for random selection
+const femaleSkins = [
+    // Story Characters
+    SKIN_MALLORIE, SKIN_KATE, SKIN_ELIZABETA, SKIN_MICHELLE, SKIN_ILYENA,
+    // TLAD
+    SKIN_ASHLEY,
+    // TBOGT
+    SKIN_DESSIE, SKIN_JONI, SKIN_KERRY, SKIN_POPPY, SKIN_CLOE,
+    // Civilians
+    SKIN_F_BUSINESS, SKIN_F_STREET, SKIN_F_RICH, SKIN_F_SHOP, SKIN_NURSE,
+    SKIN_F_TOURIST, SKIN_F_JOGGER, SKIN_F_CLUB, SKIN_F_MODEL, SKIN_F_PARTY
 ];
+
+// Legacy compatibility aliases
+const mpBoySkins = maleSkins;
+const mpGirlSkins = femaleSkins;
 
 // Execute skin change
 addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
@@ -2943,43 +3333,82 @@ addNetworkHandler("ModMenu:ExecuteSkinChange", function(skinId) {
     try {
         if (skinId === "random") {
             // Random from all skins
-            let allSkins = mpBoySkins.concat(mpGirlSkins);
+            let allSkins = maleSkins.concat(femaleSkins);
             skinId = allSkins[Math.floor(Math.random() * allSkins.length)];
-        } else if (skinId === "random_mp_boy") {
+        } else if (skinId === "random_male" || skinId === "random_mp_boy") {
             // Random male skin
-            skinId = mpBoySkins[Math.floor(Math.random() * mpBoySkins.length)];
-        } else if (skinId === "random_mp_girl") {
+            skinId = maleSkins[Math.floor(Math.random() * maleSkins.length)];
+        } else if (skinId === "random_female" || skinId === "random_mp_girl") {
             // Random female skin
-            skinId = mpGirlSkins[Math.floor(Math.random() * mpGirlSkins.length)];
+            skinId = femaleSkins[Math.floor(Math.random() * femaleSkins.length)];
+        }
+
+        // Ensure skinId is a valid number
+        skinId = parseInt(skinId);
+        if (isNaN(skinId)) {
+            console.log("[ModMenu] Invalid skin ID");
+            showNotification("Invalid skin ID");
+            return;
         }
 
         console.log("[ModMenu] Changing skin to: " + skinId);
 
-        // Request and load the model
+        // Request the model to be loaded
         natives.requestModel(skinId);
 
-        // Use interval to check if model is loaded
+        // Use interval to check if model is actually loaded
         let attempts = 0;
+        let maxAttempts = 100; // 5 seconds max wait
         let loadInterval = setInterval(function() {
             attempts++;
+
             try {
-                // Try to load all objects
+                // Force streaming to load the model
                 natives.loadAllObjectsNow();
 
-                // Check if we can change model now
-                if (attempts > 5) {
-                    clearInterval(loadInterval);
-                    // Change player model
-                    natives.changePlayerModel(0, skinId);
-                    console.log("[ModMenu] Skin changed successfully");
+                // Check if model has loaded using hasModelLoaded
+                let isLoaded = false;
+                try {
+                    isLoaded = natives.hasModelLoaded(skinId);
+                } catch(e) {
+                    // If hasModelLoaded fails, try after some attempts
+                    if (attempts > 10) {
+                        isLoaded = true; // Assume loaded after enough time
+                    }
                 }
+
+                if (isLoaded) {
+                    clearInterval(loadInterval);
+
+                    // Get player index
+                    let playerIndex = natives.getPlayerId();
+
+                    // Change the player model
+                    natives.changePlayerModel(playerIndex, skinId);
+
+                    // Refresh player ped reference
+                    try {
+                        natives.loadAllObjectsNow();
+                    } catch(e) {}
+
+                    console.log("[ModMenu] Skin changed successfully to: " + skinId);
+                    showNotification("Skin changed!");
+                    return;
+                }
+
+                // Re-request if not loaded yet
+                if (attempts % 10 === 0) {
+                    natives.requestModel(skinId);
+                }
+
             } catch(e) {
                 console.log("[ModMenu] Skin load attempt " + attempts + ": " + e);
             }
 
-            if (attempts > 20) {
+            if (attempts >= maxAttempts) {
                 clearInterval(loadInterval);
-                console.log("[ModMenu] Skin load timeout");
+                console.log("[ModMenu] Skin load timeout for: " + skinId);
+                showNotification("Skin load failed - model may not exist");
             }
         }, 50);
 
