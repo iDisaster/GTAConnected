@@ -41,14 +41,10 @@ addEventHandler("OnResourceStart", function(event, resource) {
 
 addEventHandler("OnPlayerJoined", function(event, client) {
     // Broadcast join notification to all clients
-    let joinData = {
-        name: client.name
-    };
-
-    // Send to all connected clients
+    // Send player name directly for better compatibility
     let clients = getClients();
     for (let i = 0; i < clients.length; i++) {
-        triggerNetworkEvent("playerJoined", clients[i], joinData);
+        triggerNetworkEvent("playerJoined", clients[i], client.name);
     }
 
     // Log to console
@@ -63,15 +59,11 @@ addEventHandler("OnPlayerQuit", function(event, client, reason) {
     let reasonText = getDisconnectReason(reason);
 
     // Broadcast leave notification to all remaining clients
-    let leaveData = {
-        name: client.name,
-        reason: reasonText
-    };
-
+    // Send individual parameters for better compatibility
     let clients = getClients();
     for (let i = 0; i < clients.length; i++) {
         if (clients[i].index !== client.index) {
-            triggerNetworkEvent("playerLeft", clients[i], leaveData);
+            triggerNetworkEvent("playerLeft", clients[i], client.name, reasonText);
         }
     }
 
@@ -102,15 +94,10 @@ function getDisconnectReason(reason) {
 
 addEventHandler("OnPlayerChat", function(event, client, messageText) {
     // Broadcast to all clients via custom network event
-    let chatData = {
-        text: messageText,
-        type: "normal",
-        playerName: client.name
-    };
-
+    // Send individual parameters for better compatibility
     let clients = getClients();
     for (let i = 0; i < clients.length; i++) {
-        triggerNetworkEvent("chatMessage", clients[i], chatData);
+        triggerNetworkEvent("chatMessage", clients[i], messageText, "normal", client.name);
     }
 
     // Log to history
@@ -124,6 +111,8 @@ addEventHandler("OnPlayerChat", function(event, client, messageText) {
 addNetworkHandler("chatSendMessage", function(client, messageText) {
     if (!messageText || messageText.length === 0) return;
 
+    console.log("[Chat] Received message from " + client.name + ": " + messageText);
+
     // Check if it's a command
     if (messageText.charAt(0) === '/') {
         // Parse command
@@ -136,15 +125,10 @@ addNetworkHandler("chatSendMessage", function(client, messageText) {
     }
 
     // Regular chat message - broadcast to all clients
-    let chatData = {
-        text: messageText,
-        type: "normal",
-        playerName: client.name
-    };
-
+    // Send individual parameters for better compatibility
     let clients = getClients();
     for (let i = 0; i < clients.length; i++) {
-        triggerNetworkEvent("chatMessage", clients[i], chatData);
+        triggerNetworkEvent("chatMessage", clients[i], messageText, "normal", client.name);
     }
 
     // Log to history
@@ -250,26 +234,16 @@ function handleCommand(client, cmd, params) {
 // ============================================================================
 
 function broadcastChatMessage(text, type, senderName) {
-    let chatData = {
-        text: text,
-        type: type || "normal",
-        playerName: senderName || null
-    };
-
+    // Send individual parameters for better compatibility
     let clients = getClients();
     for (let i = 0; i < clients.length; i++) {
-        triggerNetworkEvent("chatMessage", clients[i], chatData);
+        triggerNetworkEvent("chatMessage", clients[i], text, type || "normal", senderName || "");
     }
 }
 
 function sendChatMessage(client, text, type, playerName) {
-    let chatData = {
-        text: text,
-        type: type || "normal",
-        playerName: playerName || null
-    };
-
-    triggerNetworkEvent("chatMessage", client, chatData);
+    // Send individual parameters for better compatibility
+    triggerNetworkEvent("chatMessage", client, text, type || "normal", playerName || "");
 }
 
 function sendSystemMessage(client, text) {

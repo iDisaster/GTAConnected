@@ -63,6 +63,9 @@ let lastMessageTime = 0;
 let chatFadeDelay = 10000; // 10 seconds before fade
 let chatFadeSpeed = 0.02;
 
+// Track if player is in game (spawned)
+let isPlayerInGame = false;
+
 // Welcome/Leave notification queue
 let notifications = [];
 let notificationDuration = 5000; // 5 seconds
@@ -75,8 +78,12 @@ const chat = {
     messageHeight: 22,
     maxVisibleMessages: 12,
     padding: 12,
-    inputHeight: 36,
-    borderRadius: 4
+    inputHeight: 32,
+    borderRadius: 4,
+    // Font sizes for consistent text alignment
+    fontSize: 10,
+    timestampSize: 10,
+    inputFontSize: 10
 };
 
 // ============================================================================
@@ -104,19 +111,25 @@ addEventHandler("OnResourceStart", function(event, resource) {
 // ============================================================================
 // NETWORK EVENTS - Receive messages from server
 // ============================================================================
-addNetworkHandler("chatMessage", function(messageData) {
-    addChatMessage(messageData.text, messageData.type || "normal", messageData.playerName || null);
+addNetworkHandler("chatMessage", function(text, type, playerName) {
+    // Receives individual parameters instead of object for better compatibility
+    console.log("[Chat] Received message: " + text + " type: " + type + " from: " + playerName);
+    addChatMessage(text, type || "normal", playerName || null);
 });
 
-addNetworkHandler("playerJoined", function(data) {
-    addNotification(data.name + " joined the server", "join");
-    addChatMessage(data.name + " has joined the server", "system");
+addNetworkHandler("playerJoined", function(playerName) {
+    // Receives player name directly
+    console.log("[Chat] Player joined: " + playerName);
+    addNotification(playerName + " joined the server", "join");
+    addChatMessage(playerName + " has joined the server", "system");
 });
 
-addNetworkHandler("playerLeft", function(data) {
-    let reason = data.reason || "Disconnected";
-    addNotification(data.name + " left the server", "leave");
-    addChatMessage(data.name + " has left the server (" + reason + ")", "system");
+addNetworkHandler("playerLeft", function(playerName, reason) {
+    // Receives individual parameters
+    console.log("[Chat] Player left: " + playerName + " reason: " + reason);
+    let reasonText = reason || "Disconnected";
+    addNotification(playerName + " left the server", "leave");
+    addChatMessage(playerName + " has left the server (" + reasonText + ")", "system");
 });
 
 // ============================================================================
@@ -217,12 +230,24 @@ function drawText(text, x, y, colour, size) {
 addEventHandler("OnDrawnHUD", function(event) {
     animTime += 0.016; // ~60fps
 
+    // Update player in-game state
+    isPlayerInGame = checkIfPlayerInGame();
+
     let screenWidth = 1920;
     let screenHeight = 1080;
     try {
         screenWidth = game.width || 1920;
         screenHeight = game.height || 1080;
     } catch(e) {}
+
+    // Don't render anything if player is in lobby (not spawned)
+    if (!isPlayerInGame) {
+        // Close chat input if it was open when entering lobby
+        if (chatInputActive) {
+            closeChatInput();
+        }
+        return;
+    }
 
     // Update fade
     if (Date.now() - lastMessageTime > chatFadeDelay && !chatInputActive) {
@@ -277,13 +302,16 @@ addEventHandler("OnDrawnHUD", function(event) {
     let headerBg = toColour(UI.bgPanel.r, UI.bgPanel.g, UI.bgPanel.b, bgAlpha);
     drawRect(chat.x, chat.y + 2, chat.width, headerHeight, headerBg);
 
+    // Calculate vertical centering for header text
+    let headerTextY = chat.y + Math.floor((headerHeight + 4 - 11) / 2);
+
     // Header text
     let headerTextCol = toColour(UI.accent.r, UI.accent.g, UI.accent.b, alpha);
-    drawText("CHAT", chat.x + chat.padding, chat.y + 8, headerTextCol, 11);
+    drawText("CHAT", chat.x + chat.padding, headerTextY, headerTextCol, 11);
 
     // Online count (placeholder - can be updated via network)
     let onlineCol = toColour(UI.textSecondary.r, UI.textSecondary.g, UI.textSecondary.b, alpha);
-    drawText("Press T to chat", chat.x + chat.width - 120, chat.y + 9, onlineCol, 9);
+    drawText("Press T to chat", chat.x + chat.width - 115, headerTextY + 1, onlineCol, chat.fontSize);
 
     // Header bottom border
     let headerBorder = toColour(UI.border.r, UI.border.g, UI.border.b, Math.floor(100 * chatFadeAlpha));
@@ -311,23 +339,27 @@ addEventHandler("OnDrawnHUD", function(event) {
         let msgColor = getMessageColor(msg.type);
         let textCol = toColour(msgColor.r, msgColor.g, msgColor.b, alpha);
 
+        // Calculate vertical centering offset for text in message row
+        let textY = msgY + Math.floor((chat.messageHeight - chat.fontSize) / 2) - 2;
+
         // Draw timestamp
         let time = new Date(msg.timestamp);
         let timeStr = "[" + padZero(time.getHours()) + ":" + padZero(time.getMinutes()) + "]";
         let timeCol = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, Math.floor(alpha * 0.7));
-        drawText(timeStr, chat.x + chat.padding, msgY, timeCol, 9);
+        drawText(timeStr, chat.x + chat.padding, textY, timeCol, chat.timestampSize);
 
-        // Draw message text
-        let textX = chat.x + chat.padding + 55;
+        // Draw message text - timestamp takes approximately 50 pixels
+        let textX = chat.x + chat.padding + 52;
 
         if (msg.playerName && msg.type === "normal") {
             // Player name in accent color
             let nameCol = toColour(UI.playerName.r, UI.playerName.g, UI.playerName.b, alpha);
-            drawText(msg.playerName + ":", textX, msgY, nameCol, 10);
-            // Message text
-            drawText(msg.text, textX + (msg.playerName.length * 7) + 12, msgY, textCol, 10);
+            drawText(msg.playerName + ":", textX, textY, nameCol, chat.fontSize);
+            // Message text - use consistent character width calculation (6 pixels per char for size 10)
+            let nameWidth = (msg.playerName.length + 1) * 6 + 8;
+            drawText(msg.text, textX + nameWidth, textY, textCol, chat.fontSize);
         } else {
-            drawText(msg.text, textX, msgY, textCol, 10);
+            drawText(msg.text, textX, textY, textCol, chat.fontSize);
         }
     }
 
@@ -368,15 +400,18 @@ addEventHandler("OnDrawnHUD", function(event) {
         drawRect(chat.x, inputY, 2, chat.inputHeight, inputBorder);
         drawRect(chat.x + chat.width - 2, inputY, 2, chat.inputHeight, inputBorder);
 
-        // Input label
-        let labelCol = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, 255);
-        drawText("Say:", chat.x + chat.padding, inputY + 10, labelCol, 10);
+        // Calculate vertical centering for input text
+        let inputTextY = inputY + Math.floor((chat.inputHeight - chat.inputFontSize) / 2) - 1;
 
-        // Input text with cursor
+        // Input label "Say:" with consistent positioning
+        let labelCol = toColour(UI.textMuted.r, UI.textMuted.g, UI.textMuted.b, 255);
+        drawText("Say:", chat.x + chat.padding, inputTextY, labelCol, chat.inputFontSize);
+
+        // Input text with cursor - "Say:" takes about 30 pixels
         let cursorBlink = Math.floor(animTime * 2) % 2 === 0;
         let inputTextCol = toColour(UI.textPrimary.r, UI.textPrimary.g, UI.textPrimary.b, 255);
         let displayText = chatInputText + (cursorBlink ? "|" : "");
-        drawText(displayText, chat.x + chat.padding + 40, inputY + 10, inputTextCol, 10);
+        drawText(displayText, chat.x + chat.padding + 36, inputTextY, inputTextCol, chat.inputFontSize);
     }
 
     // ========================================
@@ -467,6 +502,17 @@ function padZero(num) {
     return num < 10 ? "0" + num : num.toString();
 }
 
+// Check if player is spawned in game (not in lobby)
+function checkIfPlayerInGame() {
+    try {
+        // localPlayer is null/undefined when player is not spawned (in lobby)
+        if (typeof localPlayer !== 'undefined' && localPlayer != null) {
+            return true;
+        }
+    } catch(e) {}
+    return false;
+}
+
 // ============================================================================
 // KEY CODE CONSTANTS (in case they're not predefined)
 // SDL key codes use ASCII values for letters (lowercase)
@@ -484,7 +530,8 @@ const KEY_PAGEDOWN = typeof SDLK_PAGEDOWN !== 'undefined' ? SDLK_PAGEDOWN : 1073
 
 // Bind T key to open chat
 bindKey(KEY_T, KEYSTATE_UP, function(event) {
-    if (!chatInputActive) {
+    // Only allow opening chat if player is in game (not in lobby)
+    if (!chatInputActive && isPlayerInGame) {
         openChatInput();
     }
 });
@@ -528,14 +575,12 @@ addEventHandler("OnKeyUp", function(event, key, scancode, mods) {
     // Escape to close chat
     if ((key === KEY_ESCAPE || key === SDLK_ESCAPE) && chatInputActive) {
         closeChatInput();
-        event.preventDefault();
         return;
     }
 
     // Enter to send message
     if ((key === KEY_RETURN || key === SDLK_RETURN) && chatInputActive) {
         sendChatMessage();
-        event.preventDefault();
         return;
     }
 
@@ -559,7 +604,7 @@ addEventHandler("OnCharacter", function(event, character) {
         if (character.charCodeAt(0) >= 32) {
             chatInputText += character;
         }
-        event.preventDefault();
+        // Note: OnCharacter event is not cancellable in GTA Connected
     }
 });
 
@@ -569,11 +614,8 @@ addEventHandler("OnKeyDown", function(event, key, scancode, mods) {
     // Backspace
     if ((key === KEY_BACKSPACE || key === SDLK_BACKSPACE) && chatInputText.length > 0) {
         chatInputText = chatInputText.slice(0, -1);
-        event.preventDefault();
     }
-
-    // Block other keys from reaching the game while typing
-    event.preventDefault();
+    // Note: OnKeyDown event is not cancellable in GTA Connected
 });
 
 // ============================================================================
@@ -627,9 +669,9 @@ addEventHandler("OnResourceReady", function(event, resource) {
             console.log("[Chat] Could not disable default chat: " + e);
         }
 
-        // Add a test message to verify the chat is working
-        addChatMessage("Custom chat loaded! Press T to type.", "system");
+        // Add a welcome message - will only show when player is in game
+        addChatMessage("Revolution chat loaded! Press T to type.", "system");
     }
 });
 
-console.log("[Chat] Client script loaded - Custom glossy UI enabled");
+console.log("[Chat] Revolution chat loaded - Custom glossy UI enabled");
