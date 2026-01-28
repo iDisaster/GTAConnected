@@ -279,6 +279,78 @@ addNetworkHandler("ModMenu:Fun", function(client, option) {
 });
 
 // ============================================================================
+// NETWORK HANDLERS - Player Actions
+// ============================================================================
+
+addNetworkHandler("ModMenu:HealPlayer", function(client, targetId) {
+    console.log("[ModMenu] " + client.name + " requesting to heal player ID: " + targetId);
+
+    let clients = getClients();
+    for (let i = 0; i < clients.length; i++) {
+        if (clients[i].index == targetId) {
+            console.log("[ModMenu] Found target player: " + clients[i].name);
+
+            if (clients[i].player) {
+                try {
+                    // Tell the target client to heal themselves
+                    triggerNetworkEvent("ModMenu:ExecuteHeal", clients[i]);
+                    triggerNetworkEvent("ModMenu:Notification", client, "Healed: " + clients[i].name);
+                    triggerNetworkEvent("ModMenu:Notification", clients[i], client.name + " healed you!");
+                    console.log("[ModMenu] Heal event sent to " + clients[i].name);
+                } catch(e) {
+                    console.log("[ModMenu] Error healing player: " + e);
+                    triggerNetworkEvent("ModMenu:Notification", client, "Error healing player!");
+                }
+            } else {
+                triggerNetworkEvent("ModMenu:Notification", client, "Player not spawned!");
+            }
+            return;
+        }
+    }
+    triggerNetworkEvent("ModMenu:Notification", client, "Player not found!");
+});
+
+addNetworkHandler("ModMenu:SpectatePlayer", function(client, targetId) {
+    console.log("[ModMenu] " + client.name + " requesting to spectate player ID: " + targetId);
+
+    let clients = getClients();
+    for (let i = 0; i < clients.length; i++) {
+        if (clients[i].index == targetId) {
+            console.log("[ModMenu] Found target player: " + clients[i].name);
+
+            if (clients[i].player) {
+                try {
+                    let targetPos = clients[i].player.position;
+                    // Send spectate event to client with target info
+                    triggerNetworkEvent("ModMenu:ExecuteSpectate", client, targetId, clients[i].name, targetPos.x, targetPos.y, targetPos.z);
+                    console.log("[ModMenu] Spectate event sent to " + client.name);
+                } catch(e) {
+                    console.log("[ModMenu] Error getting spectate info: " + e);
+                    triggerNetworkEvent("ModMenu:Notification", client, "Error spectating player!");
+                }
+            } else {
+                triggerNetworkEvent("ModMenu:Notification", client, "Player not spawned!");
+            }
+            return;
+        }
+    }
+    triggerNetworkEvent("ModMenu:Notification", client, "Player not found!");
+});
+
+addNetworkHandler("ModMenu:UpdateSpectate", function(client, targetId) {
+    let clients = getClients();
+    for (let i = 0; i < clients.length; i++) {
+        if (clients[i].index == targetId && clients[i].player) {
+            try {
+                let targetPos = clients[i].player.position;
+                triggerNetworkEvent("ModMenu:SpectatePosition", client, targetPos.x, targetPos.y, targetPos.z);
+            } catch(e) {}
+            return;
+        }
+    }
+});
+
+// ============================================================================
 // INITIALIZATION
 // ============================================================================
 

@@ -360,11 +360,21 @@ const itemDescriptions = {
     "color_slot_edit": "🎨 Use LEFT/RIGHT arrows to change color (0-133 from GTA IV carcols.dat)",
     "color_preset": "🎨 Apply preset colors to all 4 vehicle color slots instantly!",
 
-    // Vehicle Upgrade descriptions
-    "veh_upgrade_add": "🔧 Add upgrade - Enhance your vehicle with this mod!",
-    "veh_upgrade_remove": "❌ Remove upgrade - Take off this modification!",
-    "veh_upgrade_remove_all": "🗑️ REMOVE ALL - Strip all upgrades from vehicle!",
-    "veh_upgrades": "🔧 UPGRADES - Add NOS, hydraulics, wheels, spoilers and more!",
+    // Vehicle Extras descriptions
+    "veh_extra_toggle": "🔧 Toggle vehicle extra part ON/OFF - Shows current state!",
+    "veh_extras": "🔧 EXTRAS - Toggle vehicle extra parts like bumpers, spoilers, etc!",
+    "veh_extra_refresh": "🔄 Refresh the ON/OFF status of all extras!",
+
+    // Vehicle Flip toggle
+    "vehFlipped": "🔄 FLIP VEHICLE - Flips your vehicle upright when ON!",
+
+    // Super Jump toggle
+    "superJump": "🦘 SUPER JUMP - Jump extra high when enabled!",
+
+    // Player options
+    "teleport_to_player": "📍 Teleport directly to this player's location!",
+    "heal_player": "💊 Heal this player to full health!",
+    "spectate_player": "👁️ Watch this player from their perspective!",
 
 };
 
@@ -434,6 +444,7 @@ const menuData = {
             { label: "God Mode", action: "toggle", target: "godMode", state: false },
             { label: "Invincible", action: "toggle", target: "invincible", state: false },
             { label: "Super Run", action: "toggle", target: "superRun", state: false },
+            { label: "Super Jump", action: "toggle", target: "superJump", state: false },
             { label: "No Ragdoll", action: "toggle", target: "noRagdoll", state: false },
             { label: "Never Wanted", action: "toggle", target: "neverWanted", state: false },
             { label: "Invisible", action: "toggle", target: "invisible", state: false },
@@ -954,10 +965,10 @@ const menuData = {
     vehicleOptions: {
         title: "VEHICLE OPTIONS",
         items: [
-            { label: "Repair Vehicle", action: "veh_repair" },
-            { label: "Flip Vehicle", action: "veh_flip" },
+            { label: "Repair & Clean Vehicle", action: "veh_repair" },
+            { label: "Flip Vehicle", action: "toggle", target: "vehFlipped", state: false },
             { label: "Vehicle Colors", action: "submenu", target: "veh_colors" },
-            { label: "Vehicle Upgrades", action: "submenu", target: "veh_upgrades" },
+            { label: "Vehicle Extras", action: "submenu", target: "veh_extras" },
             { label: "--- Toggles ---", action: "none" },
             { label: "God Mode", action: "toggle", target: "vehGodMode", state: false },
             { label: "Nitro Boost", action: "veh_nitro" },
@@ -975,51 +986,20 @@ const menuData = {
         ]
     },
 
-    veh_upgrades: {
-        title: "VEHICLE UPGRADES",
+    veh_extras: {
+        title: "VEHICLE EXTRAS",
         items: [
-            { label: "--- Performance ---", action: "none" },
-            { label: "Add Nitro", action: "veh_upgrade_add", value: 1010 },
-            { label: "Add Hydraulics", action: "veh_upgrade_add", value: 1087 },
-            { label: "--- Wheels ---", action: "none" },
-            { label: "Offroad Wheels", action: "veh_upgrade_add", value: 1025 },
-            { label: "Shadow Wheels", action: "veh_upgrade_add", value: 1073 },
-            { label: "Mega Wheels", action: "veh_upgrade_add", value: 1074 },
-            { label: "Rimshine Wheels", action: "veh_upgrade_add", value: 1075 },
-            { label: "Wires Wheels", action: "veh_upgrade_add", value: 1076 },
-            { label: "Classic Wheels", action: "veh_upgrade_add", value: 1077 },
-            { label: "Twist Wheels", action: "veh_upgrade_add", value: 1078 },
-            { label: "Cutter Wheels", action: "veh_upgrade_add", value: 1079 },
-            { label: "Switch Wheels", action: "veh_upgrade_add", value: 1080 },
-            { label: "Grove Wheels", action: "veh_upgrade_add", value: 1081 },
-            { label: "Import Wheels", action: "veh_upgrade_add", value: 1082 },
-            { label: "Dollar Wheels", action: "veh_upgrade_add", value: 1083 },
-            { label: "--- Exhausts ---", action: "none" },
-            { label: "Upswept Exhaust", action: "veh_upgrade_add", value: 1018 },
-            { label: "Twin Exhaust", action: "veh_upgrade_add", value: 1019 },
-            { label: "Large Exhaust", action: "veh_upgrade_add", value: 1020 },
-            { label: "Medium Exhaust", action: "veh_upgrade_add", value: 1021 },
-            { label: "Small Exhaust", action: "veh_upgrade_add", value: 1022 },
-            { label: "--- Spoilers ---", action: "none" },
-            { label: "Pro Spoiler", action: "veh_upgrade_add", value: 1000 },
-            { label: "Win Spoiler", action: "veh_upgrade_add", value: 1001 },
-            { label: "Drag Spoiler", action: "veh_upgrade_add", value: 1002 },
-            { label: "Alpha Spoiler", action: "veh_upgrade_add", value: 1003 },
-            { label: "Champ Spoiler", action: "veh_upgrade_add", value: 1014 },
-            { label: "Fury Spoiler", action: "veh_upgrade_add", value: 1015 },
-            { label: "--- Roof ---", action: "none" },
-            { label: "Roof Scoop", action: "veh_upgrade_add", value: 1006 },
-            { label: "Roof Vent", action: "veh_upgrade_add", value: 1032 },
-            { label: "Alien Roof Vent", action: "veh_upgrade_add", value: 1033 },
-            { label: "--- Side Skirts ---", action: "none" },
-            { label: "Right Alien Skirt", action: "veh_upgrade_add", value: 1007 },
-            { label: "Left Alien Skirt", action: "veh_upgrade_add", value: 1017 },
-            { label: "Right Chrome Skirt", action: "veh_upgrade_add", value: 1027 },
-            { label: "Left Chrome Skirt", action: "veh_upgrade_add", value: 1031 },
-            { label: "--- Remove Upgrades ---", action: "none" },
-            { label: "Remove Nitro", action: "veh_upgrade_remove", value: 1010 },
-            { label: "Remove Hydraulics", action: "veh_upgrade_remove", value: 1087 },
-            { label: "Remove All Upgrades", action: "veh_upgrade_remove_all" }
+            { label: "Extra 1", action: "veh_extra_toggle", value: 1 },
+            { label: "Extra 2", action: "veh_extra_toggle", value: 2 },
+            { label: "Extra 3", action: "veh_extra_toggle", value: 3 },
+            { label: "Extra 4", action: "veh_extra_toggle", value: 4 },
+            { label: "Extra 5", action: "veh_extra_toggle", value: 5 },
+            { label: "Extra 6", action: "veh_extra_toggle", value: 6 },
+            { label: "Extra 7", action: "veh_extra_toggle", value: 7 },
+            { label: "Extra 8", action: "veh_extra_toggle", value: 8 },
+            { label: "Extra 9", action: "veh_extra_toggle", value: 9 },
+            { label: "--- Refresh ---", action: "none" },
+            { label: "Refresh Extra Status", action: "veh_extra_refresh" }
         ]
     },
 
@@ -1330,7 +1310,6 @@ const menuData = {
         items: [
             { label: "--- Physics Fun ---", action: "none" },
             { label: "Launch Me Up", action: "fun_launch" },
-            { label: "Super Jump", action: "fun_superjump" },
             { label: "Moon Gravity", action: "toggle", target: "moonGravity", state: false },
             { label: "Drunk Mode", action: "toggle", target: "drunkMode", state: false },
             { label: "Spinbot", action: "toggle", target: "spinbot", state: false },
@@ -1361,12 +1340,14 @@ let toggleStates = {
     godMode: false,
     invincible: false,
     superRun: false,
+    superJump: false,
     noRagdoll: false,
     neverWanted: false,
     invisible: false,
     infiniteSprint: false,
     freezePlayer: false,
     vehGodMode: false,
+    vehFlipped: false,
     driveOnWater: false,
     rainbowCar: false,
     neonLights: false,
@@ -1643,7 +1624,8 @@ function getNetworkMenuItems() {
     for (let i = 0; i < playerList.length; i++) {
         items.push({
             label: playerList[i].name + " [ID: " + playerList[i].id + "]",
-            action: "teleport_to_player_direct",
+            action: "submenu",
+            target: "player_options",
             playerData: playerList[i]
         });
     }
@@ -1659,6 +1641,31 @@ function refreshPlayerList() {
     // Request player list from server
     triggerNetworkEvent("ModMenu:GetPlayers");
     showNotification("Refreshing players...");
+}
+
+// Refresh vehicle extras status - updates menu items with current ON/OFF state
+function refreshVehicleExtras() {
+    if (!localPlayer || !localPlayer.vehicle) return;
+
+    let veh = localPlayer.vehicle;
+    if (menuData.veh_extras && menuData.veh_extras.items) {
+        for (let i = 0; i < menuData.veh_extras.items.length; i++) {
+            let item = menuData.veh_extras.items[i];
+            if (item.action === "veh_extra_toggle" && item.value) {
+                try {
+                    let hasExtra = natives.doesExtraExist(veh, item.value);
+                    if (hasExtra) {
+                        let isOn = natives.isVehicleExtraTurnedOn(veh, item.value);
+                        item.label = "Extra " + item.value + " [" + (isOn ? "ON" : "OFF") + "]";
+                    } else {
+                        item.label = "Extra " + item.value + " [N/A]";
+                    }
+                } catch(e) {
+                    item.label = "Extra " + item.value + " [?]";
+                }
+            }
+        }
+    }
 }
 
 // ============================================================================
@@ -1717,6 +1724,11 @@ function selectItem() {
                 if (item.target === "vehColorEditor") {
                     loadVehicleColorsToEditor();
                     colorEditorActive = true;
+                }
+
+                // Refresh vehicle extras status when entering extras menu
+                if (item.target === "veh_extras") {
+                    refreshVehicleExtras();
                 }
 
             }
@@ -1810,7 +1822,7 @@ function selectItem() {
 
         case "veh_repair":
             triggerNetworkEvent("ModMenu:VehicleOption", "repair");
-            showNotification("Repaired!");
+            showNotification("Repaired & Cleaned!");
             break;
 
         case "veh_flip":
@@ -2048,6 +2060,51 @@ function selectItem() {
             }
             break;
 
+        case "heal_player":
+            if (selectedPlayer) {
+                triggerNetworkEvent("ModMenu:HealPlayer", selectedPlayer.id);
+                showNotification("Healing " + selectedPlayer.name);
+            }
+            break;
+
+        case "spectate_player":
+            if (selectedPlayer) {
+                triggerNetworkEvent("ModMenu:SpectatePlayer", selectedPlayer.id);
+                showNotification("Spectating " + selectedPlayer.name);
+            }
+            break;
+
+        case "veh_extra_toggle":
+            if (localPlayer && localPlayer.vehicle) {
+                try {
+                    let veh = localPlayer.vehicle;
+                    let extraId = item.value;
+                    // Check if extra exists first
+                    let hasExtra = natives.doesExtraExist(veh, extraId);
+                    if (hasExtra) {
+                        let isOn = natives.isVehicleExtraTurnedOn(veh, extraId);
+                        natives.turnOffVehicleExtra(veh, extraId, isOn); // Toggle: if ON, turn OFF; if OFF, turn ON
+                        showNotification("Extra " + extraId + ": " + (isOn ? "OFF" : "ON"));
+                    } else {
+                        showNotification("Extra " + extraId + " not available");
+                    }
+                } catch(e) {
+                    showNotification("Extra toggle failed");
+                }
+            } else {
+                showNotification("Get in a vehicle first!");
+            }
+            break;
+
+        case "veh_extra_refresh":
+            if (localPlayer && localPlayer.vehicle) {
+                refreshVehicleExtras();
+                showNotification("Extras refreshed!");
+            } else {
+                showNotification("Get in a vehicle first!");
+            }
+            break;
+
         case "fun_launch":
             triggerNetworkEvent("ModMenu:Fun", "launch");
             showNotification("LAUNCH!");
@@ -2149,17 +2206,6 @@ function selectItem() {
                 natives.clearTimecycleModifier();
                 showNotification("Timecycle cleared!");
             } catch(e) {}
-            break;
-
-        case "fun_superjump":
-            if (localPlayer) {
-                try {
-                    let vel = localPlayer.velocity;
-                    vel.z = 15.0;
-                    localPlayer.velocity = vel;
-                    showNotification("SUPER JUMP!");
-                } catch(e) {}
-            }
             break;
 
         case "fun_random_explosion":
@@ -2310,10 +2356,13 @@ function selectItem() {
 }
 
 function openPlayerMenu(playerData) {
+    selectedPlayer = playerData;
     menuData.player_options = {
         title: playerData.name,
         items: [
-            { label: "Teleport to Player", action: "teleport_to_player" }
+            { label: "Teleport to Player", action: "teleport_to_player" },
+            { label: "Heal Player", action: "heal_player" },
+            { label: "Spectate Player", action: "spectate_player" }
         ]
     };
     menuStack.push({ menu: currentMenu, index: selectedIndex, scroll: scrollOffset });
@@ -2490,6 +2539,70 @@ addNetworkHandler("ModMenu:ExecuteTeleportToPlayer", function(targetId) {
         console.log("[ModMenu] Teleport to player error: " + e);
         showNotification("Teleport failed");
     }
+});
+
+// Execute heal - heal the player
+addNetworkHandler("ModMenu:ExecuteHeal", function() {
+    if (!localPlayer) return;
+
+    try {
+        localPlayer.health = 200;
+        localPlayer.armour = 100;
+        showNotification("You were healed!");
+    } catch(e) {
+        console.log("[ModMenu] Heal error: " + e);
+    }
+});
+
+// Spectate state tracking
+let spectateTarget = null;
+let spectateActive = false;
+let priorPosition = null;
+
+// Execute spectate - camera follows target player
+addNetworkHandler("ModMenu:ExecuteSpectate", function(targetId, targetName, x, y, z) {
+    if (!localPlayer) return;
+
+    try {
+        if (spectateActive && spectateTarget === targetId) {
+            // Toggle off spectate
+            spectateActive = false;
+            spectateTarget = null;
+            // Return to prior position
+            if (priorPosition) {
+                localPlayer.position = priorPosition;
+                priorPosition = null;
+            }
+            try {
+                natives.setCharVisible(localPlayer, true);
+            } catch(e) {}
+            showNotification("Stopped spectating");
+        } else {
+            // Start spectating
+            priorPosition = localPlayer.position;
+            spectateActive = true;
+            spectateTarget = targetId;
+            // Make player invisible and teleport near target
+            try {
+                natives.setCharVisible(localPlayer, false);
+            } catch(e) {}
+            localPlayer.position = new Vec3(x + 5, y + 5, z + 10);
+            showNotification("Spectating " + targetName + " (click again to stop)");
+        }
+    } catch(e) {
+        console.log("[ModMenu] Spectate error: " + e);
+        showNotification("Spectate failed");
+    }
+});
+
+// Update spectate position - follow target player
+addNetworkHandler("ModMenu:SpectatePosition", function(x, y, z) {
+    if (!localPlayer || !spectateActive) return;
+
+    try {
+        // Keep player near target but at a viewing distance
+        localPlayer.position = new Vec3(x + 5, y + 5, z + 10);
+    } catch(e) {}
 });
 
 // Vehicle model names (cleaned up for proper spawning)
@@ -2737,7 +2850,15 @@ addNetworkHandler("ModMenu:ExecuteVehicleOption", function(option) {
         switch(option) {
             case "repair":
                 natives.fixCar(veh);
-                showNotification("Vehicle repaired!");
+                try {
+                    natives.washVehicleTextures(veh, 255);
+                } catch(e) {
+                    // Try alternative method
+                    try {
+                        veh.dirt = 0;
+                    } catch(e2) {}
+                }
+                showNotification("Vehicle repaired & cleaned!");
                 break;
             case "flip":
                 let rot = veh.rotation;
@@ -3933,10 +4054,14 @@ function showNotification(text) {
 let lastGodMode = false;
 let lastInvincible = false;
 let lastSuperRun = false;
+let lastSuperJump = false;
 let lastNoRagdoll = false;
 let lastVehGodMode = false;
+let lastVehFlipped = false;
 let lastInvisible = false;
 let processCounter = 0;
+let isJumping = false;
+let wasOnGround = true;
 
 // Spinbot speed control (lower = slower)
 let spinbotSpeed = 2;
@@ -3978,6 +4103,21 @@ addEventHandler("OnProcess", function(event) {
             }
         } catch(e) {}
         lastSuperRun = toggleStates.superRun;
+    }
+
+    // Super Jump - boost player up when jumping
+    if (toggleStates.superJump) {
+        try {
+            let vel = localPlayer.velocity;
+            let isOnGround = vel.z > -0.5 && vel.z < 0.5;
+
+            // Detect when player just started jumping (was on ground, now moving up)
+            if (wasOnGround && vel.z > 0.1 && vel.z < 5.0) {
+                // Boost the jump
+                localPlayer.velocity = new Vec3(vel.x, vel.y, 12.0);
+            }
+            wasOnGround = isOnGround;
+        } catch(e) {}
     }
 
     // No Ragdoll - prevent ragdoll using multiple methods
@@ -4098,6 +4238,27 @@ addEventHandler("OnProcess", function(event) {
             try { natives.fixCar(veh); } catch(e) {}
         }
 
+        // Vehicle Flip toggle - flip vehicle upright when enabled
+        if (toggleStates.vehFlipped !== lastVehFlipped) {
+            if (toggleStates.vehFlipped) {
+                try {
+                    let rot = veh.rotation;
+                    veh.rotation = new Vec3(0, 0, rot.z);
+                } catch(e) {}
+            }
+            lastVehFlipped = toggleStates.vehFlipped;
+        }
+        // Keep vehicle upright when toggle is ON
+        if (toggleStates.vehFlipped) {
+            try {
+                let rot = veh.rotation;
+                // Check if vehicle is upside down or significantly tilted
+                if (Math.abs(rot.x) > 0.5 || Math.abs(rot.y) > 0.5) {
+                    veh.rotation = new Vec3(0, 0, rot.z);
+                }
+            } catch(e) {}
+        }
+
         // Drive on water - keep vehicle above water level
         if (toggleStates.driveOnWater) {
             try {
@@ -4184,6 +4345,14 @@ addEventHandler("OnProcess", function(event) {
                 } catch(e) {}
             }
         }
+    }
+
+    // Spectate mode - follow target player position
+    if (spectateActive && spectateTarget !== null && processCounter % 10 === 0) {
+        try {
+            // Request updated position from server
+            triggerNetworkEvent("ModMenu:UpdateSpectate", spectateTarget);
+        } catch(e) {}
     }
 
     // Rainbow sky effect
