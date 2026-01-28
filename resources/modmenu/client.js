@@ -365,6 +365,8 @@ const itemDescriptions = {
     "veh_upgrade_remove": "❌ Remove upgrade - Take off this modification!",
     "veh_upgrade_remove_all": "🗑️ REMOVE ALL - Strip all upgrades from vehicle!",
     "veh_upgrades": "🔧 UPGRADES - Add NOS, hydraulics, wheels, spoilers and more!",
+    "veh_extra_toggle": "🔩 Toggle vehicle extra component on/off (lights, antennas, etc.)",
+    "veh_extras": "🔩 EXTRAS - Toggle vehicle components like roof lights, antennas, and more!",
 
 };
 
@@ -958,6 +960,7 @@ const menuData = {
             { label: "Flip Vehicle", action: "veh_flip" },
             { label: "Vehicle Colors", action: "submenu", target: "veh_colors" },
             { label: "Vehicle Upgrades", action: "submenu", target: "veh_upgrades" },
+            { label: "Vehicle Extras", action: "submenu", target: "veh_extras" },
             { label: "--- Toggles ---", action: "none" },
             { label: "God Mode", action: "toggle", target: "vehGodMode", state: false },
             { label: "Nitro Boost", action: "veh_nitro" },
@@ -1020,6 +1023,27 @@ const menuData = {
             { label: "Remove Nitro", action: "veh_upgrade_remove", value: 1010 },
             { label: "Remove Hydraulics", action: "veh_upgrade_remove", value: 1087 },
             { label: "Remove All Upgrades", action: "veh_upgrade_remove_all" }
+        ]
+    },
+
+    // Vehicle Extras - Toggle vehicle components (lights, antennas, etc.)
+    // Based on MD EXTEND+ Vehicle Extras system
+    veh_extras: {
+        title: "VEHICLE EXTRAS",
+        items: [
+            { label: "Extra 1", action: "veh_extra_toggle", value: 0, state: false },
+            { label: "Extra 2", action: "veh_extra_toggle", value: 1, state: false },
+            { label: "Extra 3", action: "veh_extra_toggle", value: 2, state: false },
+            { label: "Extra 4", action: "veh_extra_toggle", value: 3, state: false },
+            { label: "Extra 5", action: "veh_extra_toggle", value: 4, state: false },
+            { label: "Extra 6", action: "veh_extra_toggle", value: 5, state: false },
+            { label: "Extra 7", action: "veh_extra_toggle", value: 6, state: false },
+            { label: "Extra 8", action: "veh_extra_toggle", value: 7, state: false },
+            { label: "Extra 9", action: "veh_extra_toggle", value: 8, state: false },
+            { label: "Extra 10", action: "veh_extra_toggle", value: 9, state: false },
+            { label: "--- Information ---", action: "none" },
+            { label: "Extras vary by vehicle model", action: "none" },
+            { label: "Some vehicles have no extras", action: "none" }
         ]
     },
 
@@ -1995,6 +2019,29 @@ function selectItem() {
                     } catch(e) {}
                 }
                 showNotification("All upgrades removed!");
+            }
+            break;
+
+        case "veh_extra_toggle":
+            // Toggle vehicle extra (component) on/off
+            // Based on MD EXTEND+ vehicle extras system
+            if (localPlayer && localPlayer.vehicle) {
+                let veh = localPlayer.vehicle;
+                let extraIndex = item.value;
+                try {
+                    // Check if extra is currently turned on
+                    let isOn = natives.isVehicleExtraTurnedOn(veh, extraIndex);
+                    // Toggle it (true = turn off, false = turn on)
+                    natives.turnOffVehicleExtra(veh, extraIndex, isOn);
+                    // Update menu item state
+                    item.state = !isOn;
+                    showNotification("Extra " + (extraIndex + 1) + (isOn ? " disabled" : " enabled"));
+                } catch(e) {
+                    console.log("[VehicleExtras] Failed to toggle extra " + extraIndex + ": " + e);
+                    showNotification("Extra not available for this vehicle");
+                }
+            } else {
+                showNotification("You need to be in a vehicle!");
             }
             break;
 
